@@ -1,11 +1,14 @@
 pub mod api;
 pub mod role;
 pub mod user;
+pub mod token;
 
 use tonic::{Status, transport::Channel};
+use chrono::{DateTime, Utc};
 use rmcs_auth_api::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_api::role::RoleSchema;
 use rmcs_auth_api::user::UserSchema;
+use rmcs_auth_api::token::TokenSchema;
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -226,6 +229,76 @@ impl Auth {
         -> Result<(), Status>
     {
         user::remove_user_role(&self.channel, id, role_id)
+        .await
+    }
+
+    pub async fn read_access_token(&self, access_id: u32)
+        -> Result<TokenSchema, Status>
+    {
+        token::read_access_token(&self.channel, access_id)
+        .await
+    }
+
+    pub async fn read_refresh_token(&self, refresh_id: &str)
+        -> Result<TokenSchema, Status>
+    {
+        token::read_refresh_token(&self.channel, refresh_id)
+        .await
+    }
+
+    pub async fn list_token_by_user(&self, user_id: u32)
+        -> Result<Vec<TokenSchema>, Status>
+    {
+        token::list_token_by_user(&self.channel, user_id)
+        .await
+    }
+
+    pub async fn create_access_token(&self, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
+        -> Result<(u32, String), Status>
+    {
+        token::create_access_token(&self.channel, user_id, expire, ip)
+        .await
+    }
+
+    pub async fn create_refresh_token(&self, access_id: u32, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
+        -> Result<(u32, String), Status>
+    {
+        token::create_refresh_token(&self.channel, access_id, user_id, expire, ip)
+        .await
+    }
+
+    pub async fn update_access_token(&self, access_id: u32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+        -> Result<String, Status>
+    {
+        token::update_access_token(&self.channel, access_id, expire, ip)
+        .await
+    }
+
+    pub async fn update_refresh_token(&self, refresh_id: &str, access_id: Option<u32>, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+        -> Result<String, Status>
+    {
+        token::update_refresh_token(&self.channel, refresh_id, access_id, expire, ip)
+        .await
+    }
+
+    pub async fn delete_access_token(&self, access_id: u32)
+        -> Result<(), Status>
+    {
+        token::delete_access_token(&self.channel, access_id)
+        .await
+    }
+
+    pub async fn delete_refresh_token(&self, refresh_id: &str)
+        -> Result<(), Status>
+    {
+        token::delete_refresh_token(&self.channel, refresh_id)
+        .await
+    }
+
+    pub async fn delete_token_by_user(&self, user_id: u32)
+        -> Result<(), Status>
+    {
+        token::delete_token_by_user(&self.channel, user_id)
         .await
     }
 
