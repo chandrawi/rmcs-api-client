@@ -1,9 +1,11 @@
 pub mod api;
 pub mod role;
+pub mod user;
 
 use tonic::{Status, transport::Channel};
 use rmcs_auth_api::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_api::role::RoleSchema;
+use rmcs_auth_api::user::UserSchema;
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -168,6 +170,62 @@ impl Auth {
         -> Result<(), Status>
     {
         role::remove_role_access(&self.channel, id, procedure_id)
+        .await
+    }
+
+    pub async fn read_user(&self, id: u32)
+        -> Result<UserSchema, Status>
+    {
+        user::read_user(&self.channel, id)
+        .await
+    }
+
+    pub async fn read_user_by_name(&self, name: &str)
+        -> Result<UserSchema, Status>
+    {
+        user::read_user_by_name(&self.channel, name)
+        .await
+    }
+
+    pub async fn list_user_by_role(&self, role_id: u32)
+        -> Result<Vec<UserSchema>, Status>
+    {
+        user::list_user_by_role(&self.channel, role_id)
+        .await
+    }
+
+    pub async fn create_user(&self, name: &str, email: &str, phone: &str, password: &str)
+        -> Result<u32, Status>
+    {
+        user::create_user(&self.channel, name, email, phone, password)
+        .await
+    }
+
+    pub async fn update_user(&self, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+        -> Result<(), Status>
+    {
+        user::update_user(&self.channel, id, name, email, phone, password, keys)
+        .await
+    }
+
+    pub async fn delete_user(&self, id: u32)
+        -> Result<(), Status>
+    {
+        user::delete_user(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_user_role(&self, id: u32, role_id: u32)
+        -> Result<(), Status>
+    {
+        user::add_user_role(&self.channel, id, role_id)
+        .await
+    }
+
+    pub async fn remove_user_role(&self, id: u32, role_id: u32)
+        -> Result<(), Status>
+    {
+        user::remove_user_role(&self.channel, id, role_id)
         .await
     }
 
