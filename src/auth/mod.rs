@@ -1,7 +1,9 @@
 pub mod api;
+pub mod role;
 
 use tonic::{Status, transport::Channel};
 use rmcs_auth_api::api::{ApiSchema, ProcedureSchema};
+use rmcs_auth_api::role::RoleSchema;
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -103,6 +105,69 @@ impl Auth {
         -> Result<(), Status>
     {
         api::delete_procedure(&self.channel, id)
+        .await
+    }
+
+    pub async fn read_role(&self, id: u32)
+        -> Result<RoleSchema, Status>
+    {
+        role::read_role(&self.channel, id)
+        .await
+    }
+
+    pub async fn read_role_by_name(&self, api_id: u32, name: &str)
+        -> Result<RoleSchema, Status>
+    {
+        role::read_role_by_name(&self.channel, api_id, name)
+        .await
+    }
+
+    pub async fn list_role_by_api(&self, api_id: u32)
+        -> Result<Vec<RoleSchema>, Status>
+    {
+        role::list_role_by_api(&self.channel, api_id)
+        .await
+    }
+
+    pub async fn list_role_by_user(&self, user_id: u32)
+        -> Result<Vec<RoleSchema>, Status>
+    {
+        role::list_role_by_user(&self.channel, user_id)
+        .await
+    }
+
+    pub async fn create_role(&self, api_id: u32, name: &str, multi: bool, ip_lock: bool, access_duration: u32, refresh_duration: u32)
+        -> Result<u32, Status>
+    {
+        role::create_role(&self.channel, api_id, name, multi, ip_lock, access_duration, refresh_duration)
+        .await
+    }
+
+    pub async fn update_role(&self, id: u32, name: Option<&str>, multi: Option<bool>, ip_lock: Option<bool>, access_duration: Option<u32>, refresh_duration: Option<u32>)
+        -> Result<(), Status>
+    {
+        role::update_role(&self.channel, id, name, multi, ip_lock, access_duration, refresh_duration)
+        .await
+    }
+
+    pub async fn delete_role(&self, id: u32)
+        -> Result<(), Status>
+    {
+        role::delete_role(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_role_access(&self, id: u32, procedure_id: u32)
+        -> Result<(), Status>
+    {
+        role::add_role_access(&self.channel, id, procedure_id)
+        .await
+    }
+
+    pub async fn remove_role_access(&self, id: u32, procedure_id: u32)
+        -> Result<(), Status>
+    {
+        role::remove_role_access(&self.channel, id, procedure_id)
         .await
     }
 
