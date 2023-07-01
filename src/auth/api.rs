@@ -16,7 +16,7 @@ pub(crate) async fn read_api(channel: &Channel, id: u32)
         id
     });
     let response = client.read_api(request).await?.into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(API_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(API_NOT_FOUND))?)
 }
 
 pub(crate) async fn read_api_by_name(channel: &Channel, name: &str)
@@ -29,7 +29,7 @@ pub(crate) async fn read_api_by_name(channel: &Channel, name: &str)
     let response = client.read_api_by_name(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(API_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(API_NOT_FOUND))?)
 }
 
 pub(crate) async fn list_api_by_category(channel: &Channel, category: &str)
@@ -42,7 +42,7 @@ pub(crate) async fn list_api_by_category(channel: &Channel, category: &str)
     let response = client.list_api_by_category(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub(crate) async fn create_api(channel: &Channel, name: &str, address: &str, category: &str, description: &str, password: &str)
@@ -106,7 +106,7 @@ pub(crate) async fn read_procedure(channel: &Channel, id: u32)
     let response = client.read_procedure(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(PROC_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
 pub(crate) async fn read_procedure_by_name(channel: &Channel, api_id: u32, name: &str)
@@ -120,7 +120,7 @@ pub(crate) async fn read_procedure_by_name(channel: &Channel, api_id: u32, name:
     let response = client.read_procedure_by_name(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(PROC_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
 pub(crate) async fn list_procedure_by_api(channel: &Channel, api_id: u32)
@@ -133,7 +133,7 @@ pub(crate) async fn list_procedure_by_api(channel: &Channel, api_id: u32)
     let response = client.list_procedure_by_api(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub(crate) async fn create_procedure(channel: &Channel, api_id: u32, name: &str, description: &str)

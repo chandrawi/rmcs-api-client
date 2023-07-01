@@ -187,9 +187,9 @@ mod tests {
         let user_tokens = auth.list_token_by_user(user_id1).await.unwrap();
 
         assert_eq!(refresh_token.user_id, user_id1);
-        assert_eq!(refresh_token.expire, expire1.timestamp_nanos());
+        assert_eq!(refresh_token.expire, expire1);
         assert_eq!(refresh_token.ip, [192, 168, 0, 1]);
-        assert_eq!(access_token.expire, expire2.timestamp_nanos());
+        assert_eq!(access_token.expire, expire2);
         assert_eq!(user_tokens.len(), 3);
 
         // update token
@@ -202,8 +202,8 @@ mod tests {
         let refresh_token = auth.read_refresh_token(&refresh_id1).await.unwrap();
 
         assert_ne!(new_access_token.refresh_id, access_token.refresh_id);
-        assert_eq!(new_access_token.expire, expire3.timestamp_nanos());
-        assert_eq!(refresh_token.expire, expire3.timestamp_nanos());
+        assert_eq!(new_access_token.expire, expire3);
+        assert_eq!(refresh_token.expire, expire3);
         assert_eq!(refresh_token.ip, [192, 168, 0, 100]);
 
         // try to delete resource API, procedure role and user without removing dependent item

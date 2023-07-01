@@ -17,7 +17,7 @@ pub async fn read_access_token(channel: &Channel, access_id: u32)
     let response = client.read_access_token(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(TOKEN_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(TOKEN_NOT_FOUND))?)
 }
 
 pub async fn read_refresh_token(channel: &Channel, refresh_id: &str)
@@ -30,7 +30,7 @@ pub async fn read_refresh_token(channel: &Channel, refresh_id: &str)
     let response = client.read_refresh_token(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(TOKEN_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(TOKEN_NOT_FOUND))?)
 }
 
 pub async fn list_token_by_user(channel: &Channel, user_id: u32)
@@ -43,7 +43,7 @@ pub async fn list_token_by_user(channel: &Channel, user_id: u32)
     let response = client.list_token_by_user(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub async fn create_access_token(channel: &Channel, user_id: u32, expire: DateTime<Utc>, ip: &[u8])

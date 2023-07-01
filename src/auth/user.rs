@@ -16,7 +16,7 @@ pub async fn read_user(channel: &Channel, id: u32)
     let response = client.read_user(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(USER_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
 pub async fn read_user_by_name(channel: &Channel, name: &str)
@@ -29,7 +29,7 @@ pub async fn read_user_by_name(channel: &Channel, name: &str)
     let response = client.read_user_by_name(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(USER_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
 pub async fn list_user_by_role(channel: &Channel, role_id: u32)
@@ -42,7 +42,7 @@ pub async fn list_user_by_role(channel: &Channel, role_id: u32)
     let response = client.list_user_by_role(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub async fn create_user(channel: &Channel, name: &str, email: &str, phone: &str, password: &str)

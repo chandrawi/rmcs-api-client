@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 rmcs-auth-api = { path = "../rmcs-auth-api/rust" }
+rmcs-auth-db = { path = "../rmcs-auth-db" }
 rmcs-resource-api = { path = "../rmcs-resource-api/rust" }
 rmcs-resource-db = { path = "../rmcs-resource-db" }
 prost = "0.11.9"

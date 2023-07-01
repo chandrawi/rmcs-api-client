@@ -17,7 +17,7 @@ pub(crate) async fn read_role(channel: &Channel, id: u32)
     let response = client.read_role(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(ROLE_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(ROLE_NOT_FOUND))?)
 }
 
 pub(crate) async fn read_role_by_name(channel: &Channel, api_id: u32, name: &str)
@@ -31,7 +31,7 @@ pub(crate) async fn read_role_by_name(channel: &Channel, api_id: u32, name: &str
     let response = client.read_role_by_name(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or_else(|| Status::not_found(ROLE_NOT_FOUND))?)
+    Ok(response.result.ok_or(Status::not_found(ROLE_NOT_FOUND))?)
 }
 
 pub(crate) async fn list_role_by_api(channel: &Channel, api_id: u32)
@@ -44,7 +44,7 @@ pub(crate) async fn list_role_by_api(channel: &Channel, api_id: u32)
     let response = client.list_role_by_api(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub(crate) async fn list_role_by_user(channel: &Channel, user_id: u32)
@@ -57,7 +57,7 @@ pub(crate) async fn list_role_by_user(channel: &Channel, user_id: u32)
     let response = client.list_role_by_user(request)
         .await?
         .into_inner();
-    Ok(response.result)
+    Ok(response.results)
 }
 
 pub(crate) async fn create_role(channel: &Channel, api_id: u32, name: &str, multi: bool, ip_lock: bool, access_duration: u32, refresh_duration: u32)

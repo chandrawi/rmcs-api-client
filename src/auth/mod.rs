@@ -2,13 +2,14 @@ pub mod api;
 pub mod role;
 pub mod user;
 pub mod token;
+pub mod auth;
 
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
-use rmcs_auth_api::api::{ApiSchema, ProcedureSchema};
-use rmcs_auth_api::role::RoleSchema;
-use rmcs_auth_api::user::UserSchema;
-use rmcs_auth_api::token::TokenSchema;
+use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
+use rmcs_auth_db::schema::auth_role::RoleSchema;
+use rmcs_auth_db::schema::auth_user::UserSchema;
+use rmcs_auth_db::schema::auth_token::TokenSchema;
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -37,31 +38,25 @@ impl Auth {
     pub async fn read_api(&self, id: u32)
         -> Result<ApiSchema, Status>
     {
-        api::read_api(&self.channel, id).await
+        api::read_api(&self.channel, id)
+        .await
+        .map(|s| s.into())
     }
 
     pub async fn read_api_by_name(&self, name: &str)
         -> Result<ApiSchema, Status>
     {
-        api::read_api_by_name(&self.channel, name).await
-    }
-
-    pub async fn read_procedure(&self, id: u32)
-        -> Result<ProcedureSchema, Status>
-    {
-        api::read_procedure(&self.channel, id).await
-    }
-
-    pub async fn read_procedure_by_name(&self, api_id: u32, name: &str)
-        -> Result<ProcedureSchema, Status>
-    {
-        api::read_procedure_by_name(&self.channel, api_id, name).await
+        api::read_api_by_name(&self.channel, name)
+        .await
+        .map(|s| s.into())
     }
 
     pub async fn list_api_by_category(&self, category: &str)
         -> Result<Vec<ApiSchema>, Status>
     {
-        api::list_api_by_category(&self.channel, category).await
+        api::list_api_by_category(&self.channel, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn create_api(&self, name: &str, address: &str, category: &str, description: &str, password: &str)
@@ -85,11 +80,28 @@ impl Auth {
         .await
     }
 
+    pub async fn read_procedure(&self, id: u32)
+        -> Result<ProcedureSchema, Status>
+    {
+        api::read_procedure(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn read_procedure_by_name(&self, api_id: u32, name: &str)
+        -> Result<ProcedureSchema, Status>
+    {
+        api::read_procedure_by_name(&self.channel, api_id, name)
+        .await
+        .map(|s| s.into())
+    }
+
     pub async fn list_procedure_by_api(&self, api_id: u32)
         -> Result<Vec<ProcedureSchema>, Status>
     {
         api::list_procedure_by_api(&self.channel, api_id)
         .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn create_procedure(&self, api_id: u32, name: &str, description: &str)
@@ -118,6 +130,7 @@ impl Auth {
     {
         role::read_role(&self.channel, id)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn read_role_by_name(&self, api_id: u32, name: &str)
@@ -125,6 +138,7 @@ impl Auth {
     {
         role::read_role_by_name(&self.channel, api_id, name)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn list_role_by_api(&self, api_id: u32)
@@ -132,6 +146,7 @@ impl Auth {
     {
         role::list_role_by_api(&self.channel, api_id)
         .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_role_by_user(&self, user_id: u32)
@@ -139,6 +154,7 @@ impl Auth {
     {
         role::list_role_by_user(&self.channel, user_id)
         .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn create_role(&self, api_id: u32, name: &str, multi: bool, ip_lock: bool, access_duration: u32, refresh_duration: u32)
@@ -181,6 +197,7 @@ impl Auth {
     {
         user::read_user(&self.channel, id)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn read_user_by_name(&self, name: &str)
@@ -188,6 +205,7 @@ impl Auth {
     {
         user::read_user_by_name(&self.channel, name)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn list_user_by_role(&self, role_id: u32)
@@ -195,6 +213,7 @@ impl Auth {
     {
         user::list_user_by_role(&self.channel, role_id)
         .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn create_user(&self, name: &str, email: &str, phone: &str, password: &str)
@@ -237,6 +256,7 @@ impl Auth {
     {
         token::read_access_token(&self.channel, access_id)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn read_refresh_token(&self, refresh_id: &str)
@@ -244,6 +264,7 @@ impl Auth {
     {
         token::read_refresh_token(&self.channel, refresh_id)
         .await
+        .map(|s| s.into())
     }
 
     pub async fn list_token_by_user(&self, user_id: u32)
@@ -251,6 +272,7 @@ impl Auth {
     {
         token::list_token_by_user(&self.channel, user_id)
         .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn create_access_token(&self, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
