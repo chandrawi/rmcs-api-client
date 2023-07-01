@@ -2,12 +2,15 @@ pub mod model;
 pub mod device;
 pub mod types;
 pub mod group;
+pub mod data;
 
 use tonic::{Status, transport::Channel};
-use rmcs_resource_db::schema::value::{DataIndexing, DataType, ConfigValue};
+use chrono::{DateTime, Utc};
+use rmcs_resource_db::schema::value::{DataIndexing, DataType, DataValue, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
+use rmcs_resource_db::schema::data::{DataSchema, DataModel};
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -592,6 +595,138 @@ impl Resource {
         -> Result<(), Status>
     {
         group::remove_group_gateway_member(&self.channel, id, gateway_id)
+        .await
+    }
+
+    pub async fn read_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+        -> Result<DataSchema, Status>
+    {
+        data::read_data(&self.channel, device_id, model_id, timestamp, index)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_by_time(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_time(&self.channel, device_id, model_id, timestamp)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_last_time(&self, device_id: u64, model_id: u32, last: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_last_time(&self.channel, device_id, model_id, last)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_range_time(&self, device_id: u64, model_id: u32, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_range_time(&self.channel, device_id, model_id, begin, end)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_number_before(&self, device_id: u64, model_id: u32, before: DateTime<Utc>, number: u32)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_number_before(&self.channel, device_id, model_id, before, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_number_after(&self, device_id: u64, model_id: u32, after: DateTime<Utc>, number: u32)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_number_after(&self.channel, device_id, model_id, after, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn get_data_model(&self, model_id: u32)
+        -> Result<DataModel, Status>
+    {
+        data::get_data_model(&self.channel, model_id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn read_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+        -> Result<DataSchema, Status>
+    {
+        data::read_data_with_model(&self.channel, model, device_id, timestamp, index)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_with_model_by_time(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_with_model_by_time(&self.channel, model, device_id, timestamp)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_with_model_by_last_time(&self, model: DataModel, device_id: u64, last: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_with_model_by_last_time(&self.channel, model, device_id, last)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_with_model_by_range_time(&self, model: DataModel, device_id: u64, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_with_model_by_range_time(&self.channel, model, device_id, begin, end)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_with_model_by_number_before(&self, model: DataModel, device_id: u64, before: DateTime<Utc>, number: u32)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_with_model_by_number_before(&self.channel, model, device_id, before, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_with_model_by_number_after(&self, model: DataModel, device_id: u64, after: DateTime<Utc>, number: u32)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_with_model_by_number_after(&self.channel, model, device_id, after, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+        -> Result<(), Status>
+    {
+        data::create_data(&self.channel, device_id, model_id, timestamp, index, data)
+        .await
+    }
+
+    pub async fn create_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+        -> Result<(), Status>
+    {
+        data::create_data_with_model(&self.channel, model, device_id, timestamp, index, data)
+        .await
+    }
+
+    pub async fn delete_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+        -> Result<(), Status>
+    {
+        data::delete_data(&self.channel, device_id, model_id, timestamp, index)
+        .await
+    }
+
+    pub async fn delete_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+        -> Result<(), Status>
+    {
+        data::delete_data_with_model(&self.channel, model, device_id, timestamp, index)
         .await
     }
 
