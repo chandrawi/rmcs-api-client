@@ -6,35 +6,38 @@ mod tests {
     use std::time::{SystemTime, Duration};
     use chrono::DateTime;
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
-    use rmcs_api_client::Auth;
+    use rmcs_api_client::{Auth, Resource};
 
-    fn start_auth_server()
+    fn start_server(server_kind: &str)
     {
         // start server using cargo run command
         Command::new("cargo")
-            .args(["run", "-p", "rmcs-api-server", "--bin", "auth_server"])
+            .args(["run", "-p", "rmcs-api-server", "--bin", server_kind])
             .spawn()
             .expect("running auth server failed");
 
         // wait until server process is running
-        let mut count = String::from("0\n");
+        let mut count = 0;
         let time_limit = SystemTime::now() + Duration::from_secs(30);
-        while SystemTime::now() < time_limit && count == "0\n" {
+        while SystemTime::now() < time_limit && count == 0 {
             let output = Command::new("pgrep")
                 .args(["-a", "auth_server", "-c"])
                 .output()
                 .unwrap();
             count = String::from_utf8(output.stdout)
-                .unwrap();
+                .unwrap()
+                .replace("\n", "")
+                .parse()
+                .unwrap_or(0);
             std::thread::sleep(Duration::from_millis(10));
         }
     }
 
-    fn stop_auth_server()
+    fn stop_server(server_kind: &str)
     {
         // stop server service
         Command::new("killall")
-            .args(["auth_server"])
+            .args([server_kind])
             .spawn()
             .expect("stopping auth server failed");
     }
@@ -42,7 +45,7 @@ mod tests {
     #[tokio::test]
     async fn test_auth()
     {
-        start_auth_server();
+        start_server("auth_server");
 
         // build auth client instance with address from env file
         dotenvy::dotenv().ok();
@@ -241,7 +244,22 @@ mod tests {
         assert!(result_role.is_err());
         assert!(result_api.is_err());
 
-        stop_auth_server();
+        stop_server("auth_server");
+    }
+
+    #[tokio::test]
+    async fn test_resource()
+    {
+        start_server("resource_server");
+
+        // build resource client instance with address from env file
+        dotenvy::dotenv().ok();
+        let addr = std::env::var("ADDRESS_RESOURCE").unwrap();
+        let addr = String::from("http://") + &addr;
+
+        let _resource = Resource::new(&addr).await;
+
+        stop_server("resource_server");
     }
 
 }
