@@ -205,7 +205,7 @@ pub(crate) async fn delete_model_config(channel: &Channel, id: u32)
     let request = Request::new(ConfigId {
         id
     });
-    client.read_model_config(request)
+    client.delete_model_config(request)
         .await?;
     Ok(())
 }
