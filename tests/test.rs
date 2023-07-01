@@ -4,10 +4,10 @@ mod tests {
     use std::str::FromStr;
     use std::process::Command;
     use std::time::{SystemTime, Duration};
-    use chrono::DateTime;
+    use chrono::{DateTime, Utc};
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
-    use rmcs_resource_db::{ModelConfigSchema};
-    use rmcs_resource_db::{ConfigValue::*, DataIndexing::*, DataType::*};
+    use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
+    use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
 
     fn start_server(server_kind: &str)
@@ -380,6 +380,89 @@ mod tests {
         resource.update_group_device(group_device_id, None, None, Some("Sensor devices")).await.unwrap();
         let group = resource.read_group_device(group_device_id).await.unwrap();
         assert_eq!(group.description, "Sensor devices");
+
+        // generate raw data and create buffers
+        let timestamp = DateTime::from_str("2023-05-07T07:08:48Z").unwrap();
+        let raw_1 = vec![I32(1231),I32(890)];
+        let raw_2 = vec![I32(1452),I32(-341)];
+        resource.create_buffer(device_id1, model_buf_id, timestamp, None, raw_1.clone(), "CONVERT").await.unwrap();
+        resource.create_buffer(device_id2, model_buf_id, timestamp, None, raw_2.clone(), "CONVERT").await.unwrap();
+
+        // read buffer
+        let buffers = resource.list_buffer_first(100, None, None, None).await.unwrap();
+        assert_eq!(buffers[0].data, raw_1);
+        assert_eq!(buffers[1].data, raw_2);
+
+        // get model config value then convert buffer data
+        let conf_val = |model_configs: Vec<DeviceConfigSchema>, name: &str| -> ConfigValue {
+            model_configs.iter().filter(|&cfg| cfg.name == name.to_owned())
+                .next().unwrap().value.clone()
+        };
+        let convert = |raw: i32, coef0: i64, coef1: f64| -> f64 {
+            (raw as f64 - coef0 as f64) * coef1
+        };
+        let coef0 = conf_val(device_configs.clone(), "coef_0").try_into().unwrap();
+        let coef1 = conf_val(device_configs.clone(), "coef_1").try_into().unwrap();
+        let speed = convert(raw_1[0].clone().try_into().unwrap(), coef0, coef1) as f32;
+        let direction = convert(raw_1[1].clone().try_into().unwrap(), coef0, coef1) as f32;
+        // create data
+        resource.create_data(device_id1, model_id, timestamp, None, vec![F32(speed), F32(direction)]).await.unwrap();
+
+        // read data
+        let datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100).await.unwrap();
+        let data = datas.into_iter().next().unwrap();
+        assert_eq!(vec![F32(speed), F32(direction)], data.data);
+
+        // delete data
+        resource.delete_data(device_id1, model_id, timestamp, None).await.unwrap();
+        let result = resource.read_data(device_id1, model_id, timestamp, None).await;
+        assert!(result.is_err());
+
+        // update buffer status
+        resource.update_buffer(buffers[0].id, None, Some("DELETE")).await.unwrap();
+        let buffer = resource.read_buffer(buffers[0].id).await.unwrap();
+        assert_eq!(buffer.status, "DELETE");
+
+        // delete buffer data
+        resource.delete_buffer(buffers[0].id).await.unwrap();
+        resource.delete_buffer(buffers[1].id).await.unwrap();
+        let result = resource.read_buffer(buffers[0].id).await;
+        assert!(result.is_err());
+
+        // create data slice
+        let slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, Some(0), Some(0), "Speed and compass slice", None).await.unwrap();
+        // read data
+        let slices = resource.list_slice_by_name("slice").await.unwrap();
+        let slice = slices.into_iter().next().unwrap();
+        assert_eq!(slice.timestamp_begin, timestamp);
+        assert_eq!(slice.name, "Speed and compass slice");
+
+        // update data slice
+        resource.update_slice(slice_id, None, None, None, None, None, Some("Speed and compass sensor 1 at '2023-05-07 07:08:48'")).await.unwrap();
+        let slice = resource.read_slice(slice_id).await.unwrap();
+        assert_eq!(slice.description, "Speed and compass sensor 1 at '2023-05-07 07:08:48'");
+
+        // delete data slice
+        resource.delete_slice(slice_id).await.unwrap();
+        let result = resource.read_slice(slice_id).await;
+        assert!(result.is_err());
+
+        // create system log
+        resource.create_log(timestamp, device_id1, "UNKNOWN_ERROR", Str("testing success".to_owned())).await.unwrap();
+        // read log
+        let logs = resource.list_log_by_range_time(timestamp, Utc::now(), None, None).await.unwrap();
+        let log = logs.into_iter().next().unwrap();
+        assert_eq!(log.value, Str("testing success".to_owned()));
+
+        // update system log
+        resource.update_log(timestamp, device_id1, Some("SUCCESS"), None).await.unwrap();
+        let log = resource.read_log(timestamp, device_id1).await.unwrap();
+        assert_eq!(log.status, "SUCCESS");
+
+        // delete system log
+        resource.delete_log(timestamp, device_id1).await.unwrap();
+        let result = resource.read_log(timestamp, device_id1).await;
+        assert!(result.is_err());
 
         // delete model config
         let config_id = model_configs.iter().next().map(|el| el.id).unwrap();
