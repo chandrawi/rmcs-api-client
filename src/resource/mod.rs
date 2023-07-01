@@ -3,6 +3,7 @@ pub mod device;
 pub mod types;
 pub mod group;
 pub mod data;
+pub mod buffer;
 
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
@@ -11,6 +12,7 @@ use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 use rmcs_resource_db::schema::data::{DataSchema, DataModel};
+use rmcs_resource_db::schema::buffer::BufferSchema;
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -727,6 +729,67 @@ impl Resource {
         -> Result<(), Status>
     {
         data::delete_data_with_model(&self.channel, model, device_id, timestamp, index)
+        .await
+    }
+
+    pub async fn read_buffer(&self, id: u32)
+        -> Result<BufferSchema, Status>
+    {
+        buffer::read_buffer(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn read_buffer_first(&self, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+        -> Result<BufferSchema, Status>
+    {
+        buffer::read_buffer_first(&self.channel, device_id, model_id, status)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn read_buffer_last(&self, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+        -> Result<BufferSchema, Status>
+    {
+        buffer::read_buffer_last(&self.channel, device_id, model_id, status)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_buffer_first(&self, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_first(&self.channel, number, device_id, model_id, status)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_last(&self, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_last(&self.channel, number, device_id, model_id, status)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_buffer(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+        -> Result<u32, Status>
+    {
+        buffer::create_buffer(&self.channel, device_id, model_id, timestamp, index, data, status)
+        .await
+    }
+
+    pub async fn update_buffer(&self, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
+        -> Result<(), Status>
+    {
+        buffer::update_buffer(&self.channel, id, data, status)
+        .await
+    }
+
+    pub async fn delete_buffer(&self, id: u32)
+        -> Result<(), Status>
+    {
+        buffer::delete_buffer(&self.channel, id)
         .await
     }
 
