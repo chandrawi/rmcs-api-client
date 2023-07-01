@@ -1,11 +1,13 @@
 pub mod model;
 pub mod device;
 pub mod types;
+pub mod group;
 
 use tonic::{Status, transport::Channel};
 use rmcs_resource_db::schema::value::{DataIndexing, DataType, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
+use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -387,6 +389,209 @@ impl Resource {
         -> Result<(), Status>
     {
         types::remove_type_model(&self.channel, id, model_id)
+        .await
+    }
+
+    pub async fn read_group_model(&self, id: u32)
+        -> Result<GroupModelSchema, Status>
+    {
+        group::read_group_model(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_group_model_by_name(&self, name: &str)
+        -> Result<Vec<GroupModelSchema>, Status>
+    {
+        group::list_group_model_by_name(&self.channel, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_group_model_by_category(&self, category: &str)
+        -> Result<Vec<GroupModelSchema>, Status>
+    {
+        group::list_group_model_by_category(&self.channel, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_group_model_by_name_category(&self, name: &str, category: &str)
+        -> Result<Vec<GroupModelSchema>, Status>
+    {
+        group::list_group_model_by_name_category(&self.channel, name, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_group_model(&self, name: &str, category: &str, description: Option<&str>)
+        -> Result<u32, Status>
+    {
+        group::create_group_model(&self.channel, name, category, description)
+        .await
+    }
+
+    pub async fn update_group_model(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        group::update_group_model(&self.channel, id, name, category, description)
+        .await
+    }
+
+    pub async fn delete_group_model(&self, id: u32)
+        -> Result<(), Status>
+    {
+        group::delete_group_model(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_group_model_member(&self, id: u32, model_id: u32)
+        -> Result<(), Status>
+    {
+        group::add_group_model_member(&self.channel, id, model_id)
+        .await
+    }
+
+    pub async fn remove_group_model_member(&self, id: u32, model_id: u32)
+        -> Result<(), Status>
+    {
+        group::remove_group_model_member(&self.channel, id, model_id)
+        .await
+    }
+
+    pub async fn read_group_device(&self, id: u32)
+        -> Result<GroupDeviceSchema, Status>
+    {
+        group::read_group_device(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_group_device_by_name(&self, name: &str)
+        -> Result<Vec<GroupDeviceSchema>, Status>
+    {
+        group::list_group_device_by_name(&self.channel, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_group_device_by_category(&self, category: &str)
+        -> Result<Vec<GroupDeviceSchema>, Status>
+    {
+        group::list_group_device_by_category(&self.channel, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_group_device_by_name_category(&self, name: &str, category: &str)
+        -> Result<Vec<GroupDeviceSchema>, Status>
+    {
+        group::list_group_device_by_name_category(&self.channel, name, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_group_device(&self, name: &str, category: &str, description: Option<&str>)
+        -> Result<u32, Status>
+    {
+        group::create_group_device(&self.channel, name, category, description)
+        .await
+    }
+
+    pub async fn update_group_device(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        group::update_group_device(&self.channel, id, name, category, description)
+        .await
+    }
+
+    pub async fn delete_group_device(&self, id: u32)
+        -> Result<(), Status>
+    {
+        group::delete_group_device(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_group_device_member(&self, id: u32, device_id: u64)
+        -> Result<(), Status>
+    {
+        group::add_group_device_member(&self.channel, id, device_id)
+        .await
+    }
+
+    pub async fn remove_group_device_member(&self, id: u32, device_id: u64)
+        -> Result<(), Status>
+    {
+        group::remove_group_device_member(&self.channel, id, device_id)
+        .await
+    }
+
+    pub async fn read_group_gateway(&self, id: u32)
+        -> Result<GroupGatewaySchema, Status>
+    {
+        group::read_group_gateway(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_group_gateway_by_name(&self, name: &str)
+        -> Result<Vec<GroupGatewaySchema>, Status>
+    {
+        group::list_group_gateway_by_name(&self.channel, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_group_gateway_by_category(&self, category: &str)
+        -> Result<Vec<GroupGatewaySchema>, Status>
+    {
+        group::list_group_gateway_by_category(&self.channel, category)
+        .await
+        .map(|v| {
+            v.into_iter().map(|s| s.into()).collect()
+        })
+    }
+
+    pub async fn list_group_gateway_by_name_category(&self, name: &str, category: &str)
+        -> Result<Vec<GroupGatewaySchema>, Status>
+    {
+        group::list_group_gateway_by_name_category(&self.channel, name, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_group_gateway(&self, name: &str, category: &str, description: Option<&str>)
+        -> Result<u32, Status>
+    {
+        group::create_group_gateway(&self.channel, name, category, description)
+        .await
+    }
+
+    pub async fn update_group_gateway(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        group::update_group_gateway(&self.channel, id, name, category, description)
+        .await
+    }
+
+    pub async fn delete_group_gateway(&self, id: u32)
+        -> Result<(), Status>
+    {
+        group::delete_group_gateway(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_group_gateway_member(&self, id: u32, gateway_id: u64)
+        -> Result<(), Status>
+    {
+        group::add_group_gateway_member(&self.channel, id, gateway_id)
+        .await
+    }
+
+    pub async fn remove_group_gateway_member(&self, id: u32, gateway_id: u64)
+        -> Result<(), Status>
+    {
+        group::remove_group_gateway_member(&self.channel, id, gateway_id)
         .await
     }
 
