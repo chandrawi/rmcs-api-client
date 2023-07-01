@@ -4,6 +4,7 @@ pub mod types;
 pub mod group;
 pub mod data;
 pub mod buffer;
+pub mod slice;
 
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
@@ -13,6 +14,7 @@ use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, Gateway
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 use rmcs_resource_db::schema::data::{DataSchema, DataModel};
 use rmcs_resource_db::schema::buffer::BufferSchema;
+use rmcs_resource_db::schema::slice::SliceSchema;
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -791,6 +793,62 @@ impl Resource {
     {
         buffer::delete_buffer(&self.channel, id)
         .await
+    }
+
+    pub async fn read_slice(&self, id: u32)
+        -> Result<SliceSchema, Status>
+    {
+        slice::read_slice(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_slice_by_name(&self, name: &str)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_by_name(&self.channel, name).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_by_device(&self, device_id: u64)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_by_device(&self.channel, device_id).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_by_model(&self, model_id: u32)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_by_model(&self.channel, model_id).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_by_device_model(&self, device_id: u64, model_id: u32)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_by_device_model(&self.channel, device_id, model_id).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_slice(&self, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+        -> Result<u32, Status>
+    {
+        slice::create_slice(&self.channel, device_id, model_id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+        .await
+    }
+
+    pub async fn update_slice(&self, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        slice::update_slice(&self.channel, id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+        .await
+    }
+
+    pub async fn delete_slice(&self, id: u32)
+        -> Result<(), Status>
+    {
+        slice::delete_slice(&self.channel, id).await
     }
 
 }
