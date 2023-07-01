@@ -5,6 +5,7 @@ pub mod group;
 pub mod data;
 pub mod buffer;
 pub mod slice;
+pub mod log;
 
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
@@ -15,6 +16,7 @@ use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, Group
 use rmcs_resource_db::schema::data::{DataSchema, DataModel};
 use rmcs_resource_db::schema::buffer::BufferSchema;
 use rmcs_resource_db::schema::slice::SliceSchema;
+use rmcs_resource_db::schema::log::LogSchema;
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -849,6 +851,58 @@ impl Resource {
         -> Result<(), Status>
     {
         slice::delete_slice(&self.channel, id).await
+    }
+
+    pub async fn read_log(&self, timestamp: DateTime<Utc>, device_id: u64)
+        -> Result<LogSchema, Status>
+    {
+        log::read_log(&self.channel, timestamp, device_id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+        -> Result<Vec<LogSchema>, Status>
+    {
+        log::list_log_by_time(&self.channel, timestamp, device_id, status)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+        -> Result<Vec<LogSchema>, Status>
+    {
+        log::list_log_by_last_time(&self.channel, last, device_id, status)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+        -> Result<Vec<LogSchema>, Status>
+    {
+        log::list_log_by_range_time(&self.channel, begin, end, device_id, status)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: u64, status: &str, value: ConfigValue)
+        -> Result<(), Status>
+    {
+        log::create_log(&self.channel, timestamp, device_id, status, value)
+        .await
+    }
+
+    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: u64, status: Option<&str>, value: Option<ConfigValue>)
+        -> Result<(), Status>
+    {
+        log::update_log(&self.channel, timestamp, device_id, status, value)
+        .await
+    }
+
+    pub async fn delete_log(&self, timestamp: DateTime<Utc>, device_id: u64)
+        -> Result<(), Status>
+    {
+        log::delete_log(&self.channel, timestamp, device_id).await
     }
 
 }
