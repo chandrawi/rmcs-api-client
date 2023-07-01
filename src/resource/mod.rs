@@ -1,10 +1,11 @@
 pub mod model;
 pub mod device;
+pub mod types;
 
 use tonic::{Status, transport::Channel};
 use rmcs_resource_db::schema::value::{DataIndexing, DataType, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
-use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema};
+use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -335,6 +336,57 @@ impl Resource {
         -> Result<(), Status>
     {
         device::delete_gateway_config(&self.channel, id)
+        .await
+    }
+
+    pub async fn read_type(&self, id: u32)
+        -> Result<TypeSchema, Status>
+    {
+        types::read_type(&self.channel, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_type_by_name(&self, name: &str)
+        -> Result<Vec<TypeSchema>, Status>
+    {
+        types::list_type_by_name(&self.channel, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_type(&self, name: &str, description: Option<&str>)
+        -> Result<u32, Status>
+    {
+        types::create_type(&self.channel, name, description)
+        .await
+    }
+
+    pub async fn update_type(&self, id: u32, name: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        types::update_type(&self.channel, id, name, description)
+        .await
+    }
+
+    pub async fn delete_type(&self, id: u32)
+        -> Result<(), Status>
+    {
+        types::delete_type(&self.channel, id)
+        .await
+    }
+
+    pub async fn add_type_model(&self, id: u32, model_id: u32)
+        -> Result<(), Status>
+    {
+        types::add_type_model(&self.channel, id, model_id)
+        .await
+    }
+
+    pub async fn remove_type_model(&self, id: u32, model_id: u32)
+        -> Result<(), Status>
+    {
+        types::remove_type_model(&self.channel, id, model_id)
         .await
     }
 
