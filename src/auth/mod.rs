@@ -10,6 +10,7 @@ use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_db::schema::auth_role::RoleSchema;
 use rmcs_auth_db::schema::auth_user::UserSchema;
 use rmcs_auth_db::schema::auth_token::TokenSchema;
+use rmcs_auth_api::auth::{ApiLoginResponse, UserLoginResponse, UserRefreshResponse, UserLogoutResponse};
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -33,6 +34,30 @@ impl Auth {
         Auth {
             channel
         }
+    }
+
+    pub async fn api_login(&self, api_id: u32, password: &str)
+        -> Result<ApiLoginResponse, Status>
+    {
+        auth::api_login(&self.channel, api_id, password).await
+    }
+
+    pub async fn user_login(&self, username: &str, password: &str)
+        -> Result<UserLoginResponse, Status>
+    {
+        auth::user_login(&self.channel, username, password).await
+    }
+
+    pub async fn user_refresh(&self, api_id: u32, access_token: &str, refresh_token: &str)
+        -> Result<UserRefreshResponse, Status>
+    {
+        auth::user_refresh(&self.channel, api_id, access_token, refresh_token).await
+    }
+
+    pub async fn user_logout(&self, refresh_token: &str)
+        -> Result<UserLogoutResponse, Status>
+    {
+        auth::user_logout(&self.channel, refresh_token).await
     }
 
     pub async fn read_api(&self, id: u32)
