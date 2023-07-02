@@ -6,7 +6,7 @@ use rmcs_resource_api::device::{
 
 const TYPE_NOT_FOUND: &str = "requested type not found";
 
-pub async fn read_type(channel: &Channel, id: u32)
+pub(crate) async fn read_type(channel: &Channel, id: u32)
     -> Result<TypeSchema, Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -19,7 +19,7 @@ pub async fn read_type(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(TYPE_NOT_FOUND))?)
 }
 
-pub async fn list_type_by_name(channel: &Channel, name: &str)
+pub(crate) async fn list_type_by_name(channel: &Channel, name: &str)
     -> Result<Vec<TypeSchema>, Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -32,7 +32,7 @@ pub async fn list_type_by_name(channel: &Channel, name: &str)
     Ok(response.results)
 }
 
-pub async fn create_type(channel: &Channel, name: &str, description: Option<&str>)
+pub(crate) async fn create_type(channel: &Channel, name: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -48,7 +48,7 @@ pub async fn create_type(channel: &Channel, name: &str, description: Option<&str
     Ok(response.id)
 }
 
-pub async fn update_type(channel: &Channel, id: u32, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_type(channel: &Channel, id: u32, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -62,7 +62,7 @@ pub async fn update_type(channel: &Channel, id: u32, name: Option<&str>, descrip
     Ok(())
 }
 
-pub async fn delete_type(channel: &Channel, id: u32)
+pub(crate) async fn delete_type(channel: &Channel, id: u32)
     -> Result<(), Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -74,7 +74,7 @@ pub async fn delete_type(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub async fn add_type_model(channel: &Channel, id: u32, model_id: u32)
+pub(crate) async fn add_type_model(channel: &Channel, id: u32, model_id: u32)
     -> Result<(), Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());
@@ -87,7 +87,7 @@ pub async fn add_type_model(channel: &Channel, id: u32, model_id: u32)
     Ok(())
 }
 
-pub async fn remove_type_model(channel: &Channel, id: u32, model_id: u32)
+pub(crate) async fn remove_type_model(channel: &Channel, id: u32, model_id: u32)
     -> Result<(), Status>
 {
     let mut client = DeviceServiceClient::new(channel.to_owned());

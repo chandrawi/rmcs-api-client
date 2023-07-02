@@ -17,6 +17,8 @@ chrono = { version = "0.4.24", default-features = false, features = ["clock", "i
 rand = "0.8.5"
 serde = "1.0.164"
 rsa = "0.9.2"
+pkcs8 = "0.10.2"
+spki = "0.7.2"
 jsonwebtoken = { version = "8.3.0", default-features = false }
 
 [dev-dependencies]

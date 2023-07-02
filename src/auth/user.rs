@@ -6,7 +6,7 @@ use rmcs_auth_api::user::{
 
 const USER_NOT_FOUND: &str = "requested user not found";
 
-pub async fn read_user(channel: &Channel, id: u32)
+pub(crate) async fn read_user(channel: &Channel, id: u32)
     -> Result<UserSchema, Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -19,7 +19,7 @@ pub async fn read_user(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
-pub async fn read_user_by_name(channel: &Channel, name: &str)
+pub(crate) async fn read_user_by_name(channel: &Channel, name: &str)
     -> Result<UserSchema, Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -32,7 +32,7 @@ pub async fn read_user_by_name(channel: &Channel, name: &str)
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
-pub async fn list_user_by_role(channel: &Channel, role_id: u32)
+pub(crate) async fn list_user_by_role(channel: &Channel, role_id: u32)
     -> Result<Vec<UserSchema>, Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -45,7 +45,7 @@ pub async fn list_user_by_role(channel: &Channel, role_id: u32)
     Ok(response.results)
 }
 
-pub async fn create_user(channel: &Channel, name: &str, email: &str, phone: &str, password: &str)
+pub(crate) async fn create_user(channel: &Channel, name: &str, email: &str, phone: &str, password: &str)
     -> Result<u32, Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -64,7 +64,7 @@ pub async fn create_user(channel: &Channel, name: &str, email: &str, phone: &str
     Ok(response.id)
 }
 
-pub async fn update_user(channel: &Channel, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_user(channel: &Channel, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
     -> Result<(), Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -81,7 +81,7 @@ pub async fn update_user(channel: &Channel, id: u32, name: Option<&str>, email: 
     Ok(())
 }
 
-pub async fn delete_user(channel: &Channel, id: u32)
+pub(crate) async fn delete_user(channel: &Channel, id: u32)
     -> Result<(), Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -93,7 +93,7 @@ pub async fn delete_user(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub async fn add_user_role(channel: &Channel, id: u32, role_id: u32)
+pub(crate) async fn add_user_role(channel: &Channel, id: u32, role_id: u32)
     -> Result<(), Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());
@@ -106,7 +106,7 @@ pub async fn add_user_role(channel: &Channel, id: u32, role_id: u32)
     Ok(())
 }
 
-pub async fn remove_user_role(channel: &Channel, id: u32, role_id: u32)
+pub(crate) async fn remove_user_role(channel: &Channel, id: u32, role_id: u32)
     -> Result<(), Status>
 {
     let mut client = UserServiceClient::new(channel.to_owned());

@@ -7,7 +7,7 @@ use rmcs_resource_api::group::{
 
 const GROUP_NOT_FOUND: &str = "requested group not found";
 
-pub async fn read_group_model(channel: &Channel, id: u32)
+pub(crate) async fn read_group_model(channel: &Channel, id: u32)
     -> Result<GroupModelSchema, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -20,7 +20,7 @@ pub async fn read_group_model(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
 }
 
-pub async fn list_group_model_by_name(channel: &Channel, name: &str)
+pub(crate) async fn list_group_model_by_name(channel: &Channel, name: &str)
     -> Result<Vec<GroupModelSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -33,7 +33,7 @@ pub async fn list_group_model_by_name(channel: &Channel, name: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_model_by_category(channel: &Channel, category: &str)
+pub(crate) async fn list_group_model_by_category(channel: &Channel, category: &str)
     -> Result<Vec<GroupModelSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -46,7 +46,7 @@ pub async fn list_group_model_by_category(channel: &Channel, category: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_model_by_name_category(channel: &Channel, name: &str, category: &str)
+pub(crate) async fn list_group_model_by_name_category(channel: &Channel, name: &str, category: &str)
     -> Result<Vec<GroupModelSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -60,7 +60,7 @@ pub async fn list_group_model_by_name_category(channel: &Channel, name: &str, ca
     Ok(response.results)
 }
 
-pub async fn create_group_model(channel: &Channel, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_model(channel: &Channel, name: &str, category: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -77,7 +77,7 @@ pub async fn create_group_model(channel: &Channel, name: &str, category: &str, d
     Ok(response.id)
 }
 
-pub async fn update_group_model(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_model(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -92,7 +92,7 @@ pub async fn update_group_model(channel: &Channel, id: u32, name: Option<&str>, 
     Ok(())
 }
 
-pub async fn delete_group_model(channel: &Channel, id: u32)
+pub(crate) async fn delete_group_model(channel: &Channel, id: u32)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -104,7 +104,7 @@ pub async fn delete_group_model(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub async fn add_group_model_member(channel: &Channel, id: u32, model_id: u32)
+pub(crate) async fn add_group_model_member(channel: &Channel, id: u32, model_id: u32)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -117,7 +117,7 @@ pub async fn add_group_model_member(channel: &Channel, id: u32, model_id: u32)
     Ok(())
 }
 
-pub async fn remove_group_model_member(channel: &Channel, id: u32, model_id: u32)
+pub(crate) async fn remove_group_model_member(channel: &Channel, id: u32, model_id: u32)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -130,7 +130,7 @@ pub async fn remove_group_model_member(channel: &Channel, id: u32, model_id: u32
     Ok(())
 }
 
-pub async fn read_group_device(channel: &Channel, id: u32)
+pub(crate) async fn read_group_device(channel: &Channel, id: u32)
     -> Result<GroupDeviceSchema, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -143,7 +143,7 @@ pub async fn read_group_device(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
 }
 
-pub async fn list_group_device_by_name(channel: &Channel, name: &str)
+pub(crate) async fn list_group_device_by_name(channel: &Channel, name: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -156,7 +156,7 @@ pub async fn list_group_device_by_name(channel: &Channel, name: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_device_by_category(channel: &Channel, category: &str)
+pub(crate) async fn list_group_device_by_category(channel: &Channel, category: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -169,7 +169,7 @@ pub async fn list_group_device_by_category(channel: &Channel, category: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_device_by_name_category(channel: &Channel, name: &str, category: &str)
+pub(crate) async fn list_group_device_by_name_category(channel: &Channel, name: &str, category: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -183,7 +183,7 @@ pub async fn list_group_device_by_name_category(channel: &Channel, name: &str, c
     Ok(response.results)
 }
 
-pub async fn create_group_device(channel: &Channel, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_device(channel: &Channel, name: &str, category: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -200,7 +200,7 @@ pub async fn create_group_device(channel: &Channel, name: &str, category: &str, 
     Ok(response.id)
 }
 
-pub async fn update_group_device(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_device(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -215,7 +215,7 @@ pub async fn update_group_device(channel: &Channel, id: u32, name: Option<&str>,
     Ok(())
 }
 
-pub async fn delete_group_device(channel: &Channel, id: u32)
+pub(crate) async fn delete_group_device(channel: &Channel, id: u32)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -227,7 +227,7 @@ pub async fn delete_group_device(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub async fn add_group_device_member(channel: &Channel, id: u32, device_id: u64)
+pub(crate) async fn add_group_device_member(channel: &Channel, id: u32, device_id: u64)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -240,7 +240,7 @@ pub async fn add_group_device_member(channel: &Channel, id: u32, device_id: u64)
     Ok(())
 }
 
-pub async fn remove_group_device_member(channel: &Channel, id: u32, device_id: u64)
+pub(crate) async fn remove_group_device_member(channel: &Channel, id: u32, device_id: u64)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -253,7 +253,7 @@ pub async fn remove_group_device_member(channel: &Channel, id: u32, device_id: u
     Ok(())
 }
 
-pub async fn read_group_gateway(channel: &Channel, id: u32)
+pub(crate) async fn read_group_gateway(channel: &Channel, id: u32)
     -> Result<GroupDeviceSchema, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -266,7 +266,7 @@ pub async fn read_group_gateway(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
 }
 
-pub async fn list_group_gateway_by_name(channel: &Channel, name: &str)
+pub(crate) async fn list_group_gateway_by_name(channel: &Channel, name: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -279,7 +279,7 @@ pub async fn list_group_gateway_by_name(channel: &Channel, name: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_gateway_by_category(channel: &Channel, category: &str)
+pub(crate) async fn list_group_gateway_by_category(channel: &Channel, category: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -292,7 +292,7 @@ pub async fn list_group_gateway_by_category(channel: &Channel, category: &str)
     Ok(response.results)
 }
 
-pub async fn list_group_gateway_by_name_category(channel: &Channel, name: &str, category: &str)
+pub(crate) async fn list_group_gateway_by_name_category(channel: &Channel, name: &str, category: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -306,7 +306,7 @@ pub async fn list_group_gateway_by_name_category(channel: &Channel, name: &str, 
     Ok(response.results)
 }
 
-pub async fn create_group_gateway(channel: &Channel, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_gateway(channel: &Channel, name: &str, category: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -323,7 +323,7 @@ pub async fn create_group_gateway(channel: &Channel, name: &str, category: &str,
     Ok(response.id)
 }
 
-pub async fn update_group_gateway(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_gateway(channel: &Channel, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -338,7 +338,7 @@ pub async fn update_group_gateway(channel: &Channel, id: u32, name: Option<&str>
     Ok(())
 }
 
-pub async fn delete_group_gateway(channel: &Channel, id: u32)
+pub(crate) async fn delete_group_gateway(channel: &Channel, id: u32)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -350,7 +350,7 @@ pub async fn delete_group_gateway(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub async fn add_group_gateway_member(channel: &Channel, id: u32, gateway_id: u64)
+pub(crate) async fn add_group_gateway_member(channel: &Channel, id: u32, gateway_id: u64)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());
@@ -363,7 +363,7 @@ pub async fn add_group_gateway_member(channel: &Channel, id: u32, gateway_id: u6
     Ok(())
 }
 
-pub async fn remove_group_gateway_member(channel: &Channel, id: u32, gateway_id: u64)
+pub(crate) async fn remove_group_gateway_member(channel: &Channel, id: u32, gateway_id: u64)
     -> Result<(), Status>
 {
     let mut client = GroupServiceClient::new(channel.to_owned());

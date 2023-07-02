@@ -9,7 +9,7 @@ use rmcs_resource_api::log::{
 
 const LOG_NOT_FOUND: &str = "requested log not found";
 
-pub async fn read_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64)
+pub(crate) async fn read_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64)
     -> Result<LogSchema, Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -23,7 +23,7 @@ pub async fn read_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u6
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub async fn list_log_by_time(channel: &Channel, timestamp: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_time(channel: &Channel, timestamp: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -44,7 +44,7 @@ pub async fn list_log_by_time(channel: &Channel, timestamp: DateTime<Utc>, devic
     Ok(response.results)
 }
 
-pub async fn list_log_by_last_time(channel: &Channel, last: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_last_time(channel: &Channel, last: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -65,7 +65,7 @@ pub async fn list_log_by_last_time(channel: &Channel, last: DateTime<Utc>, devic
     Ok(response.results)
 }
 
-pub async fn list_log_by_range_time(channel: &Channel, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_range_time(channel: &Channel, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -87,7 +87,7 @@ pub async fn list_log_by_range_time(channel: &Channel, begin: DateTime<Utc>, end
     Ok(response.results)
 }
 
-pub async fn create_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64, status: &str, value: ConfigValue)
+pub(crate) async fn create_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64, status: &str, value: ConfigValue)
     -> Result<(), Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -103,7 +103,7 @@ pub async fn create_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: 
     Ok(())
 }
 
-pub async fn update_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64, status: Option<&str>, value: Option<ConfigValue>)
+pub(crate) async fn update_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64, status: Option<&str>, value: Option<ConfigValue>)
     -> Result<(), Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
@@ -125,7 +125,7 @@ pub async fn update_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: 
     Ok(())
 }
 
-pub async fn delete_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64)
+pub(crate) async fn delete_log(channel: &Channel, timestamp: DateTime<Utc>, device_id: u64)
     -> Result<(), Status>
 {
     let mut client = LogServiceClient::new(channel.to_owned());
