@@ -2,6 +2,7 @@ use rsa::{RsaPrivateKey, Pkcs1v15Encrypt, RsaPublicKey};
 use pkcs8::DecodePublicKey;
 use spki::EncodePublicKey;
 use rand::thread_rng;
+use tonic::{Request, Status, service::Interceptor, metadata::MetadataValue};
 
 pub(crate) fn generate_keys() -> Result<(RsaPrivateKey, RsaPublicKey), rsa::Error>
 {
@@ -32,4 +33,16 @@ pub(crate) fn decrypt_message(ciphertext: &[u8], priv_key: RsaPrivateKey) -> Res
 pub(crate) fn encrypt_message(message: &[u8], pub_key: RsaPublicKey) -> Result<Vec<u8>, rsa::Error>
 {
     pub_key.encrypt(&mut thread_rng(), Pkcs1v15Encrypt, message)
+}
+
+pub(crate) struct TokenInterceptor(pub(crate) String);
+
+impl Interceptor for TokenInterceptor {
+    fn call(&mut self, mut request: Request<()>) -> Result<Request<()>, Status> {
+        request.metadata_mut().insert(
+            "authorization", 
+            MetadataValue::try_from(String::from("Bearer ") + &self.0).unwrap()
+        );
+        Ok(request)
+    }
 }
