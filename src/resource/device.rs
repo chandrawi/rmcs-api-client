@@ -9,6 +9,7 @@ use rmcs_resource_api::device::{
     TypeSchema, TypeId
 };
 use crate::resource::Resource;
+use crate::utility::TokenInterceptor;
 
 const DEVICE_NOT_FOUND: &str = "requested device not found";
 const GATEWAY_NOT_FOUND: &str = "requested gateway not found";
@@ -17,7 +18,9 @@ const CONF_NOT_FOUND: &str = "requested config not found";
 pub(crate) async fn read_device(resource: &Resource, id: u64)
     -> Result<DeviceSchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceId {
         id
     });
@@ -30,7 +33,9 @@ pub(crate) async fn read_device(resource: &Resource, id: u64)
 pub(crate) async fn read_device_by_sn(resource: &Resource, serial_number: &str)
     -> Result<DeviceSchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SerialNumber {
         serial_number: serial_number.to_owned()
     });
@@ -43,7 +48,9 @@ pub(crate) async fn read_device_by_sn(resource: &Resource, serial_number: &str)
 pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: u64)
     -> Result<Vec<DeviceSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayId {
         id: gateway_id
     });
@@ -56,7 +63,9 @@ pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: u64)
 pub(crate) async fn list_device_by_type(resource: &Resource, type_id: u32)
     -> Result<Vec<DeviceSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeId {
         id: type_id
     });
@@ -69,7 +78,9 @@ pub(crate) async fn list_device_by_type(resource: &Resource, type_id: u32)
 pub(crate) async fn list_device_by_name(resource: &Resource, name: &str)
     -> Result<Vec<DeviceSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceName {
         name: name.to_owned()
     });
@@ -82,7 +93,9 @@ pub(crate) async fn list_device_by_name(resource: &Resource, name: &str)
 pub(crate) async fn list_device_by_gateway_type(resource: &Resource, gateway_id: u64, type_id: u32)
     -> Result<Vec<DeviceSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceGatewayType {
         gateway_id,
         type_id
@@ -96,7 +109,9 @@ pub(crate) async fn list_device_by_gateway_type(resource: &Resource, gateway_id:
 pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id: u64, name: &str)
     -> Result<Vec<DeviceSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceGatewayName {
         gateway_id,
         name: name.to_owned()
@@ -110,7 +125,9 @@ pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id:
 pub(crate) async fn create_device(resource: &Resource, id: u64, gateway_id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceSchema {
         id,
         gateway_id,
@@ -133,7 +150,9 @@ pub(crate) async fn create_device(resource: &Resource, id: u64, gateway_id: u64,
 pub(crate) async fn update_device(resource: &Resource, id: u64, gateway_id: Option<u64>, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceUpdate {
         id,
         gateway_id,
@@ -150,7 +169,9 @@ pub(crate) async fn update_device(resource: &Resource, id: u64, gateway_id: Opti
 pub(crate) async fn delete_device(resource: &Resource, id: u64)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceId {
         id
     });
@@ -162,7 +183,9 @@ pub(crate) async fn delete_device(resource: &Resource, id: u64)
 pub(crate) async fn read_gateway(resource: &Resource, id: u64)
     -> Result<GatewaySchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayId {
         id
     });
@@ -175,7 +198,9 @@ pub(crate) async fn read_gateway(resource: &Resource, id: u64)
 pub(crate) async fn read_gateway_by_sn(resource: &Resource, serial_number: &str)
     -> Result<GatewaySchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SerialNumber {
         serial_number: serial_number.to_owned()
     });
@@ -188,7 +213,9 @@ pub(crate) async fn read_gateway_by_sn(resource: &Resource, serial_number: &str)
 pub(crate) async fn list_gateway_by_type(resource: &Resource, type_id: u32)
     -> Result<Vec<GatewaySchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeId {
         id: type_id
     });
@@ -201,7 +228,9 @@ pub(crate) async fn list_gateway_by_type(resource: &Resource, type_id: u32)
 pub(crate) async fn list_gateway_by_name(resource: &Resource, name: &str)
     -> Result<Vec<GatewaySchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayName {
         name: name.to_owned()
     });
@@ -214,7 +243,9 @@ pub(crate) async fn list_gateway_by_name(resource: &Resource, name: &str)
 pub(crate) async fn create_gateway(resource: &Resource, id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewaySchema {
         id,
         serial_number: serial_number.to_owned(),
@@ -236,7 +267,9 @@ pub(crate) async fn create_gateway(resource: &Resource, id: u64, type_id: u32, s
 pub(crate) async fn update_gateway(resource: &Resource, id: u64, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayUpdate {
         id,
         serial_number: serial_number.map(|s| s.to_owned()),
@@ -252,7 +285,9 @@ pub(crate) async fn update_gateway(resource: &Resource, id: u64, type_id: Option
 pub(crate) async fn delete_gateway(resource: &Resource, id: u64)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayId {
         id
     });
@@ -264,7 +299,9 @@ pub(crate) async fn delete_gateway(resource: &Resource, id: u64)
 pub(crate) async fn read_device_config(resource: &Resource, id: u32)
     -> Result<ConfigSchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });
@@ -277,7 +314,9 @@ pub(crate) async fn read_device_config(resource: &Resource, id: u32)
 pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id: u64)
     -> Result<Vec<ConfigSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DeviceId {
         id: device_id
     });
@@ -290,7 +329,9 @@ pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id:
 pub(crate) async fn create_device_config(resource: &Resource, device_id: u64, name: &str, value: ConfigValue, category: &str)
     -> Result<u32, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigSchema {
         id: 0,
         device_id,
@@ -308,7 +349,9 @@ pub(crate) async fn create_device_config(resource: &Resource, device_id: u64, na
 pub(crate) async fn update_device_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigUpdate {
         id,
         name: name.map(|s| s.to_owned()),
@@ -324,7 +367,9 @@ pub(crate) async fn update_device_config(resource: &Resource, id: u32, name: Opt
 pub(crate) async fn delete_device_config(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });
@@ -336,7 +381,9 @@ pub(crate) async fn delete_device_config(resource: &Resource, id: u32)
 pub(crate) async fn read_gateway_config(resource: &Resource, id: u32)
     -> Result<ConfigSchema, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });
@@ -349,7 +396,9 @@ pub(crate) async fn read_gateway_config(resource: &Resource, id: u32)
 pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_id: u64)
     -> Result<Vec<ConfigSchema>, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GatewayId {
         id: gateway_id
     });
@@ -362,7 +411,9 @@ pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_
 pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: u64, name: &str, value: ConfigValue, category: &str)
     -> Result<u32, Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigSchema {
         id: 0,
         device_id: gateway_id,
@@ -380,7 +431,9 @@ pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: u64, 
 pub(crate) async fn update_gateway_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigUpdate {
         id,
         name: name.map(|s| s.to_owned()),
@@ -396,7 +449,9 @@ pub(crate) async fn update_gateway_config(resource: &Resource, id: u32, name: Op
 pub(crate) async fn delete_gateway_config(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = DeviceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });

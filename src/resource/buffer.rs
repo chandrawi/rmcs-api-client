@@ -7,13 +7,16 @@ use rmcs_resource_api::buffer::{
     BufferSchema, BufferId, BufferSelector, BuffersSelector, BufferUpdate, BufferStatus
 };
 use crate::resource::Resource;
+use crate::utility::TokenInterceptor;
 
 const BUFFER_NOT_FOUND: &str = "requested buffer not found";
 
 pub(crate) async fn read_buffer(resource: &Resource, id: u32)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferId {
         id
     });
@@ -26,7 +29,9 @@ pub(crate) async fn read_buffer(resource: &Resource, id: u32)
 pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSelector {
         device_id,
         model_id,
@@ -47,7 +52,9 @@ pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<u64
 pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSelector {
         device_id,
         model_id,
@@ -68,7 +75,9 @@ pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<u64>
 pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BuffersSelector {
         device_id,
         model_id,
@@ -90,7 +99,9 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_i
 pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BuffersSelector {
         device_id,
         model_id,
@@ -112,7 +123,9 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
 pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
     -> Result<u32, Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSchema {
         id: 0,
         device_id,
@@ -134,7 +147,9 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id:
 pub(crate) async fn update_buffer(resource: &Resource, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferUpdate {
         id,
         data_bytes: data.as_deref().map(|v| ArrayDataValue::from_vec(v).to_bytes()),
@@ -151,7 +166,9 @@ pub(crate) async fn update_buffer(resource: &Resource, id: u32, data: Option<Vec
 pub(crate) async fn delete_buffer(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = BufferServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferId {
         id
     });

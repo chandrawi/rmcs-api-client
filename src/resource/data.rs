@@ -9,13 +9,16 @@ use rmcs_resource_api::data::{
     DataIdModel, DataTimeModel, DataRangeModel, DataNumberModel, DataSchemaModel
 };
 use crate::resource::Resource;
+use crate::utility::TokenInterceptor;
 
 const DATA_NOT_FOUND: &str = "requested data not found";
 
 pub(crate) async fn read_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<DataSchema, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataId {
         device_id,
         model_id,
@@ -31,7 +34,9 @@ pub(crate) async fn read_data(resource: &Resource, device_id: u64, model_id: u32
 pub(crate) async fn list_data_by_time(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataTime {
         device_id,
         model_id,
@@ -46,7 +51,9 @@ pub(crate) async fn list_data_by_time(resource: &Resource, device_id: u64, model
 pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: u64, model_id: u32, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataTime {
         device_id,
         model_id,
@@ -61,7 +68,9 @@ pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: u64, 
 pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: u64, model_id: u32, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataRange {
         device_id,
         model_id,
@@ -77,7 +86,9 @@ pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: u64,
 pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: u64, model_id: u32, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataNumber {
         device_id,
         model_id,
@@ -93,7 +104,9 @@ pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: u
 pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: u64, model_id: u32, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataNumber {
         device_id,
         model_id,
@@ -109,7 +122,9 @@ pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: u6
 pub(crate) async fn get_data_model(resource: &Resource, model_id: u32)
     -> Result<ApiDataModel, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
         id: model_id
     });
@@ -122,7 +137,9 @@ pub(crate) async fn get_data_model(resource: &Resource, model_id: u32)
 pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<DataSchema, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id,
@@ -138,7 +155,9 @@ pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, 
 pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataTimeModel {
         model: Some(model.into()),
         device_id,
@@ -153,7 +172,9 @@ pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: Dat
 pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model: DataModel, device_id: u64, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataTimeModel {
         model: Some(model.into()),
         device_id,
@@ -168,7 +189,9 @@ pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model
 pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, model: DataModel, device_id: u64, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataRangeModel {
         model: Some(model.into()),
         device_id,
@@ -184,7 +207,9 @@ pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, mode
 pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, model: DataModel, device_id: u64, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataNumberModel {
         model: Some(model.into()),
         device_id,
@@ -200,7 +225,9 @@ pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, m
 pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, model: DataModel, device_id: u64, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataNumberModel {
         model: Some(model.into()),
         device_id,
@@ -216,7 +243,9 @@ pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, mo
 pub(crate) async fn create_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataSchema {
         device_id,
         model_id,
@@ -235,7 +264,9 @@ pub(crate) async fn create_data(resource: &Resource, device_id: u64, model_id: u
 pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataSchemaModel {
         model: Some(model.into()),
         device_id,
@@ -254,7 +285,9 @@ pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel
 pub(crate) async fn delete_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataId {
         device_id,
         model_id,
@@ -269,7 +302,9 @@ pub(crate) async fn delete_data(resource: &Resource, device_id: u64, model_id: u
 pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id,

@@ -5,13 +5,16 @@ use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceName, SliceDevice, SliceModel, SliceDeviceModel, SliceUpdate
 };
 use crate::resource::Resource;
+use crate::utility::TokenInterceptor;
 
 const SLICE_NOT_FOUND: &str = "requested slice not found";
 
 pub(crate) async fn read_slice(resource: &Resource, id: u32)
     -> Result<SliceSchema, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceId {
         id
     });
@@ -24,7 +27,9 @@ pub(crate) async fn read_slice(resource: &Resource, id: u32)
 pub(crate) async fn list_slice_by_name(resource: &Resource, name: &str)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceName {
         name: name.to_owned()
     });
@@ -37,7 +42,9 @@ pub(crate) async fn list_slice_by_name(resource: &Resource, name: &str)
 pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: u64)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceDevice {
         device_id
     });
@@ -50,7 +57,9 @@ pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: u64)
 pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: u32)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceModel {
         model_id
     });
@@ -63,7 +72,9 @@ pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: u32)
 pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: u64, model_id: u32)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceDeviceModel {
         device_id,
         model_id
@@ -77,7 +88,9 @@ pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: u
 pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceSchema {
         id: 0,
         device_id,
@@ -98,7 +111,9 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: 
 pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceUpdate {
         id,
         timestamp_begin: timestamp_begin.map(|t| t.timestamp_nanos()),
@@ -116,7 +131,9 @@ pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: 
 pub(crate) async fn delete_slice(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = SliceServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceId {
         id
     });

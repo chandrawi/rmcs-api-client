@@ -7,6 +7,7 @@ use rmcs_resource_api::model::{
     ConfigSchema, ConfigId, ConfigUpdate
 };
 use crate::resource::Resource;
+use crate::utility::TokenInterceptor;
 
 const MODEL_NOT_FOUND: &str = "requested model not found";
 const CONF_NOT_FOUND: &str = "requested config not found";
@@ -14,7 +15,9 @@ const CONF_NOT_FOUND: &str = "requested config not found";
 pub(crate) async fn read_model(resource: &Resource, id: u32)
     -> Result<ModelSchema, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
         id
     });
@@ -27,7 +30,9 @@ pub(crate) async fn read_model(resource: &Resource, id: u32)
 pub(crate) async fn list_model_by_name(resource: &Resource, name: &str)
     -> Result<Vec<ModelSchema>, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelName {
         name: name.to_owned()
     });
@@ -40,7 +45,9 @@ pub(crate) async fn list_model_by_name(resource: &Resource, name: &str)
 pub(crate) async fn list_model_by_category(resource: &Resource, category: &str)
     -> Result<Vec<ModelSchema>, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelCategory {
         category: category.to_owned()
     });
@@ -53,7 +60,9 @@ pub(crate) async fn list_model_by_category(resource: &Resource, category: &str)
 pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str, category: &str)
     -> Result<Vec<ModelSchema>, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelNameCategory {
         name: name.to_owned(),
         category: category.to_owned()
@@ -67,7 +76,9 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
 pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelSchema {
         id: 0,
         indexing: Into::<common::DataIndexing>::into(indexing).into(),
@@ -86,7 +97,9 @@ pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, ca
 pub(crate) async fn update_model(resource: &Resource, id: u32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelUpdate {
         id,
         indexing: indexing.map(|s| Into::<common::DataIndexing>::into(s).into()),
@@ -102,7 +115,9 @@ pub(crate) async fn update_model(resource: &Resource, id: u32, indexing: Option<
 pub(crate) async fn delete_model(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
         id
     });
@@ -114,7 +129,9 @@ pub(crate) async fn delete_model(resource: &Resource, id: u32)
 pub(crate) async fn add_model_type(resource: &Resource, id: u32, types: &[DataType])
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelTypes {
         id,
         types: types.into_iter()
@@ -129,7 +146,9 @@ pub(crate) async fn add_model_type(resource: &Resource, id: u32, types: &[DataTy
 pub(crate) async fn remove_model_type(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
         id
     });
@@ -141,7 +160,9 @@ pub(crate) async fn remove_model_type(resource: &Resource, id: u32)
 pub(crate) async fn read_model_config(resource: &Resource, id: u32)
     -> Result<ConfigSchema, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });
@@ -154,7 +175,9 @@ pub(crate) async fn read_model_config(resource: &Resource, id: u32)
 pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: u32)
     -> Result<Vec<ConfigSchema>, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
         id: model_id
     });
@@ -167,7 +190,9 @@ pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: u3
 pub(crate) async fn create_model_config(resource: &Resource, model_id: u32, index: u32, name: &str, value: ConfigValue, category: &str)
     -> Result<u32, Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigSchema {
         id: 0,
         model_id,
@@ -186,7 +211,9 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: u32, inde
 pub(crate) async fn update_model_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigUpdate {
         id,
         name: name.map(|s| s.to_owned()),
@@ -202,7 +229,9 @@ pub(crate) async fn update_model_config(resource: &Resource, id: u32, name: Opti
 pub(crate) async fn delete_model_config(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = ModelServiceClient::new(resource.channel.to_owned());
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigId {
         id
     });
