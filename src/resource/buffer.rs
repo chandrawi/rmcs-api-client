@@ -1,4 +1,4 @@
-use tonic::{Request, Status, transport::Channel};
+use tonic::{Request, Status};
 use chrono::{DateTime, Utc};
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
@@ -6,13 +6,14 @@ use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
     BufferSchema, BufferId, BufferSelector, BuffersSelector, BufferUpdate, BufferStatus
 };
+use crate::resource::Resource;
 
 const BUFFER_NOT_FOUND: &str = "requested buffer not found";
 
-pub(crate) async fn read_buffer(channel: &Channel, id: u32)
+pub(crate) async fn read_buffer(resource: &Resource, id: u32)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferId {
         id
     });
@@ -22,10 +23,10 @@ pub(crate) async fn read_buffer(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_first(channel: &Channel, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferSelector {
         device_id,
         model_id,
@@ -43,10 +44,10 @@ pub(crate) async fn read_buffer_first(channel: &Channel, device_id: Option<u64>,
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_last(channel: &Channel, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferSelector {
         device_id,
         model_id,
@@ -64,10 +65,10 @@ pub(crate) async fn read_buffer_last(channel: &Channel, device_id: Option<u64>, 
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_buffer_first(channel: &Channel, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BuffersSelector {
         device_id,
         model_id,
@@ -86,10 +87,10 @@ pub(crate) async fn list_buffer_first(channel: &Channel, number: u32, device_id:
     Ok(response.results)
 }
 
-pub(crate) async fn list_buffer_last(channel: &Channel, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BuffersSelector {
         device_id,
         model_id,
@@ -108,10 +109,10 @@ pub(crate) async fn list_buffer_last(channel: &Channel, number: u32, device_id: 
     Ok(response.results)
 }
 
-pub(crate) async fn create_buffer(channel: &Channel, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
     -> Result<u32, Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferSchema {
         id: 0,
         device_id,
@@ -130,10 +131,10 @@ pub(crate) async fn create_buffer(channel: &Channel, device_id: u64, model_id: u
     Ok(response.id)
 }
 
-pub(crate) async fn update_buffer(channel: &Channel, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
+pub(crate) async fn update_buffer(resource: &Resource, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferUpdate {
         id,
         data_bytes: data.as_deref().map(|v| ArrayDataValue::from_vec(v).to_bytes()),
@@ -147,10 +148,10 @@ pub(crate) async fn update_buffer(channel: &Channel, id: u32, data: Option<Vec<D
     Ok(())
 }
 
-pub(crate) async fn delete_buffer(channel: &Channel, id: u32)
+pub(crate) async fn delete_buffer(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = BufferServiceClient::new(channel.to_owned());
+    let mut client = BufferServiceClient::new(resource.channel.to_owned());
     let request = Request::new(BufferId {
         id
     });

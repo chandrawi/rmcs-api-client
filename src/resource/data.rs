@@ -1,4 +1,4 @@
-use tonic::{Request, Status, transport::Channel};
+use tonic::{Request, Status};
 use chrono::{DateTime, Utc};
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_db::schema::data::DataModel;
@@ -8,13 +8,14 @@ use rmcs_resource_api::data::{
     DataSchema, DataId, DataTime, DataRange, DataNumber, DataModel as ApiDataModel, ModelId,
     DataIdModel, DataTimeModel, DataRangeModel, DataNumberModel, DataSchemaModel
 };
+use crate::resource::Resource;
 
 const DATA_NOT_FOUND: &str = "requested data not found";
 
-pub(crate) async fn read_data(channel: &Channel, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+pub(crate) async fn read_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<DataSchema, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataId {
         device_id,
         model_id,
@@ -27,10 +28,10 @@ pub(crate) async fn read_data(channel: &Channel, device_id: u64, model_id: u32, 
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_data_by_time(channel: &Channel, device_id: u64, model_id: u32, timestamp: DateTime<Utc>)
+pub(crate) async fn list_data_by_time(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataTime {
         device_id,
         model_id,
@@ -42,10 +43,10 @@ pub(crate) async fn list_data_by_time(channel: &Channel, device_id: u64, model_i
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_last_time(channel: &Channel, device_id: u64, model_id: u32, last: DateTime<Utc>)
+pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: u64, model_id: u32, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataTime {
         device_id,
         model_id,
@@ -57,10 +58,10 @@ pub(crate) async fn list_data_by_last_time(channel: &Channel, device_id: u64, mo
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_range_time(channel: &Channel, device_id: u64, model_id: u32, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: u64, model_id: u32, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataRange {
         device_id,
         model_id,
@@ -73,10 +74,10 @@ pub(crate) async fn list_data_by_range_time(channel: &Channel, device_id: u64, m
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_number_before(channel: &Channel, device_id: u64, model_id: u32, before: DateTime<Utc>, number: u32)
+pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: u64, model_id: u32, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataNumber {
         device_id,
         model_id,
@@ -89,10 +90,10 @@ pub(crate) async fn list_data_by_number_before(channel: &Channel, device_id: u64
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_number_after(channel: &Channel, device_id: u64, model_id: u32, after: DateTime<Utc>, number: u32)
+pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: u64, model_id: u32, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataNumber {
         device_id,
         model_id,
@@ -105,10 +106,10 @@ pub(crate) async fn list_data_by_number_after(channel: &Channel, device_id: u64,
     Ok(response.results)
 }
 
-pub(crate) async fn get_data_model(channel: &Channel, model_id: u32)
+pub(crate) async fn get_data_model(resource: &Resource, model_id: u32)
     -> Result<ApiDataModel, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(ModelId {
         id: model_id
     });
@@ -118,10 +119,10 @@ pub(crate) async fn get_data_model(channel: &Channel, model_id: u32)
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_data_with_model(channel: &Channel, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<DataSchema, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id,
@@ -134,10 +135,10 @@ pub(crate) async fn read_data_with_model(channel: &Channel, model: DataModel, de
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_data_with_model_by_time(channel: &Channel, model: DataModel, device_id: u64, timestamp: DateTime<Utc>)
+pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataTimeModel {
         model: Some(model.into()),
         device_id,
@@ -149,10 +150,10 @@ pub(crate) async fn list_data_with_model_by_time(channel: &Channel, model: DataM
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_last_time(channel: &Channel, model: DataModel, device_id: u64, last: DateTime<Utc>)
+pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model: DataModel, device_id: u64, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataTimeModel {
         model: Some(model.into()),
         device_id,
@@ -164,10 +165,10 @@ pub(crate) async fn list_data_with_model_by_last_time(channel: &Channel, model: 
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_range_time(channel: &Channel, model: DataModel, device_id: u64, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, model: DataModel, device_id: u64, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataRangeModel {
         model: Some(model.into()),
         device_id,
@@ -180,10 +181,10 @@ pub(crate) async fn list_data_with_model_by_range_time(channel: &Channel, model:
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_number_before(channel: &Channel, model: DataModel, device_id: u64, before: DateTime<Utc>, number: u32)
+pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, model: DataModel, device_id: u64, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataNumberModel {
         model: Some(model.into()),
         device_id,
@@ -196,10 +197,10 @@ pub(crate) async fn list_data_with_model_by_number_before(channel: &Channel, mod
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_number_after(channel: &Channel, model: DataModel, device_id: u64, after: DateTime<Utc>, number: u32)
+pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, model: DataModel, device_id: u64, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataNumberModel {
         model: Some(model.into()),
         device_id,
@@ -212,10 +213,10 @@ pub(crate) async fn list_data_with_model_by_number_after(channel: &Channel, mode
     Ok(response.results)
 }
 
-pub(crate) async fn create_data(channel: &Channel, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+pub(crate) async fn create_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataSchema {
         device_id,
         model_id,
@@ -231,10 +232,10 @@ pub(crate) async fn create_data(channel: &Channel, device_id: u64, model_id: u32
     Ok(())
 }
 
-pub(crate) async fn create_data_with_model(channel: &Channel, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataSchemaModel {
         model: Some(model.into()),
         device_id,
@@ -250,10 +251,10 @@ pub(crate) async fn create_data_with_model(channel: &Channel, model: DataModel, 
     Ok(())
 }
 
-pub(crate) async fn delete_data(channel: &Channel, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+pub(crate) async fn delete_data(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataId {
         device_id,
         model_id,
@@ -265,10 +266,10 @@ pub(crate) async fn delete_data(channel: &Channel, device_id: u64, model_id: u32
     Ok(())
 }
 
-pub(crate) async fn delete_data_with_model(channel: &Channel, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
     -> Result<(), Status>
 {
-    let mut client = DataServiceClient::new(channel.to_owned());
+    let mut client = DataServiceClient::new(resource.channel.to_owned());
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id,

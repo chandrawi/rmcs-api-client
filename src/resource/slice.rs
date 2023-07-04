@@ -1,16 +1,17 @@
-use tonic::{Request, Status, transport::Channel};
+use tonic::{Request, Status};
 use chrono::{DateTime, Utc};
 use rmcs_resource_api::slice::slice_service_client::SliceServiceClient;
 use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceName, SliceDevice, SliceModel, SliceDeviceModel, SliceUpdate
 };
+use crate::resource::Resource;
 
 const SLICE_NOT_FOUND: &str = "requested slice not found";
 
-pub(crate) async fn read_slice(channel: &Channel, id: u32)
+pub(crate) async fn read_slice(resource: &Resource, id: u32)
     -> Result<SliceSchema, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceId {
         id
     });
@@ -20,10 +21,10 @@ pub(crate) async fn read_slice(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(SLICE_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_slice_by_name(channel: &Channel, name: &str)
+pub(crate) async fn list_slice_by_name(resource: &Resource, name: &str)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceName {
         name: name.to_owned()
     });
@@ -33,10 +34,10 @@ pub(crate) async fn list_slice_by_name(channel: &Channel, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device(channel: &Channel, device_id: u64)
+pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: u64)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceDevice {
         device_id
     });
@@ -46,10 +47,10 @@ pub(crate) async fn list_slice_by_device(channel: &Channel, device_id: u64)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_model(channel: &Channel, model_id: u32)
+pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: u32)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceModel {
         model_id
     });
@@ -59,10 +60,10 @@ pub(crate) async fn list_slice_by_model(channel: &Channel, model_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device_model(channel: &Channel, device_id: u64, model_id: u32)
+pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: u64, model_id: u32)
     -> Result<Vec<SliceSchema>, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceDeviceModel {
         device_id,
         model_id
@@ -73,10 +74,10 @@ pub(crate) async fn list_slice_by_device_model(channel: &Channel, device_id: u64
     Ok(response.results)
 }
 
-pub(crate) async fn create_slice(channel: &Channel, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
     -> Result<u32, Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceSchema {
         id: 0,
         device_id,
@@ -94,10 +95,10 @@ pub(crate) async fn create_slice(channel: &Channel, device_id: u64, model_id: u3
     Ok(response.id)
 }
 
-pub(crate) async fn update_slice(channel: &Channel, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceUpdate {
         id,
         timestamp_begin: timestamp_begin.map(|t| t.timestamp_nanos()),
@@ -112,10 +113,10 @@ pub(crate) async fn update_slice(channel: &Channel, id: u32, timestamp_begin: Op
     Ok(())
 }
 
-pub(crate) async fn delete_slice(channel: &Channel, id: u32)
+pub(crate) async fn delete_slice(resource: &Resource, id: u32)
     -> Result<(), Status>
 {
-    let mut client = SliceServiceClient::new(channel.to_owned());
+    let mut client = SliceServiceClient::new(resource.channel.to_owned());
     let request = Request::new(SliceId {
         id
     });
