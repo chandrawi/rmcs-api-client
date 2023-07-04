@@ -1,4 +1,4 @@
-use tonic::{Request, Status, transport::Channel};
+use tonic::{Request, Status};
 use rmcs_auth_api::auth::auth_service_client::AuthServiceClient;
 use rmcs_auth_api::auth::{
     ApiKeyRequest, ApiLoginRequest, ApiLoginResponse,
@@ -7,16 +7,17 @@ use rmcs_auth_api::auth::{
     UserLogoutRequest, UserLogoutResponse
 };
 use crate::utility::{import_public_key, encrypt_message, decrypt_message, generate_keys, export_public_key};
+use crate::auth::Auth;
 
 const KEY_IMPORT_ERR: &str = "key import error";
 const KEY_GEN_ERR: &str = "generate key error";
 const DECRYPT_ERR: &str = "decrypt key error";
 const ENCRYPT_ERR: &str = "encrypt password error";
 
-pub(crate) async fn api_login(channel: &Channel, api_id: u32, password: &str)
+pub(crate) async fn api_login(auth: &Auth, api_id: u32, password: &str)
     -> Result<ApiLoginResponse, Status>
 {
-    let mut client = AuthServiceClient::new(channel.to_owned());
+    let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(ApiKeyRequest {
         api_id
     });
@@ -42,10 +43,10 @@ pub(crate) async fn api_login(channel: &Channel, api_id: u32, password: &str)
     Ok(response)
 }
 
-pub(crate) async fn user_login(channel: &Channel, username: &str, password: &str)
+pub(crate) async fn user_login(auth: &Auth, username: &str, password: &str)
     -> Result<UserLoginResponse, Status>
 {
-    let mut client = AuthServiceClient::new(channel.to_owned());
+    let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserKeyRequest {
         name: username.to_owned()
     });
@@ -64,10 +65,10 @@ pub(crate) async fn user_login(channel: &Channel, username: &str, password: &str
     Ok(response)
 }
 
-pub(crate) async fn user_refresh(channel: &Channel, api_id: u32, access_token: &str, refresh_token: &str)
+pub(crate) async fn user_refresh(auth: &Auth, api_id: u32, access_token: &str, refresh_token: &str)
     -> Result<UserRefreshResponse, Status>
 {
-    let mut client = AuthServiceClient::new(channel.to_owned());
+    let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserRefreshRequest {
         refresh_token: refresh_token.to_owned(),
         access_token: Some(AccessTokenMap {
@@ -79,10 +80,10 @@ pub(crate) async fn user_refresh(channel: &Channel, api_id: u32, access_token: &
     Ok(response)
 }
 
-pub(crate) async fn user_logout(channel: &Channel, refresh_token: &str)
+pub(crate) async fn user_logout(auth: &Auth, refresh_token: &str)
     -> Result<UserLogoutResponse, Status>
 {
-    let mut client = AuthServiceClient::new(channel.to_owned());
+    let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserLogoutRequest {
         refresh_token: refresh_token.to_owned()
     });

@@ -1,15 +1,16 @@
-use tonic::{Request, Status, transport::Channel};
+use tonic::{Request, Status};
 use rmcs_auth_api::user::user_service_client::UserServiceClient;
 use rmcs_auth_api::user::{
     UserSchema, UserId, UserName, RoleId, UserUpdate, UserRole
 };
+use crate::auth::Auth;
 
 const USER_NOT_FOUND: &str = "requested user not found";
 
-pub(crate) async fn read_user(channel: &Channel, id: u32)
+pub(crate) async fn read_user(auth: &Auth, id: u32)
     -> Result<UserSchema, Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserId {
         id
     });
@@ -19,10 +20,10 @@ pub(crate) async fn read_user(channel: &Channel, id: u32)
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_user_by_name(channel: &Channel, name: &str)
+pub(crate) async fn read_user_by_name(auth: &Auth, name: &str)
     -> Result<UserSchema, Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserName {
         name: name.to_owned()
     });
@@ -32,10 +33,10 @@ pub(crate) async fn read_user_by_name(channel: &Channel, name: &str)
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_user_by_role(channel: &Channel, role_id: u32)
+pub(crate) async fn list_user_by_role(auth: &Auth, role_id: u32)
     -> Result<Vec<UserSchema>, Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(RoleId {
         id: role_id
     });
@@ -45,10 +46,10 @@ pub(crate) async fn list_user_by_role(channel: &Channel, role_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_user(channel: &Channel, name: &str, email: &str, phone: &str, password: &str)
+pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &str, password: &str)
     -> Result<u32, Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserSchema {
         id: 0,
         name: name.to_owned(),
@@ -64,10 +65,10 @@ pub(crate) async fn create_user(channel: &Channel, name: &str, email: &str, phon
     Ok(response.id)
 }
 
-pub(crate) async fn update_user(channel: &Channel, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_user(auth: &Auth, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserUpdate {
         id,
         name: name.map(|s| s.to_owned()),
@@ -81,10 +82,10 @@ pub(crate) async fn update_user(channel: &Channel, id: u32, name: Option<&str>, 
     Ok(())
 }
 
-pub(crate) async fn delete_user(channel: &Channel, id: u32)
+pub(crate) async fn delete_user(auth: &Auth, id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserId {
         id
     });
@@ -93,10 +94,10 @@ pub(crate) async fn delete_user(channel: &Channel, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_user_role(channel: &Channel, id: u32, role_id: u32)
+pub(crate) async fn add_user_role(auth: &Auth, id: u32, role_id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserRole {
         user_id: id,
         role_id
@@ -106,10 +107,10 @@ pub(crate) async fn add_user_role(channel: &Channel, id: u32, role_id: u32)
     Ok(())
 }
 
-pub(crate) async fn remove_user_role(channel: &Channel, id: u32, role_id: u32)
+pub(crate) async fn remove_user_role(auth: &Auth, id: u32, role_id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(channel.to_owned());
+    let mut client = UserServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserRole {
         user_id: id,
         role_id
