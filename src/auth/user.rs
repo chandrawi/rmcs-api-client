@@ -4,13 +4,16 @@ use rmcs_auth_api::user::{
     UserSchema, UserId, UserName, RoleId, UserUpdate, UserRole
 };
 use crate::auth::Auth;
+use crate::utility::TokenInterceptor;
 
 const USER_NOT_FOUND: &str = "requested user not found";
 
 pub(crate) async fn read_user(auth: &Auth, id: u32)
     -> Result<UserSchema, Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
         id
     });
@@ -23,7 +26,9 @@ pub(crate) async fn read_user(auth: &Auth, id: u32)
 pub(crate) async fn read_user_by_name(auth: &Auth, name: &str)
     -> Result<UserSchema, Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserName {
         name: name.to_owned()
     });
@@ -36,7 +41,9 @@ pub(crate) async fn read_user_by_name(auth: &Auth, name: &str)
 pub(crate) async fn list_user_by_role(auth: &Auth, role_id: u32)
     -> Result<Vec<UserSchema>, Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(RoleId {
         id: role_id
     });
@@ -49,7 +56,9 @@ pub(crate) async fn list_user_by_role(auth: &Auth, role_id: u32)
 pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &str, password: &str)
     -> Result<u32, Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserSchema {
         id: 0,
         name: name.to_owned(),
@@ -68,7 +77,9 @@ pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &st
 pub(crate) async fn update_user(auth: &Auth, id: u32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserUpdate {
         id,
         name: name.map(|s| s.to_owned()),
@@ -85,7 +96,9 @@ pub(crate) async fn update_user(auth: &Auth, id: u32, name: Option<&str>, email:
 pub(crate) async fn delete_user(auth: &Auth, id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
         id
     });
@@ -97,7 +110,9 @@ pub(crate) async fn delete_user(auth: &Auth, id: u32)
 pub(crate) async fn add_user_role(auth: &Auth, id: u32, role_id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserRole {
         user_id: id,
         role_id
@@ -110,7 +125,9 @@ pub(crate) async fn add_user_role(auth: &Auth, id: u32, role_id: u32)
 pub(crate) async fn remove_user_role(auth: &Auth, id: u32, role_id: u32)
     -> Result<(), Status>
 {
-    let mut client = UserServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserRole {
         user_id: id,
         role_id

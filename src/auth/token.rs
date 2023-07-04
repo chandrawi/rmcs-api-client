@@ -5,13 +5,16 @@ use rmcs_auth_api::token::{
     TokenSchema, AccessId, RefreshId, UserId, TokenUpdate
 };
 use crate::auth::Auth;
+use crate::utility::TokenInterceptor;
 
 const TOKEN_NOT_FOUND: &str = "requested token not found";
 
 pub(crate) async fn read_access_token(auth: &Auth, access_id: u32)
     -> Result<TokenSchema, Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(AccessId {
         access_id
     });
@@ -24,7 +27,9 @@ pub(crate) async fn read_access_token(auth: &Auth, access_id: u32)
 pub(crate) async fn read_refresh_token(auth: &Auth, refresh_id: &str)
     -> Result<TokenSchema, Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(RefreshId {
         refresh_id: refresh_id.to_owned()
     });
@@ -37,7 +42,9 @@ pub(crate) async fn read_refresh_token(auth: &Auth, refresh_id: &str)
 pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
     -> Result<Vec<TokenSchema>, Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
         user_id
     });
@@ -50,7 +57,9 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
 pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
     -> Result<(u32, String), Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenSchema {
         refresh_id: String::new(),
         access_id: 0,
@@ -67,7 +76,9 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, expire: DateT
 pub(crate) async fn create_refresh_token(auth: &Auth, access_id: u32, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
     -> Result<(u32, String), Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenSchema {
         refresh_id: String::new(),
         access_id,
@@ -84,7 +95,9 @@ pub(crate) async fn create_refresh_token(auth: &Auth, access_id: u32, user_id: u
 pub(crate) async fn update_access_token(auth: &Auth, access_id: u32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
     -> Result<String, Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenUpdate {
         refresh_id: None,
         access_id: Some(access_id),
@@ -100,7 +113,9 @@ pub(crate) async fn update_access_token(auth: &Auth, access_id: u32, expire: Opt
 pub(crate) async fn update_refresh_token(auth: &Auth, refresh_id: &str, access_id: Option<u32>, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
     -> Result<String, Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenUpdate {
         refresh_id: Some(refresh_id.to_owned()),
         access_id,
@@ -116,7 +131,9 @@ pub(crate) async fn update_refresh_token(auth: &Auth, refresh_id: &str, access_i
 pub(crate) async fn delete_access_token(auth: &Auth, access_id: u32)
     -> Result<(), Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(AccessId {
         access_id
     });
@@ -128,7 +145,9 @@ pub(crate) async fn delete_access_token(auth: &Auth, access_id: u32)
 pub(crate) async fn delete_refresh_token(auth: &Auth, refresh_id: &str)
     -> Result<(), Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(RefreshId {
         refresh_id: refresh_id.to_owned()
     });
@@ -140,7 +159,9 @@ pub(crate) async fn delete_refresh_token(auth: &Auth, refresh_id: &str)
 pub(crate) async fn delete_token_by_user(auth: &Auth, user_id: u32)
     -> Result<(), Status>
 {
-    let mut client = TokenServiceClient::new(auth.channel.to_owned());
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
         user_id
     });

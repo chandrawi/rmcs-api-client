@@ -6,8 +6,8 @@ use rmcs_auth_api::auth::{
     UserRefreshRequest, UserRefreshResponse, AccessTokenMap,
     UserLogoutRequest, UserLogoutResponse
 };
-use crate::utility::{import_public_key, encrypt_message, decrypt_message, generate_keys, export_public_key};
 use crate::auth::Auth;
+use crate::utility::{import_public_key, encrypt_message, decrypt_message, generate_keys, export_public_key};
 
 const KEY_IMPORT_ERR: &str = "key import error";
 const KEY_GEN_ERR: &str = "generate key error";
