@@ -292,12 +292,12 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn read_refresh_token(&self, refresh_id: &str)
-        -> Result<TokenSchema, Status>
+    pub async fn list_auth_token(&self, refresh_token: &str)
+        -> Result<Vec<TokenSchema>, Status>
     {
-        token::read_refresh_token(&self, refresh_id)
+        token::list_auth_token(&self, refresh_token)
         .await
-        .map(|s| s.into())
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_token_by_user(&self, user_id: u32)
@@ -308,31 +308,31 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_access_token(&self, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
-        -> Result<(u32, String), Status>
+    pub async fn create_access_token(&self, user_id: u32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
+        -> Result<(u32, String, String), Status>
     {
-        token::create_access_token(&self, user_id, expire, ip)
+        token::create_access_token(&self, user_id, auth_token, expire, ip)
         .await
     }
 
-    pub async fn create_refresh_token(&self, access_id: u32, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
-        -> Result<(u32, String), Status>
+    pub async fn create_auth_token(&self, user_id: u32, expire: DateTime<Utc>, ip: &[u8], number: u32)
+        -> Result<Vec<(u32, String, String)>, Status>
     {
-        token::create_refresh_token(&self, access_id, user_id, expire, ip)
+        token::create_auth_token(&self, user_id, expire, ip, number)
         .await
     }
 
     pub async fn update_access_token(&self, access_id: u32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
-        -> Result<String, Status>
+        -> Result<(String, String), Status>
     {
         token::update_access_token(&self, access_id, expire, ip)
         .await
     }
 
-    pub async fn update_refresh_token(&self, refresh_id: &str, access_id: Option<u32>, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
-        -> Result<String, Status>
+    pub async fn update_auth_token(&self, auth_token: &str, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+        -> Result<(String, String), Status>
     {
-        token::update_refresh_token(&self, refresh_id, access_id, expire, ip)
+        token::update_auth_token(&self, auth_token, expire, ip)
         .await
     }
 
@@ -343,10 +343,10 @@ impl Auth {
         .await
     }
 
-    pub async fn delete_refresh_token(&self, refresh_id: &str)
+    pub async fn delete_auth_token(&self, auth_token: &str)
         -> Result<(), Status>
     {
-        token::delete_refresh_token(&self, refresh_id)
+        token::delete_auth_token(&self, auth_token)
         .await
     }
 

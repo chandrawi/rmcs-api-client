@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use chrono::{DateTime, Utc};
 use rmcs_auth_api::token::token_service_client::TokenServiceClient;
 use rmcs_auth_api::token::{
-    TokenSchema, AccessId, RefreshId, UserId, TokenUpdate
+    TokenSchema, AccessId, AuthToken, UserId, AuthTokenCreate, TokenUpdate
 };
 use crate::auth::Auth;
 use crate::utility::TokenInterceptor;
@@ -24,19 +24,19 @@ pub(crate) async fn read_access_token(auth: &Auth, access_id: u32)
     Ok(response.result.ok_or(Status::not_found(TOKEN_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_refresh_token(auth: &Auth, refresh_id: &str)
-    -> Result<TokenSchema, Status>
+pub(crate) async fn list_auth_token(auth: &Auth, auth_token: &str)
+    -> Result<Vec<TokenSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
-    let request = Request::new(RefreshId {
-        refresh_id: refresh_id.to_owned()
+    let request = Request::new(AuthToken {
+        auth_token: auth_token.to_owned()
     });
-    let response = client.read_refresh_token(request)
+    let response = client.list_auth_token(request)
         .await?
         .into_inner();
-    Ok(response.result.ok_or(Status::not_found(TOKEN_NOT_FOUND))?)
+    Ok(response.results)
 }
 
 pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
@@ -54,78 +54,84 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
-    -> Result<(u32, String), Status>
+pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
+    -> Result<(u32, String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenSchema {
-        refresh_id: String::new(),
         access_id: 0,
         user_id,
+        refresh_token: String::new(),
+        auth_token: auth_token.to_owned(),
         expire: expire.timestamp_nanos(),
         ip: ip.to_vec()
     });
     let response = client.create_access_token(request)
         .await?
         .into_inner();
-    Ok((response.access_id, response.refresh_id))
+    Ok((response.access_id, response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn create_refresh_token(auth: &Auth, access_id: u32, user_id: u32, expire: DateTime<Utc>, ip: &[u8])
-    -> Result<(u32, String), Status>
+pub(crate) async fn create_auth_token(auth: &Auth, user_id: u32, expire: DateTime<Utc>, ip: &[u8], number: u32)
+    -> Result<Vec<(u32, String, String)>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
-    let request = Request::new(TokenSchema {
-        refresh_id: String::new(),
-        access_id,
+    let request = Request::new(AuthTokenCreate {
         user_id,
+        number,
         expire: expire.timestamp_nanos(),
         ip: ip.to_vec()
     });
-    let response = client.create_refresh_token(request)
+    let response = client.create_auth_token(request)
         .await?
         .into_inner();
-    Ok((response.access_id, response.refresh_id))
+    Ok(
+        response.tokens.into_iter()
+            .map(|t| (t.access_id, t.refresh_token, t.auth_token))
+            .collect()
+    )
 }
 
 pub(crate) async fn update_access_token(auth: &Auth, access_id: u32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
-    -> Result<String, Status>
+    -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenUpdate {
-        refresh_id: None,
         access_id: Some(access_id),
+        refresh_token: None,
+        auth_token: None,
         expire: expire.map(|s| s.timestamp_nanos()),
         ip: ip.map(|s| s.to_vec())
     });
     let response = client.update_access_token(request)
         .await?
         .into_inner();
-    Ok(response.refresh_id)
+    Ok((response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn update_refresh_token(auth: &Auth, refresh_id: &str, access_id: Option<u32>, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
-    -> Result<String, Status>
+pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+    -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenUpdate {
-        refresh_id: Some(refresh_id.to_owned()),
-        access_id,
+        access_id: None,
+        refresh_token: None,
+        auth_token: Some(auth_token.to_owned()),
         expire: expire.map(|s| s.timestamp_nanos()),
         ip: ip.map(|s| s.to_vec())
     });
-    let response = client.update_refresh_token(request)
+    let response = client.update_auth_token(request)
         .await?
         .into_inner();
-    Ok(response.refresh_id)
+    Ok((response.refresh_token, response.auth_token))
 }
 
 pub(crate) async fn delete_access_token(auth: &Auth, access_id: u32)
@@ -142,16 +148,16 @@ pub(crate) async fn delete_access_token(auth: &Auth, access_id: u32)
     Ok(())
 }
 
-pub(crate) async fn delete_refresh_token(auth: &Auth, refresh_id: &str)
+pub(crate) async fn delete_auth_token(auth: &Auth, auth_token: &str)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
-    let request = Request::new(RefreshId {
-        refresh_id: refresh_id.to_owned()
+    let request = Request::new(AuthToken {
+        auth_token: auth_token.to_owned()
     });
-    client.delete_refresh_token(request)
+    client.delete_auth_token(request)
         .await?;
     Ok(())
 }
