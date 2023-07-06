@@ -3,7 +3,7 @@ use rmcs_auth_api::auth::auth_service_client::AuthServiceClient;
 use rmcs_auth_api::auth::{
     ApiKeyRequest, ApiLoginRequest, ApiLoginResponse,
     UserKeyRequest, UserLoginRequest, UserLoginResponse,
-    UserRefreshRequest, UserRefreshResponse, AccessTokenMap,
+    UserRefreshRequest, UserRefreshResponse,
     UserLogoutRequest, UserLogoutResponse
 };
 use crate::auth::Auth;
@@ -48,7 +48,7 @@ pub(crate) async fn user_login(auth: &Auth, username: &str, password: &str)
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserKeyRequest {
-        name: username.to_owned()
+        username: username.to_owned()
     });
     // get transport public key of requested user and encrypt the password
     let response = client.user_login_key(request).await?.into_inner();
@@ -58,7 +58,7 @@ pub(crate) async fn user_login(auth: &Auth, username: &str, password: &str)
         .map_err(|_| Status::internal(ENCRYPT_ERR))?;
     // request access and refresh tokens
     let request = Request::new(UserLoginRequest {
-        name: username.to_owned(),
+        username: username.to_owned(),
         password: passhash
     });
     let response = client.user_login(request).await?.into_inner();
@@ -70,22 +70,21 @@ pub(crate) async fn user_refresh(auth: &Auth, api_id: u32, access_token: &str, r
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserRefreshRequest {
+        api_id,
+        access_token: access_token.to_owned(),
         refresh_token: refresh_token.to_owned(),
-        access_token: Some(AccessTokenMap {
-            api_id,
-            access_token: access_token.to_owned()
-        })
     });
     let response = client.user_refresh(request).await?.into_inner();
     Ok(response)
 }
 
-pub(crate) async fn user_logout(auth: &Auth, refresh_token: &str)
+pub(crate) async fn user_logout(auth: &Auth, user_id: u32, auth_token: &str)
     -> Result<UserLogoutResponse, Status>
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserLogoutRequest {
-        refresh_token: refresh_token.to_owned()
+        user_id,
+        auth_token: auth_token.to_owned()
     });
     let response = client.user_logout(request).await?.into_inner();
     Ok(response)

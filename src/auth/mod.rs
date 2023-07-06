@@ -62,10 +62,10 @@ impl Auth {
         auth::user_refresh(&self, api_id, access_token, refresh_token).await
     }
 
-    pub async fn user_logout(&self, refresh_token: &str)
+    pub async fn user_logout(&self, user_id: u32, auth_token: &str)
         -> Result<UserLogoutResponse, Status>
     {
-        auth::user_logout(&self, refresh_token).await
+        auth::user_logout(&self, user_id, auth_token).await
     }
 
     pub async fn read_api(&self, id: u32)
