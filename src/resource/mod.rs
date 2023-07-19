@@ -28,8 +28,8 @@ pub struct Resource {
 impl Resource {
 
     pub async fn new(addr: &str) -> Self {
-        let addr: &'static str = Box::leak(addr.to_owned().into_boxed_str());
-        let channel = Channel::from_static(addr)
+        let channel = Channel::from_shared(addr.to_owned())
+            .expect("Invalid address")
             .connect()
             .await
             .expect(&format!("Error making channel to {}", addr));

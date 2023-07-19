@@ -21,8 +21,8 @@ pub struct Auth {
 impl Auth {
     
     pub async fn new(addr: &str) -> Auth {
-        let addr: &'static str = Box::leak(addr.to_owned().into_boxed_str());
-        let channel = Channel::from_static(addr)
+        let channel = Channel::from_shared(addr.to_owned())
+            .expect("Invalid address")
             .connect()
             .await
             .expect(&format!("Error making channel to {}", addr));

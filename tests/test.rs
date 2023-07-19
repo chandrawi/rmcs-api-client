@@ -2,7 +2,7 @@
 mod tests {
 
     use std::str::FromStr;
-    use std::process::Command;
+    use std::process::{Command, Stdio};
     use std::time::{SystemTime, Duration};
     use chrono::{DateTime, Utc};
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
@@ -10,7 +10,7 @@ mod tests {
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
 
-    fn start_server(server_kind: &str)
+    fn start_server(server_kind: &str, port: &str)
     {
         // start server using cargo run command
         Command::new("cargo")
@@ -22,10 +22,18 @@ mod tests {
         let mut count = 0;
         let time_limit = SystemTime::now() + Duration::from_secs(30);
         while SystemTime::now() < time_limit && count == 0 {
-            let output = Command::new("pgrep")
-                .args(["-a", "auth_server", "-c"])
-                .output()
+            let ss_child = Command::new("ss")
+                .arg("-tulpn")
+                .stdout(Stdio::piped())
+                .spawn()
                 .unwrap();
+            let grep_child = Command::new("grep")
+                .args([port, "-c"])
+                .stdin(Stdio::from(ss_child.stdout.unwrap()))
+                .stdout(Stdio::piped())
+                .spawn()
+                .unwrap();
+            let output = grep_child.wait_with_output().unwrap();
             count = String::from_utf8(output.stdout)
                 .unwrap()
                 .replace("\n", "")
@@ -48,12 +56,14 @@ mod tests {
     async fn test_auth()
     {
         // std::env::set_var("RUST_BACKTRACE", "1");
-        start_server("auth_server");
 
-        // build auth client instance with address from env file
+        // get address from env file
         dotenvy::dotenv().ok();
         let addr = std::env::var("ADDRESS_AUTH").unwrap();
+        let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
         let addr = String::from("http://") + &addr;
+
+        start_server("test_auth_server", &port);
 
         let auth = Auth::new(&addr).await;
 
@@ -249,19 +259,21 @@ mod tests {
         assert!(result_role.is_err());
         assert!(result_api.is_err());
 
-        stop_server("auth_server");
+        stop_server("test_auth_server");
     }
 
     #[tokio::test]
     async fn test_resource()
     {
         // std::env::set_var("RUST_BACKTRACE", "full");
-        start_server("resource_server");
 
-        // build resource client instance with address from env file
+        // get address from env file
         dotenvy::dotenv().ok();
         let addr = std::env::var("ADDRESS_RESOURCE").unwrap();
+        let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
         let addr = String::from("http://") + &addr;
+
+        start_server("test_resource_server", &port);
 
         let resource = Resource::new(&addr).await;
 
@@ -516,7 +528,7 @@ mod tests {
         let result = resource.read_group_device(group_device_id).await;
         assert!(result.is_err());
 
-        stop_server("resource_server");
+        stop_server("test_resource_server");
     }
 
 }
