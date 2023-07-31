@@ -11,7 +11,7 @@ use crate::utility::TokenInterceptor;
 
 const LOG_NOT_FOUND: &str = "requested log not found";
 
-pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: u64)
+pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64)
     -> Result<LogSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -27,7 +27,7 @@ pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, devi
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -50,7 +50,7 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -73,7 +73,7 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -97,7 +97,7 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<
     Ok(response.results)
 }
 
-pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: u64, status: &str, value: ConfigValue)
+pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64, status: &str, value: ConfigValue)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -115,7 +115,7 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, de
     Ok(())
 }
 
-pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: u64, status: Option<&str>, value: Option<ConfigValue>)
+pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -139,7 +139,7 @@ pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, de
     Ok(())
 }
 
-pub(crate) async fn delete_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: u64)
+pub(crate) async fn delete_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

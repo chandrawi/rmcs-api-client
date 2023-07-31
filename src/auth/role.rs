@@ -8,7 +8,7 @@ use crate::utility::TokenInterceptor;
 
 const ROLE_NOT_FOUND: &str = "requested role not found";
 
-pub(crate) async fn read_role(auth: &Auth, id: u32)
+pub(crate) async fn read_role(auth: &Auth, id: i32)
     -> Result<RoleSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -23,7 +23,7 @@ pub(crate) async fn read_role(auth: &Auth, id: u32)
     Ok(response.result.ok_or(Status::not_found(ROLE_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_role_by_name(auth: &Auth, api_id: u32, name: &str)
+pub(crate) async fn read_role_by_name(auth: &Auth, api_id: i32, name: &str)
     -> Result<RoleSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -39,7 +39,7 @@ pub(crate) async fn read_role_by_name(auth: &Auth, api_id: u32, name: &str)
     Ok(response.result.ok_or(Status::not_found(ROLE_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_role_by_api(auth: &Auth, api_id: u32)
+pub(crate) async fn list_role_by_api(auth: &Auth, api_id: i32)
     -> Result<Vec<RoleSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -54,7 +54,7 @@ pub(crate) async fn list_role_by_api(auth: &Auth, api_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn list_role_by_user(auth: &Auth, user_id: u32)
+pub(crate) async fn list_role_by_user(auth: &Auth, user_id: i32)
     -> Result<Vec<RoleSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -69,8 +69,8 @@ pub(crate) async fn list_role_by_user(auth: &Auth, user_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_role(auth: &Auth, api_id: u32, name: &str, multi: bool, ip_lock: bool, access_duration: u32, refresh_duration: u32)
-    -> Result<u32, Status>
+pub(crate) async fn create_role(auth: &Auth, api_id: i32, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
@@ -92,7 +92,7 @@ pub(crate) async fn create_role(auth: &Auth, api_id: u32, name: &str, multi: boo
     Ok(response.id)
 }
 
-pub(crate) async fn update_role(auth: &Auth, id: u32, name: Option<&str>, multi: Option<bool>, ip_lock: Option<bool>, access_duration: Option<u32>, refresh_duration: Option<u32>)
+pub(crate) async fn update_role(auth: &Auth, id: i32, name: Option<&str>, multi: Option<bool>, ip_lock: Option<bool>, access_duration: Option<i32>, refresh_duration: Option<i32>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -112,7 +112,7 @@ pub(crate) async fn update_role(auth: &Auth, id: u32, name: Option<&str>, multi:
     Ok(())
 }
 
-pub(crate) async fn delete_role(auth: &Auth, id: u32)
+pub(crate) async fn delete_role(auth: &Auth, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -127,7 +127,7 @@ pub(crate) async fn delete_role(auth: &Auth, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_role_access(auth: &Auth, id: u32, procedure_id: u32)
+pub(crate) async fn add_role_access(auth: &Auth, id: i32, procedure_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -143,7 +143,7 @@ pub(crate) async fn add_role_access(auth: &Auth, id: u32, procedure_id: u32)
     Ok(())
 }
 
-pub(crate) async fn remove_role_access(auth: &Auth, id: u32, procedure_id: u32)
+pub(crate) async fn remove_role_access(auth: &Auth, id: i32, procedure_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());

@@ -9,7 +9,7 @@ use crate::utility::TokenInterceptor;
 
 const SLICE_NOT_FOUND: &str = "requested slice not found";
 
-pub(crate) async fn read_slice(resource: &Resource, id: u32)
+pub(crate) async fn read_slice(resource: &Resource, id: i32)
     -> Result<SliceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -39,7 +39,7 @@ pub(crate) async fn list_slice_by_name(resource: &Resource, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: u64)
+pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: i64)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -54,7 +54,7 @@ pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: u64)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: u32)
+pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: i32)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -69,7 +69,7 @@ pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: u64, model_id: u32)
+pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: i64, model_id: i32)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -85,8 +85,8 @@ pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: u
     Ok(response.results)
 }
 
-pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
-    -> Result<u32, Status>
+pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: i32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -97,8 +97,8 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: 
         model_id,
         timestamp_begin: timestamp_begin.timestamp_nanos(),
         timestamp_end: timestamp_end.timestamp_nanos(),
-        index_begin: index_begin.unwrap_or_default() as u32,
-        index_end: index_end.unwrap_or_default() as u32,
+        index_begin: index_begin.unwrap_or_default() as i32,
+        index_end: index_end.unwrap_or_default() as i32,
         name: name.to_owned(),
         description: description.unwrap_or_default().to_owned()
     });
@@ -108,7 +108,7 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: u64, model_id: 
     Ok(response.id)
 }
 
-pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -118,8 +118,8 @@ pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: 
         id,
         timestamp_begin: timestamp_begin.map(|t| t.timestamp_nanos()),
         timestamp_end: timestamp_end.map(|t| t.timestamp_nanos()),
-        index_begin: index_begin.map(|i| i as u32),
-        index_end: index_end.map(|i| i as u32),
+        index_begin: index_begin.map(|i| i as i32),
+        index_end: index_end.map(|i| i as i32),
         name: name.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
     });
@@ -128,7 +128,7 @@ pub(crate) async fn update_slice(resource: &Resource, id: u32, timestamp_begin: 
     Ok(())
 }
 
-pub(crate) async fn delete_slice(resource: &Resource, id: u32)
+pub(crate) async fn delete_slice(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

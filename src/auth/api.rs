@@ -10,7 +10,7 @@ use crate::utility::TokenInterceptor;
 const API_NOT_FOUND: &str = "requested api not found";
 const PROC_NOT_FOUND: &str = "requested procedure not found";
 
-pub(crate) async fn read_api(auth: &Auth, id: u32)
+pub(crate) async fn read_api(auth: &Auth, id: i32)
     -> Result<ApiSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -54,7 +54,7 @@ pub(crate) async fn list_api_by_category(auth: &Auth, category: &str)
 }
 
 pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category: &str, description: &str, password: &str)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
@@ -76,7 +76,7 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
     Ok(response.id)
 }
 
-pub(crate) async fn update_api(auth: &Auth, id: u32, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_api(auth: &Auth, id: i32, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -96,7 +96,7 @@ pub(crate) async fn update_api(auth: &Auth, id: u32, name: Option<&str>, address
     Ok(())
 }
 
-pub(crate) async fn delete_api(auth: &Auth, id: u32)
+pub(crate) async fn delete_api(auth: &Auth, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -110,7 +110,7 @@ pub(crate) async fn delete_api(auth: &Auth, id: u32)
     Ok(())
 }
 
-pub(crate) async fn read_procedure(auth: &Auth, id: u32)
+pub(crate) async fn read_procedure(auth: &Auth, id: i32)
     -> Result<ProcedureSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -125,7 +125,7 @@ pub(crate) async fn read_procedure(auth: &Auth, id: u32)
     Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: u32, name: &str)
+pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: i32, name: &str)
     -> Result<ProcedureSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -141,7 +141,7 @@ pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: u32, name: &str)
     Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: u32)
+pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: i32)
     -> Result<Vec<ProcedureSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -156,8 +156,8 @@ pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_procedure(auth: &Auth, api_id: u32, name: &str, description: &str)
-    -> Result<u32, Status>
+pub(crate) async fn create_procedure(auth: &Auth, api_id: i32, name: &str, description: &str)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
@@ -175,7 +175,7 @@ pub(crate) async fn create_procedure(auth: &Auth, api_id: u32, name: &str, descr
     Ok(response.id)
 }
 
-pub(crate) async fn update_procedure(auth: &Auth, id: u32, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_procedure(auth: &Auth, id: i32, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -191,7 +191,7 @@ pub(crate) async fn update_procedure(auth: &Auth, id: u32, name: Option<&str>, d
     Ok(())
 }
 
-pub(crate) async fn delete_procedure(auth: &Auth, id: u32)
+pub(crate) async fn delete_procedure(auth: &Auth, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());

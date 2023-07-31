@@ -11,7 +11,7 @@ use crate::utility::TokenInterceptor;
 
 const BUFFER_NOT_FOUND: &str = "requested buffer not found";
 
-pub(crate) async fn read_buffer(resource: &Resource, id: u32)
+pub(crate) async fn read_buffer(resource: &Resource, id: i32)
     -> Result<BufferSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -26,7 +26,7 @@ pub(crate) async fn read_buffer(resource: &Resource, id: u32)
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -49,7 +49,7 @@ pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<u64
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -72,7 +72,7 @@ pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<u64>
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -96,7 +96,7 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_i
     Ok(response.results)
 }
 
-pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -120,8 +120,8 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
     Ok(response.results)
 }
 
-pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
-    -> Result<u32, Status>
+pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -131,7 +131,7 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id:
         device_id,
         model_id,
         timestamp: timestamp.timestamp_nanos(),
-        index: index.unwrap_or(0) as u32,
+        index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
             Into::<common::DataType>::into(el).into()
@@ -144,7 +144,7 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: u64, model_id:
     Ok(response.id)
 }
 
-pub(crate) async fn update_buffer(resource: &Resource, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
+pub(crate) async fn update_buffer(resource: &Resource, id: i32, data: Option<Vec<DataValue>>, status: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -163,7 +163,7 @@ pub(crate) async fn update_buffer(resource: &Resource, id: u32, data: Option<Vec
     Ok(())
 }
 
-pub(crate) async fn delete_buffer(resource: &Resource, id: u32)
+pub(crate) async fn delete_buffer(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

@@ -187,10 +187,11 @@ mod tests {
         // create new access token and refresh token
         let expire1 = DateTime::from_str("2023-01-01T00:00:00Z").unwrap();
         let expire2 = DateTime::from_str("2023-01-01T12:00:00Z").unwrap();
-        let (access_id1, _, auth_token1) = auth.create_access_token(user_id1, " ", expire1, &[192, 168, 0, 1]).await.unwrap();
+        let auth_token = "rGKrHrDuWXt2CDbjmrt1SHbmea86wIQb";
+        let (access_id1, _, auth_token1) = auth.create_access_token(user_id1, auth_token, expire1, &[192, 168, 0, 1]).await.unwrap();
         let access_id2 = access_id1 + 1;
         auth.create_auth_token(user_id1, expire2, &[192, 168, 0, 1], 1).await.unwrap();
-        auth.create_access_token(user_id1, " ", expire1, &[]).await.unwrap();
+        auth.create_access_token(user_id1, auth_token, expire1, &[]).await.unwrap();
 
         // get token data
         let access_token = auth.read_access_token(access_id2).await.unwrap();
@@ -295,8 +296,8 @@ mod tests {
         resource.add_type_model(type_id, model_buf_id).await.unwrap();
 
         // create new devices with newly created type as its type 
-        let gateway_id = 0x87AD915C32B89D09;
-        let device_id1 = 0xA07C2589F301DB46;
+        let gateway_id = 0x47AD915C32B89D09;
+        let device_id1 = 0x507C2589F301DB46;
         let device_id2 = 0x2C8B82061E8F10A2;
         resource.create_device(device_id1, gateway_id, type_id, "TEST01", "Speedometer Compass 1", None).await.unwrap();
         resource.create_device(device_id2, gateway_id, type_id, "TEST02", "Speedometer Compass 2", None).await.unwrap();
@@ -351,16 +352,16 @@ mod tests {
 
         // read group model
         let groups = resource.list_group_model_by_category("APPLICATION").await.unwrap();
-        let group = groups.into_iter().next().unwrap();
-        assert_eq!(group.models, [model_id]);
-        assert_eq!(group.name, "data");
-        assert_eq!(group.category, "APPLICATION");
+        let group_model = groups.into_iter().next().unwrap();
+        assert_eq!(group_model.models, [model_id]);
+        assert_eq!(group_model.name, "data");
+        assert_eq!(group_model.category, "APPLICATION");
         // read group device
         let groups = resource.list_group_device_by_name("sensor").await.unwrap();
-        let group = groups.into_iter().next().unwrap();
-        assert_eq!(group.devices, [device_id2, device_id1]);
-        assert_eq!(group.name, "sensor");
-        assert_eq!(group.category, "APPLICATION");
+        let group_device = groups.into_iter().next().unwrap();
+        assert_eq!(group_device.devices, [device_id1, device_id2]);
+        assert_eq!(group_device.name, "sensor");
+        assert_eq!(group_device.category, "APPLICATION");
 
         // update model
         resource.update_model(model_buf_id, None, None, Some("buffer 2 integer"), Some("Model for store 2 i32 temporary data")).await.unwrap();

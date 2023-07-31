@@ -14,7 +14,7 @@ const KEY_GEN_ERR: &str = "generate key error";
 const DECRYPT_ERR: &str = "decrypt key error";
 const ENCRYPT_ERR: &str = "encrypt password error";
 
-pub(crate) async fn api_login(auth: &Auth, api_id: u32, password: &str)
+pub(crate) async fn api_login(auth: &Auth, api_id: i32, password: &str)
     -> Result<ApiLoginResponse, Status>
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
@@ -65,7 +65,7 @@ pub(crate) async fn user_login(auth: &Auth, username: &str, password: &str)
     Ok(response)
 }
 
-pub(crate) async fn user_refresh(auth: &Auth, api_id: u32, access_token: &str, refresh_token: &str)
+pub(crate) async fn user_refresh(auth: &Auth, api_id: i32, access_token: &str, refresh_token: &str)
     -> Result<UserRefreshResponse, Status>
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
@@ -78,7 +78,7 @@ pub(crate) async fn user_refresh(auth: &Auth, api_id: u32, access_token: &str, r
     Ok(response)
 }
 
-pub(crate) async fn user_logout(auth: &Auth, user_id: u32, auth_token: &str)
+pub(crate) async fn user_logout(auth: &Auth, user_id: i32, auth_token: &str)
     -> Result<UserLogoutResponse, Status>
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());

@@ -15,7 +15,7 @@ const DEVICE_NOT_FOUND: &str = "requested device not found";
 const GATEWAY_NOT_FOUND: &str = "requested gateway not found";
 const CONF_NOT_FOUND: &str = "requested config not found";
 
-pub(crate) async fn read_device(resource: &Resource, id: u64)
+pub(crate) async fn read_device(resource: &Resource, id: i64)
     -> Result<DeviceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -45,7 +45,7 @@ pub(crate) async fn read_device_by_sn(resource: &Resource, serial_number: &str)
     Ok(response.result.ok_or(Status::not_found(DEVICE_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: u64)
+pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: i64)
     -> Result<Vec<DeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -60,7 +60,7 @@ pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: u64)
     Ok(response.results)
 }
 
-pub(crate) async fn list_device_by_type(resource: &Resource, type_id: u32)
+pub(crate) async fn list_device_by_type(resource: &Resource, type_id: i32)
     -> Result<Vec<DeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -90,7 +90,7 @@ pub(crate) async fn list_device_by_name(resource: &Resource, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_device_by_gateway_type(resource: &Resource, gateway_id: u64, type_id: u32)
+pub(crate) async fn list_device_by_gateway_type(resource: &Resource, gateway_id: i64, type_id: i32)
     -> Result<Vec<DeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -106,7 +106,7 @@ pub(crate) async fn list_device_by_gateway_type(resource: &Resource, gateway_id:
     Ok(response.results)
 }
 
-pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id: u64, name: &str)
+pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id: i64, name: &str)
     -> Result<Vec<DeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -122,7 +122,7 @@ pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id:
     Ok(response.results)
 }
 
-pub(crate) async fn create_device(resource: &Resource, id: u64, gateway_id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
+pub(crate) async fn create_device(resource: &Resource, id: i64, gateway_id: i64, type_id: i32, serial_number: &str, name: &str, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -147,7 +147,7 @@ pub(crate) async fn create_device(resource: &Resource, id: u64, gateway_id: u64,
     Ok(())
 }
 
-pub(crate) async fn update_device(resource: &Resource, id: u64, gateway_id: Option<u64>, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_device(resource: &Resource, id: i64, gateway_id: Option<i64>, type_id: Option<i32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -166,7 +166,7 @@ pub(crate) async fn update_device(resource: &Resource, id: u64, gateway_id: Opti
     Ok(())
 }
 
-pub(crate) async fn delete_device(resource: &Resource, id: u64)
+pub(crate) async fn delete_device(resource: &Resource, id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -180,7 +180,7 @@ pub(crate) async fn delete_device(resource: &Resource, id: u64)
     Ok(())
 }
 
-pub(crate) async fn read_gateway(resource: &Resource, id: u64)
+pub(crate) async fn read_gateway(resource: &Resource, id: i64)
     -> Result<GatewaySchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -210,7 +210,7 @@ pub(crate) async fn read_gateway_by_sn(resource: &Resource, serial_number: &str)
     Ok(response.result.ok_or(Status::not_found(GATEWAY_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_gateway_by_type(resource: &Resource, type_id: u32)
+pub(crate) async fn list_gateway_by_type(resource: &Resource, type_id: i32)
     -> Result<Vec<GatewaySchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -240,7 +240,7 @@ pub(crate) async fn list_gateway_by_name(resource: &Resource, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn create_gateway(resource: &Resource, id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
+pub(crate) async fn create_gateway(resource: &Resource, id: i64, type_id: i32, serial_number: &str, name: &str, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -264,7 +264,7 @@ pub(crate) async fn create_gateway(resource: &Resource, id: u64, type_id: u32, s
     Ok(())
 }
 
-pub(crate) async fn update_gateway(resource: &Resource, id: u64, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_gateway(resource: &Resource, id: i64, type_id: Option<i32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -282,7 +282,7 @@ pub(crate) async fn update_gateway(resource: &Resource, id: u64, type_id: Option
     Ok(())
 }
 
-pub(crate) async fn delete_gateway(resource: &Resource, id: u64)
+pub(crate) async fn delete_gateway(resource: &Resource, id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -296,7 +296,7 @@ pub(crate) async fn delete_gateway(resource: &Resource, id: u64)
     Ok(())
 }
 
-pub(crate) async fn read_device_config(resource: &Resource, id: u32)
+pub(crate) async fn read_device_config(resource: &Resource, id: i32)
     -> Result<ConfigSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -311,7 +311,7 @@ pub(crate) async fn read_device_config(resource: &Resource, id: u32)
     Ok(response.result.ok_or(Status::not_found(CONF_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id: u64)
+pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id: i64)
     -> Result<Vec<ConfigSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -326,8 +326,8 @@ pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id:
     Ok(response.results)
 }
 
-pub(crate) async fn create_device_config(resource: &Resource, device_id: u64, name: &str, value: ConfigValue, category: &str)
-    -> Result<u32, Status>
+pub(crate) async fn create_device_config(resource: &Resource, device_id: i64, name: &str, value: ConfigValue, category: &str)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -346,7 +346,7 @@ pub(crate) async fn create_device_config(resource: &Resource, device_id: u64, na
     Ok(response.id)
 }
 
-pub(crate) async fn update_device_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_device_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -364,7 +364,7 @@ pub(crate) async fn update_device_config(resource: &Resource, id: u32, name: Opt
     Ok(())
 }
 
-pub(crate) async fn delete_device_config(resource: &Resource, id: u32)
+pub(crate) async fn delete_device_config(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -378,7 +378,7 @@ pub(crate) async fn delete_device_config(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn read_gateway_config(resource: &Resource, id: u32)
+pub(crate) async fn read_gateway_config(resource: &Resource, id: i32)
     -> Result<ConfigSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -393,7 +393,7 @@ pub(crate) async fn read_gateway_config(resource: &Resource, id: u32)
     Ok(response.result.ok_or(Status::not_found(CONF_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_id: u64)
+pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_id: i64)
     -> Result<Vec<ConfigSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -408,8 +408,8 @@ pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_
     Ok(response.results)
 }
 
-pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: u64, name: &str, value: ConfigValue, category: &str)
-    -> Result<u32, Status>
+pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: i64, name: &str, value: ConfigValue, category: &str)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -428,7 +428,7 @@ pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: u64, 
     Ok(response.id)
 }
 
-pub(crate) async fn update_gateway_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_gateway_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -446,7 +446,7 @@ pub(crate) async fn update_gateway_config(resource: &Resource, id: u32, name: Op
     Ok(())
 }
 
-pub(crate) async fn delete_gateway_config(resource: &Resource, id: u32)
+pub(crate) async fn delete_gateway_config(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

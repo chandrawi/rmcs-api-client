@@ -12,7 +12,7 @@ use crate::utility::TokenInterceptor;
 const MODEL_NOT_FOUND: &str = "requested model not found";
 const CONF_NOT_FOUND: &str = "requested config not found";
 
-pub(crate) async fn read_model(resource: &Resource, id: u32)
+pub(crate) async fn read_model(resource: &Resource, id: i32)
     -> Result<ModelSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -74,7 +74,7 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
 }
 
 pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -94,7 +94,7 @@ pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, ca
     Ok(response.id)
 }
 
-pub(crate) async fn update_model(resource: &Resource, id: u32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_model(resource: &Resource, id: i32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -112,7 +112,7 @@ pub(crate) async fn update_model(resource: &Resource, id: u32, indexing: Option<
     Ok(())
 }
 
-pub(crate) async fn delete_model(resource: &Resource, id: u32)
+pub(crate) async fn delete_model(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -126,7 +126,7 @@ pub(crate) async fn delete_model(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_model_type(resource: &Resource, id: u32, types: &[DataType])
+pub(crate) async fn add_model_type(resource: &Resource, id: i32, types: &[DataType])
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -143,7 +143,7 @@ pub(crate) async fn add_model_type(resource: &Resource, id: u32, types: &[DataTy
     Ok(())
 }
 
-pub(crate) async fn remove_model_type(resource: &Resource, id: u32)
+pub(crate) async fn remove_model_type(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -157,7 +157,7 @@ pub(crate) async fn remove_model_type(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn read_model_config(resource: &Resource, id: u32)
+pub(crate) async fn read_model_config(resource: &Resource, id: i32)
     -> Result<ConfigSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -172,7 +172,7 @@ pub(crate) async fn read_model_config(resource: &Resource, id: u32)
     Ok(response.result.ok_or(Status::not_found(CONF_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: u32)
+pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: i32)
     -> Result<Vec<ConfigSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -187,8 +187,8 @@ pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: u3
     Ok(response.results)
 }
 
-pub(crate) async fn create_model_config(resource: &Resource, model_id: u32, index: u32, name: &str, value: ConfigValue, category: &str)
-    -> Result<u32, Status>
+pub(crate) async fn create_model_config(resource: &Resource, model_id: i32, index: i32, name: &str, value: ConfigValue, category: &str)
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -208,7 +208,7 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: u32, inde
     Ok(response.id)
 }
 
-pub(crate) async fn update_model_config(resource: &Resource, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_model_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -226,7 +226,7 @@ pub(crate) async fn update_model_config(resource: &Resource, id: u32, name: Opti
     Ok(())
 }
 
-pub(crate) async fn delete_model_config(resource: &Resource, id: u32)
+pub(crate) async fn delete_model_config(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

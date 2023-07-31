@@ -54,7 +54,7 @@ impl Resource {
         self
     }
 
-    pub async fn read_model(&self, id: u32)
+    pub async fn read_model(&self, id: i32)
         -> Result<ModelSchema, Status>
     {
         model::read_model(&self, id)
@@ -87,41 +87,41 @@ impl Resource {
     }
 
     pub async fn create_model(&self, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
-        -> Result<u32, Status>
+        -> Result<i32, Status>
     {
         model::create_model(&self, indexing, category, name, description)
         .await
     }
 
-    pub async fn update_model(&self, id: u32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_model(&self, id: i32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         model::update_model(&self, id, indexing, category, name, description)
         .await
     }
 
-    pub async fn delete_model(&self, id: u32)
+    pub async fn delete_model(&self, id: i32)
         -> Result<(), Status>
     {
         model::delete_model(&self, id)
         .await
     }
 
-    pub async fn add_model_type(&self, id: u32, types: &[DataType])
+    pub async fn add_model_type(&self, id: i32, types: &[DataType])
         -> Result<(), Status>
     {
         model::add_model_type(&self, id, types)
         .await
     }
 
-    pub async fn remove_model_type(&self, id: u32)
+    pub async fn remove_model_type(&self, id: i32)
         -> Result<(), Status>
     {
         model::remove_model_type(&self, id)
         .await
     }
 
-    pub async fn read_model_config(&self, id: u32)
+    pub async fn read_model_config(&self, id: i32)
         -> Result<ModelConfigSchema, Status>
     {
         model::read_model_config(&self, id)
@@ -129,7 +129,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_model_config_by_model(&self, model_id: u32)
+    pub async fn list_model_config_by_model(&self, model_id: i32)
         -> Result<Vec<ModelConfigSchema>, Status>
     {
         model::list_model_config_by_model(&self, model_id)
@@ -137,28 +137,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_model_config(&self, model_id: u32, index: u32, name: &str, value: ConfigValue, category: &str)
-        -> Result<u32, Status>
+    pub async fn create_model_config(&self, model_id: i32, index: i32, name: &str, value: ConfigValue, category: &str)
+        -> Result<i32, Status>
     {
         model::create_model_config(&self, model_id, index, name, value, category)
         .await
     }
 
-    pub async fn update_model_config(&self, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_model_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         model::update_model_config(&self, id, name, value, category)
         .await
     }
 
-    pub async fn delete_model_config(&self, id: u32)
+    pub async fn delete_model_config(&self, id: i32)
         -> Result<(), Status>
     {
         model::delete_model_config(&self, id)
         .await
     }
 
-    pub async fn read_device(&self, id: u64)
+    pub async fn read_device(&self, id: i64)
         -> Result<DeviceSchema, Status>
     {
         device::read_device(&self, id)
@@ -174,7 +174,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_device_by_gateway(&self, gateway_id: u64)
+    pub async fn list_device_by_gateway(&self, gateway_id: i64)
         -> Result<Vec<DeviceSchema>, Status>
     {
         device::list_device_by_gateway(&self, gateway_id)
@@ -182,7 +182,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_device_by_type(&self, type_id: u32)
+    pub async fn list_device_by_type(&self, type_id: i32)
         -> Result<Vec<DeviceSchema>, Status>
     {
         device::list_device_by_type(&self, type_id)
@@ -198,7 +198,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_device_by_gateway_type(&self, gateway_id: u64, type_id: u32)
+    pub async fn list_device_by_gateway_type(&self, gateway_id: i64, type_id: i32)
         -> Result<Vec<DeviceSchema>, Status>
     {
         device::list_device_by_gateway_type(&self, gateway_id, type_id)
@@ -206,7 +206,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_device_by_gateway_name(&self, gateway_id: u64, name: &str)
+    pub async fn list_device_by_gateway_name(&self, gateway_id: i64, name: &str)
         -> Result<Vec<DeviceSchema>, Status>
     {
         device::list_device_by_gateway_name(&self, gateway_id, name)
@@ -214,28 +214,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_device(&self, id: u64, gateway_id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
+    pub async fn create_device(&self, id: i64, gateway_id: i64, type_id: i32, serial_number: &str, name: &str, description: Option<&str>)
         -> Result<(), Status>
     {
         device::create_device(&self, id, gateway_id, type_id, serial_number, name, description)
         .await
     }
 
-    pub async fn update_device(&self, id: u64, gateway_id: Option<u64>, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_device(&self, id: i64, gateway_id: Option<i64>, type_id: Option<i32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         device::update_device(&self, id, gateway_id, type_id, serial_number, name, description)
         .await
     }
 
-    pub async fn delete_device(&self, id: u64)
+    pub async fn delete_device(&self, id: i64)
         -> Result<(), Status>
     {
         device::delete_device(&self, id)
         .await
     }
 
-    pub async fn read_gateway(&self, id: u64)
+    pub async fn read_gateway(&self, id: i64)
         -> Result<GatewaySchema, Status>
     {
         device::read_gateway(&self, id)
@@ -251,7 +251,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_gateway_by_type(&self, type_id: u32)
+    pub async fn list_gateway_by_type(&self, type_id: i32)
         -> Result<Vec<GatewaySchema>, Status>
     {
         device::list_gateway_by_type(&self, type_id)
@@ -267,28 +267,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_gateway(&self, id: u64, type_id: u32, serial_number: &str, name: &str, description: Option<&str>)
+    pub async fn create_gateway(&self, id: i64, type_id: i32, serial_number: &str, name: &str, description: Option<&str>)
         -> Result<(), Status>
     {
         device::create_gateway(&self, id, type_id, serial_number, name, description)
         .await
     }
 
-    pub async fn update_gateway(&self, id: u64, type_id: Option<u32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_gateway(&self, id: i64, type_id: Option<i32>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         device::update_gateway(&self, id, type_id, serial_number, name, description)
         .await
     }
 
-    pub async fn delete_gateway(&self, id: u64)
+    pub async fn delete_gateway(&self, id: i64)
         -> Result<(), Status>
     {
         device::delete_gateway(&self, id)
         .await
     }
 
-    pub async fn read_device_config(&self, id: u32)
+    pub async fn read_device_config(&self, id: i32)
         -> Result<DeviceConfigSchema, Status>
     {
         device::read_device_config(&self, id)
@@ -296,7 +296,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_device_config_by_device(&self, device_id: u64)
+    pub async fn list_device_config_by_device(&self, device_id: i64)
         -> Result<Vec<DeviceConfigSchema>, Status>
     {
         device::list_device_config_by_device(&self, device_id)
@@ -304,28 +304,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_device_config(&self, device_id: u64, name: &str, value: ConfigValue, category: &str)
-        -> Result<u32, Status>
+    pub async fn create_device_config(&self, device_id: i64, name: &str, value: ConfigValue, category: &str)
+        -> Result<i32, Status>
     {
         device::create_device_config(&self, device_id, name, value, category)
         .await
     }
 
-    pub async fn update_device_config(&self, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_device_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         device::update_device_config(&self, id, name, value, category)
         .await
     }
 
-    pub async fn delete_device_config(&self, id: u32)
+    pub async fn delete_device_config(&self, id: i32)
         -> Result<(), Status>
     {
         device::delete_device_config(&self, id)
         .await
     }
 
-    pub async fn read_gateway_config(&self, id: u32)
+    pub async fn read_gateway_config(&self, id: i32)
         -> Result<GatewayConfigSchema, Status>
     {
         device::read_gateway_config(&self, id)
@@ -333,7 +333,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_gateway_config_by_gateway(&self, gateway_id: u64)
+    pub async fn list_gateway_config_by_gateway(&self, gateway_id: i64)
         -> Result<Vec<GatewayConfigSchema>, Status>
     {
         device::list_gateway_config_by_gateway(&self, gateway_id)
@@ -341,28 +341,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_gateway_config(&self, gateway_id: u64, name: &str, value: ConfigValue, category: &str)
-        -> Result<u32, Status>
+    pub async fn create_gateway_config(&self, gateway_id: i64, name: &str, value: ConfigValue, category: &str)
+        -> Result<i32, Status>
     {
         device::create_gateway_config(&self, gateway_id, name, value, category)
         .await
     }
 
-    pub async fn update_gateway_config(&self, id: u32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_gateway_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         device::update_gateway_config(&self, id, name, value, category)
         .await
     }
 
-    pub async fn delete_gateway_config(&self, id: u32)
+    pub async fn delete_gateway_config(&self, id: i32)
         -> Result<(), Status>
     {
         device::delete_gateway_config(&self, id)
         .await
     }
 
-    pub async fn read_type(&self, id: u32)
+    pub async fn read_type(&self, id: i32)
         -> Result<TypeSchema, Status>
     {
         types::read_type(&self, id)
@@ -379,41 +379,41 @@ impl Resource {
     }
 
     pub async fn create_type(&self, name: &str, description: Option<&str>)
-        -> Result<u32, Status>
+        -> Result<i32, Status>
     {
         types::create_type(&self, name, description)
         .await
     }
 
-    pub async fn update_type(&self, id: u32, name: Option<&str>, description: Option<&str>)
+    pub async fn update_type(&self, id: i32, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         types::update_type(&self, id, name, description)
         .await
     }
 
-    pub async fn delete_type(&self, id: u32)
+    pub async fn delete_type(&self, id: i32)
         -> Result<(), Status>
     {
         types::delete_type(&self, id)
         .await
     }
 
-    pub async fn add_type_model(&self, id: u32, model_id: u32)
+    pub async fn add_type_model(&self, id: i32, model_id: i32)
         -> Result<(), Status>
     {
         types::add_type_model(&self, id, model_id)
         .await
     }
 
-    pub async fn remove_type_model(&self, id: u32, model_id: u32)
+    pub async fn remove_type_model(&self, id: i32, model_id: i32)
         -> Result<(), Status>
     {
         types::remove_type_model(&self, id, model_id)
         .await
     }
 
-    pub async fn read_group_model(&self, id: u32)
+    pub async fn read_group_model(&self, id: i32)
         -> Result<GroupModelSchema, Status>
     {
         group::read_group_model(&self, id)
@@ -446,41 +446,41 @@ impl Resource {
     }
 
     pub async fn create_group_model(&self, name: &str, category: &str, description: Option<&str>)
-        -> Result<u32, Status>
+        -> Result<i32, Status>
     {
         group::create_group_model(&self, name, category, description)
         .await
     }
 
-    pub async fn update_group_model(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+    pub async fn update_group_model(&self, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         group::update_group_model(&self, id, name, category, description)
         .await
     }
 
-    pub async fn delete_group_model(&self, id: u32)
+    pub async fn delete_group_model(&self, id: i32)
         -> Result<(), Status>
     {
         group::delete_group_model(&self, id)
         .await
     }
 
-    pub async fn add_group_model_member(&self, id: u32, model_id: u32)
+    pub async fn add_group_model_member(&self, id: i32, model_id: i32)
         -> Result<(), Status>
     {
         group::add_group_model_member(&self, id, model_id)
         .await
     }
 
-    pub async fn remove_group_model_member(&self, id: u32, model_id: u32)
+    pub async fn remove_group_model_member(&self, id: i32, model_id: i32)
         -> Result<(), Status>
     {
         group::remove_group_model_member(&self, id, model_id)
         .await
     }
 
-    pub async fn read_group_device(&self, id: u32)
+    pub async fn read_group_device(&self, id: i32)
         -> Result<GroupDeviceSchema, Status>
     {
         group::read_group_device(&self, id)
@@ -513,41 +513,41 @@ impl Resource {
     }
 
     pub async fn create_group_device(&self, name: &str, category: &str, description: Option<&str>)
-        -> Result<u32, Status>
+        -> Result<i32, Status>
     {
         group::create_group_device(&self, name, category, description)
         .await
     }
 
-    pub async fn update_group_device(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+    pub async fn update_group_device(&self, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         group::update_group_device(&self, id, name, category, description)
         .await
     }
 
-    pub async fn delete_group_device(&self, id: u32)
+    pub async fn delete_group_device(&self, id: i32)
         -> Result<(), Status>
     {
         group::delete_group_device(&self, id)
         .await
     }
 
-    pub async fn add_group_device_member(&self, id: u32, device_id: u64)
+    pub async fn add_group_device_member(&self, id: i32, device_id: i64)
         -> Result<(), Status>
     {
         group::add_group_device_member(&self, id, device_id)
         .await
     }
 
-    pub async fn remove_group_device_member(&self, id: u32, device_id: u64)
+    pub async fn remove_group_device_member(&self, id: i32, device_id: i64)
         -> Result<(), Status>
     {
         group::remove_group_device_member(&self, id, device_id)
         .await
     }
 
-    pub async fn read_group_gateway(&self, id: u32)
+    pub async fn read_group_gateway(&self, id: i32)
         -> Result<GroupGatewaySchema, Status>
     {
         group::read_group_gateway(&self, id)
@@ -582,41 +582,41 @@ impl Resource {
     }
 
     pub async fn create_group_gateway(&self, name: &str, category: &str, description: Option<&str>)
-        -> Result<u32, Status>
+        -> Result<i32, Status>
     {
         group::create_group_gateway(&self, name, category, description)
         .await
     }
 
-    pub async fn update_group_gateway(&self, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+    pub async fn update_group_gateway(&self, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         group::update_group_gateway(&self, id, name, category, description)
         .await
     }
 
-    pub async fn delete_group_gateway(&self, id: u32)
+    pub async fn delete_group_gateway(&self, id: i32)
         -> Result<(), Status>
     {
         group::delete_group_gateway(&self, id)
         .await
     }
 
-    pub async fn add_group_gateway_member(&self, id: u32, gateway_id: u64)
+    pub async fn add_group_gateway_member(&self, id: i32, gateway_id: i64)
         -> Result<(), Status>
     {
         group::add_group_gateway_member(&self, id, gateway_id)
         .await
     }
 
-    pub async fn remove_group_gateway_member(&self, id: u32, gateway_id: u64)
+    pub async fn remove_group_gateway_member(&self, id: i32, gateway_id: i64)
         -> Result<(), Status>
     {
         group::remove_group_gateway_member(&self, id, gateway_id)
         .await
     }
 
-    pub async fn read_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn read_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>)
         -> Result<DataSchema, Status>
     {
         data::read_data(&self, device_id, model_id, timestamp, index)
@@ -624,7 +624,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_by_time(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>)
+    pub async fn list_data_by_time(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_time(&self, device_id, model_id, timestamp)
@@ -632,7 +632,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_last_time(&self, device_id: u64, model_id: u32, last: DateTime<Utc>)
+    pub async fn list_data_by_last_time(&self, device_id: i64, model_id: i32, last: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_last_time(&self, device_id, model_id, last)
@@ -640,7 +640,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_range_time(&self, device_id: u64, model_id: u32, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_by_range_time(&self, device_id: i64, model_id: i32, begin: DateTime<Utc>, end: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_range_time(&self, device_id, model_id, begin, end)
@@ -648,7 +648,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_before(&self, device_id: u64, model_id: u32, before: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_before(&self, device_id: i64, model_id: i32, before: DateTime<Utc>, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_before(&self, device_id, model_id, before, number)
@@ -656,7 +656,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_after(&self, device_id: u64, model_id: u32, after: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_after(&self, device_id: i64, model_id: i32, after: DateTime<Utc>, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_after(&self, device_id, model_id, after, number)
@@ -664,7 +664,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn get_data_model(&self, model_id: u32)
+    pub async fn get_data_model(&self, model_id: i32)
         -> Result<DataModel, Status>
     {
         data::get_data_model(&self, model_id)
@@ -672,7 +672,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn read_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>)
         -> Result<DataSchema, Status>
     {
         data::read_data_with_model(&self, model, device_id, timestamp, index)
@@ -680,7 +680,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_with_model_by_time(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>)
+    pub async fn list_data_with_model_by_time(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_time(&self, model, device_id, timestamp)
@@ -688,7 +688,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_last_time(&self, model: DataModel, device_id: u64, last: DateTime<Utc>)
+    pub async fn list_data_with_model_by_last_time(&self, model: DataModel, device_id: i64, last: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_last_time(&self, model, device_id, last)
@@ -696,7 +696,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_range_time(&self, model: DataModel, device_id: u64, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_with_model_by_range_time(&self, model: DataModel, device_id: i64, begin: DateTime<Utc>, end: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_range_time(&self, model, device_id, begin, end)
@@ -704,7 +704,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_number_before(&self, model: DataModel, device_id: u64, before: DateTime<Utc>, number: u32)
+    pub async fn list_data_with_model_by_number_before(&self, model: DataModel, device_id: i64, before: DateTime<Utc>, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_number_before(&self, model, device_id, before, number)
@@ -712,7 +712,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_number_after(&self, model: DataModel, device_id: u64, after: DateTime<Utc>, number: u32)
+    pub async fn list_data_with_model_by_number_after(&self, model: DataModel, device_id: i64, after: DateTime<Utc>, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_number_after(&self, model, device_id, after, number)
@@ -720,35 +720,35 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+    pub async fn create_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
         data::create_data(&self, device_id, model_id, timestamp, index, data)
         .await
     }
 
-    pub async fn create_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+    pub async fn create_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
         data::create_data_with_model(&self, model, device_id, timestamp, index, data)
         .await
     }
 
-    pub async fn delete_data(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn delete_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>)
         -> Result<(), Status>
     {
         data::delete_data(&self, device_id, model_id, timestamp, index)
         .await
     }
 
-    pub async fn delete_data_with_model(&self, model: DataModel, device_id: u64, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn delete_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>)
         -> Result<(), Status>
     {
         data::delete_data_with_model(&self, model, device_id, timestamp, index)
         .await
     }
 
-    pub async fn read_buffer(&self, id: u32)
+    pub async fn read_buffer(&self, id: i32)
         -> Result<BufferSchema, Status>
     {
         buffer::read_buffer(&self, id)
@@ -756,7 +756,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_buffer_first(&self, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+    pub async fn read_buffer_first(&self, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
         -> Result<BufferSchema, Status>
     {
         buffer::read_buffer_first(&self, device_id, model_id, status)
@@ -764,7 +764,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_buffer_last(&self, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+    pub async fn read_buffer_last(&self, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
         -> Result<BufferSchema, Status>
     {
         buffer::read_buffer_last(&self, device_id, model_id, status)
@@ -772,7 +772,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_buffer_first(&self, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+    pub async fn list_buffer_first(&self, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_first(&self, number, device_id, model_id, status)
@@ -780,7 +780,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_last(&self, number: u32, device_id: Option<u64>, model_id: Option<u32>, status: Option<&str>)
+    pub async fn list_buffer_last(&self, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_last(&self, number, device_id, model_id, status)
@@ -788,28 +788,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_buffer(&self, device_id: u64, model_id: u32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
-        -> Result<u32, Status>
+    pub async fn create_buffer(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+        -> Result<i32, Status>
     {
         buffer::create_buffer(&self, device_id, model_id, timestamp, index, data, status)
         .await
     }
 
-    pub async fn update_buffer(&self, id: u32, data: Option<Vec<DataValue>>, status: Option<&str>)
+    pub async fn update_buffer(&self, id: i32, data: Option<Vec<DataValue>>, status: Option<&str>)
         -> Result<(), Status>
     {
         buffer::update_buffer(&self, id, data, status)
         .await
     }
 
-    pub async fn delete_buffer(&self, id: u32)
+    pub async fn delete_buffer(&self, id: i32)
         -> Result<(), Status>
     {
         buffer::delete_buffer(&self, id)
         .await
     }
 
-    pub async fn read_slice(&self, id: u32)
+    pub async fn read_slice(&self, id: i32)
         -> Result<SliceSchema, Status>
     {
         slice::read_slice(&self, id)
@@ -824,48 +824,48 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_device(&self, device_id: u64)
+    pub async fn list_slice_by_device(&self, device_id: i64)
         -> Result<Vec<SliceSchema>, Status>
     {
         slice::list_slice_by_device(&self, device_id).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_model(&self, model_id: u32)
+    pub async fn list_slice_by_model(&self, model_id: i32)
         -> Result<Vec<SliceSchema>, Status>
     {
         slice::list_slice_by_model(&self, model_id).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_device_model(&self, device_id: u64, model_id: u32)
+    pub async fn list_slice_by_device_model(&self, device_id: i64, model_id: i32)
         -> Result<Vec<SliceSchema>, Status>
     {
         slice::list_slice_by_device_model(&self, device_id, model_id).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_slice(&self, device_id: u64, model_id: u32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
-        -> Result<u32, Status>
+    pub async fn create_slice(&self, device_id: i64, model_id: i32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+        -> Result<i32, Status>
     {
         slice::create_slice(&self, device_id, model_id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
         .await
     }
 
-    pub async fn update_slice(&self, id: u32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_slice(&self, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         slice::update_slice(&self, id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
         .await
     }
 
-    pub async fn delete_slice(&self, id: u32)
+    pub async fn delete_slice(&self, id: i32)
         -> Result<(), Status>
     {
         slice::delete_slice(&self, id).await
     }
 
-    pub async fn read_log(&self, timestamp: DateTime<Utc>, device_id: u64)
+    pub async fn read_log(&self, timestamp: DateTime<Utc>, device_id: i64)
         -> Result<LogSchema, Status>
     {
         log::read_log(&self, timestamp, device_id)
@@ -873,7 +873,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_time(&self, timestamp, device_id, status)
@@ -881,7 +881,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_last_time(&self, last, device_id, status)
@@ -889,7 +889,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<u64>, status: Option<&str>)
+    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_range_time(&self, begin, end, device_id, status)
@@ -897,21 +897,21 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: u64, status: &str, value: ConfigValue)
+    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: i64, status: &str, value: ConfigValue)
         -> Result<(), Status>
     {
         log::create_log(&self, timestamp, device_id, status, value)
         .await
     }
 
-    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: u64, status: Option<&str>, value: Option<ConfigValue>)
+    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
         -> Result<(), Status>
     {
         log::update_log(&self, timestamp, device_id, status, value)
         .await
     }
 
-    pub async fn delete_log(&self, timestamp: DateTime<Utc>, device_id: u64)
+    pub async fn delete_log(&self, timestamp: DateTime<Utc>, device_id: i64)
         -> Result<(), Status>
     {
         log::delete_log(&self, timestamp, device_id).await

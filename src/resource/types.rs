@@ -8,7 +8,7 @@ use crate::utility::TokenInterceptor;
 
 const TYPE_NOT_FOUND: &str = "requested type not found";
 
-pub(crate) async fn read_type(resource: &Resource, id: u32)
+pub(crate) async fn read_type(resource: &Resource, id: i32)
     -> Result<TypeSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -39,7 +39,7 @@ pub(crate) async fn list_type_by_name(resource: &Resource, name: &str)
 }
 
 pub(crate) async fn create_type(resource: &Resource, name: &str, description: Option<&str>)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -56,7 +56,7 @@ pub(crate) async fn create_type(resource: &Resource, name: &str, description: Op
     Ok(response.id)
 }
 
-pub(crate) async fn update_type(resource: &Resource, id: u32, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_type(resource: &Resource, id: i32, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -72,7 +72,7 @@ pub(crate) async fn update_type(resource: &Resource, id: u32, name: Option<&str>
     Ok(())
 }
 
-pub(crate) async fn delete_type(resource: &Resource, id: u32)
+pub(crate) async fn delete_type(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -86,7 +86,7 @@ pub(crate) async fn delete_type(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_type_model(resource: &Resource, id: u32, model_id: u32)
+pub(crate) async fn add_type_model(resource: &Resource, id: i32, model_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -101,7 +101,7 @@ pub(crate) async fn add_type_model(resource: &Resource, id: u32, model_id: u32)
     Ok(())
 }
 
-pub(crate) async fn remove_type_model(resource: &Resource, id: u32, model_id: u32)
+pub(crate) async fn remove_type_model(resource: &Resource, id: i32, model_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

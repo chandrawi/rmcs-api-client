@@ -9,7 +9,7 @@ use crate::utility::TokenInterceptor;
 
 const TOKEN_NOT_FOUND: &str = "requested token not found";
 
-pub(crate) async fn read_access_token(auth: &Auth, access_id: u32)
+pub(crate) async fn read_access_token(auth: &Auth, access_id: i32)
     -> Result<TokenSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -39,7 +39,7 @@ pub(crate) async fn list_auth_token(auth: &Auth, auth_token: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
+pub(crate) async fn list_token_by_user(auth: &Auth, user_id: i32)
     -> Result<Vec<TokenSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -54,8 +54,8 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: u32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
-    -> Result<(u32, String, String), Status>
+pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
+    -> Result<(i32, String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
@@ -74,8 +74,8 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: u32, auth_token: &
     Ok((response.access_id, response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn create_auth_token(auth: &Auth, user_id: u32, expire: DateTime<Utc>, ip: &[u8], number: u32)
-    -> Result<Vec<(u32, String, String)>, Status>
+pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: DateTime<Utc>, ip: &[u8], number: u32)
+    -> Result<Vec<(i32, String, String)>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
@@ -96,7 +96,7 @@ pub(crate) async fn create_auth_token(auth: &Auth, user_id: u32, expire: DateTim
     )
 }
 
-pub(crate) async fn update_access_token(auth: &Auth, access_id: u32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
     -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -134,7 +134,7 @@ pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Opt
     Ok((response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn delete_access_token(auth: &Auth, access_id: u32)
+pub(crate) async fn delete_access_token(auth: &Auth, access_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -162,7 +162,7 @@ pub(crate) async fn delete_auth_token(auth: &Auth, auth_token: &str)
     Ok(())
 }
 
-pub(crate) async fn delete_token_by_user(auth: &Auth, user_id: u32)
+pub(crate) async fn delete_token_by_user(auth: &Auth, user_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());

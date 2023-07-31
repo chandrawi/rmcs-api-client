@@ -9,7 +9,7 @@ use crate::utility::TokenInterceptor;
 
 const GROUP_NOT_FOUND: &str = "requested group not found";
 
-pub(crate) async fn read_group_model(resource: &Resource, id: u32)
+pub(crate) async fn read_group_model(resource: &Resource, id: i32)
     -> Result<GroupModelSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -71,7 +71,7 @@ pub(crate) async fn list_group_model_by_name_category(resource: &Resource, name:
 }
 
 pub(crate) async fn create_group_model(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -89,7 +89,7 @@ pub(crate) async fn create_group_model(resource: &Resource, name: &str, category
     Ok(response.id)
 }
 
-pub(crate) async fn update_group_model(resource: &Resource, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_model(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -106,7 +106,7 @@ pub(crate) async fn update_group_model(resource: &Resource, id: u32, name: Optio
     Ok(())
 }
 
-pub(crate) async fn delete_group_model(resource: &Resource, id: u32)
+pub(crate) async fn delete_group_model(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -120,7 +120,7 @@ pub(crate) async fn delete_group_model(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_group_model_member(resource: &Resource, id: u32, model_id: u32)
+pub(crate) async fn add_group_model_member(resource: &Resource, id: i32, model_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -135,7 +135,7 @@ pub(crate) async fn add_group_model_member(resource: &Resource, id: u32, model_i
     Ok(())
 }
 
-pub(crate) async fn remove_group_model_member(resource: &Resource, id: u32, model_id: u32)
+pub(crate) async fn remove_group_model_member(resource: &Resource, id: i32, model_id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -150,7 +150,7 @@ pub(crate) async fn remove_group_model_member(resource: &Resource, id: u32, mode
     Ok(())
 }
 
-pub(crate) async fn read_group_device(resource: &Resource, id: u32)
+pub(crate) async fn read_group_device(resource: &Resource, id: i32)
     -> Result<GroupDeviceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -212,7 +212,7 @@ pub(crate) async fn list_group_device_by_name_category(resource: &Resource, name
 }
 
 pub(crate) async fn create_group_device(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -230,7 +230,7 @@ pub(crate) async fn create_group_device(resource: &Resource, name: &str, categor
     Ok(response.id)
 }
 
-pub(crate) async fn update_group_device(resource: &Resource, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_device(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -247,7 +247,7 @@ pub(crate) async fn update_group_device(resource: &Resource, id: u32, name: Opti
     Ok(())
 }
 
-pub(crate) async fn delete_group_device(resource: &Resource, id: u32)
+pub(crate) async fn delete_group_device(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -261,7 +261,7 @@ pub(crate) async fn delete_group_device(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_group_device_member(resource: &Resource, id: u32, device_id: u64)
+pub(crate) async fn add_group_device_member(resource: &Resource, id: i32, device_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -276,7 +276,7 @@ pub(crate) async fn add_group_device_member(resource: &Resource, id: u32, device
     Ok(())
 }
 
-pub(crate) async fn remove_group_device_member(resource: &Resource, id: u32, device_id: u64)
+pub(crate) async fn remove_group_device_member(resource: &Resource, id: i32, device_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -291,7 +291,7 @@ pub(crate) async fn remove_group_device_member(resource: &Resource, id: u32, dev
     Ok(())
 }
 
-pub(crate) async fn read_group_gateway(resource: &Resource, id: u32)
+pub(crate) async fn read_group_gateway(resource: &Resource, id: i32)
     -> Result<GroupDeviceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -353,7 +353,7 @@ pub(crate) async fn list_group_gateway_by_name_category(resource: &Resource, nam
 }
 
 pub(crate) async fn create_group_gateway(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<u32, Status>
+    -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -371,7 +371,7 @@ pub(crate) async fn create_group_gateway(resource: &Resource, name: &str, catego
     Ok(response.id)
 }
 
-pub(crate) async fn update_group_gateway(resource: &Resource, id: u32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_gateway(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -388,7 +388,7 @@ pub(crate) async fn update_group_gateway(resource: &Resource, id: u32, name: Opt
     Ok(())
 }
 
-pub(crate) async fn delete_group_gateway(resource: &Resource, id: u32)
+pub(crate) async fn delete_group_gateway(resource: &Resource, id: i32)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -402,7 +402,7 @@ pub(crate) async fn delete_group_gateway(resource: &Resource, id: u32)
     Ok(())
 }
 
-pub(crate) async fn add_group_gateway_member(resource: &Resource, id: u32, gateway_id: u64)
+pub(crate) async fn add_group_gateway_member(resource: &Resource, id: i32, gateway_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -417,7 +417,7 @@ pub(crate) async fn add_group_gateway_member(resource: &Resource, id: u32, gatew
     Ok(())
 }
 
-pub(crate) async fn remove_group_gateway_member(resource: &Resource, id: u32, gateway_id: u64)
+pub(crate) async fn remove_group_gateway_member(resource: &Resource, id: i32, gateway_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
