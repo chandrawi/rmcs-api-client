@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_resource_db::schema::value::ConfigValue;
 use rmcs_resource_api::common;
 use rmcs_resource_api::log::log_service_client::LogServiceClient;
@@ -11,14 +11,14 @@ use crate::utility::TokenInterceptor;
 
 const LOG_NOT_FOUND: &str = "requested log not found";
 
-pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64)
+pub(crate) async fn read_log(resource: &Resource, timestamp: NaiveDateTime, device_id: i64)
     -> Result<LogSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogId {
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         device_id
     });
     let response = client.read_log(request)
@@ -27,14 +27,14 @@ pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, devi
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogTime {
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         device_id,
         status: match status {
             Some(value) => match LogStatus::from_str_name(value) {
@@ -50,14 +50,14 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+pub(crate) async fn list_log_by_last_time(resource: &Resource, last: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogTime {
-        timestamp: last.timestamp_nanos(),
+        timestamp: last.timestamp_micros(),
         device_id,
         status: match status {
             Some(value) => match LogStatus::from_str_name(value) {
@@ -73,15 +73,15 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: NaiveDateTime, end: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogRange {
-        begin: begin.timestamp_nanos(),
-        end: end.timestamp_nanos(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros(),
         device_id,
         status: match status {
             Some(value) => match LogStatus::from_str_name(value) {
@@ -97,14 +97,14 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<
     Ok(response.results)
 }
 
-pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64, status: &str, value: ConfigValue)
+pub(crate) async fn create_log(resource: &Resource, timestamp: NaiveDateTime, device_id: i64, status: &str, value: ConfigValue)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogSchema {
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         device_id,
         status: LogStatus::from_str_name(status).unwrap_or_default().into(),
         log_bytes: value.to_bytes(),
@@ -115,14 +115,14 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, de
     Ok(())
 }
 
-pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
+pub(crate) async fn update_log(resource: &Resource, timestamp: NaiveDateTime, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogUpdate {
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         device_id,
         status: match status {
             Some(value) => match LogStatus::from_str_name(value) {
@@ -139,14 +139,14 @@ pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, de
     Ok(())
 }
 
-pub(crate) async fn delete_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: i64)
+pub(crate) async fn delete_log(resource: &Resource, timestamp: NaiveDateTime, device_id: i64)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(LogId {
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         device_id
     });
     client.delete_log(request)

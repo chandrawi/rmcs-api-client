@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
@@ -120,7 +120,7 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
     Ok(response.results)
 }
 
-pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>, status: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -130,7 +130,7 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id:
         id: 0,
         device_id,
         model_id,
-        timestamp: timestamp.timestamp_nanos(),
+        timestamp: timestamp.timestamp_micros(),
         index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {

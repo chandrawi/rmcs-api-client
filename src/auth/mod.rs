@@ -5,7 +5,7 @@ pub mod token;
 pub mod auth;
 
 use tonic::{Status, transport::Channel};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_db::schema::auth_role::RoleSchema;
 use rmcs_auth_db::schema::auth_user::UserSchema;
@@ -308,28 +308,28 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_access_token(&self, user_id: i32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
+    pub async fn create_access_token(&self, user_id: i32, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
         -> Result<(i32, String, String), Status>
     {
         token::create_access_token(&self, user_id, auth_token, expire, ip)
         .await
     }
 
-    pub async fn create_auth_token(&self, user_id: i32, expire: DateTime<Utc>, ip: &[u8], number: u32)
+    pub async fn create_auth_token(&self, user_id: i32, expire: NaiveDateTime, ip: &[u8], number: u32)
         -> Result<Vec<(i32, String, String)>, Status>
     {
         token::create_auth_token(&self, user_id, expire, ip, number)
         .await
     }
 
-    pub async fn update_access_token(&self, access_id: i32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+    pub async fn update_access_token(&self, access_id: i32, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
         -> Result<(String, String), Status>
     {
         token::update_access_token(&self, access_id, expire, ip)
         .await
     }
 
-    pub async fn update_auth_token(&self, auth_token: &str, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+    pub async fn update_auth_token(&self, auth_token: &str, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
         -> Result<(String, String), Status>
     {
         token::update_auth_token(&self, auth_token, expire, ip)

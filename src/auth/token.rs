@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_auth_api::token::token_service_client::TokenServiceClient;
 use rmcs_auth_api::token::{
     TokenSchema, AccessId, AuthToken, UserId, AuthTokenCreate, TokenUpdate
@@ -54,7 +54,7 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: i32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
+pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
     -> Result<(i32, String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -65,7 +65,7 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &
         user_id,
         refresh_token: String::new(),
         auth_token: auth_token.to_owned(),
-        expire: expire.timestamp_nanos(),
+        expire: expire.timestamp_micros(),
         ip: ip.to_vec()
     });
     let response = client.create_access_token(request)
@@ -74,7 +74,7 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &
     Ok((response.access_id, response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: DateTime<Utc>, ip: &[u8], number: u32)
+pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: NaiveDateTime, ip: &[u8], number: u32)
     -> Result<Vec<(i32, String, String)>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -83,7 +83,7 @@ pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: DateTim
     let request = Request::new(AuthTokenCreate {
         user_id,
         number,
-        expire: expire.timestamp_nanos(),
+        expire: expire.timestamp_micros(),
         ip: ip.to_vec()
     });
     let response = client.create_auth_token(request)
@@ -96,7 +96,7 @@ pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: DateTim
     )
 }
 
-pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
     -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -106,7 +106,7 @@ pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Opt
         access_id: Some(access_id),
         refresh_token: None,
         auth_token: None,
-        expire: expire.map(|s| s.timestamp_nanos()),
+        expire: expire.map(|s| s.timestamp_micros()),
         ip: ip.map(|s| s.to_vec())
     });
     let response = client.update_access_token(request)
@@ -115,7 +115,7 @@ pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Opt
     Ok((response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
+pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
     -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -125,7 +125,7 @@ pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Opt
         access_id: None,
         refresh_token: None,
         auth_token: Some(auth_token.to_owned()),
-        expire: expire.map(|s| s.timestamp_nanos()),
+        expire: expire.map(|s| s.timestamp_micros()),
         ip: ip.map(|s| s.to_vec())
     });
     let response = client.update_auth_token(request)

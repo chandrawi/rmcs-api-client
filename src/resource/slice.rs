@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_resource_api::slice::slice_service_client::SliceServiceClient;
 use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceName, SliceDevice, SliceModel, SliceDeviceModel, SliceUpdate
@@ -85,7 +85,7 @@ pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: i
     Ok(response.results)
 }
 
-pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: i32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: i32, timestamp_begin: NaiveDateTime, timestamp_end: NaiveDateTime, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -95,8 +95,8 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: 
         id: 0,
         device_id,
         model_id,
-        timestamp_begin: timestamp_begin.timestamp_nanos(),
-        timestamp_end: timestamp_end.timestamp_nanos(),
+        timestamp_begin: timestamp_begin.timestamp_micros(),
+        timestamp_end: timestamp_end.timestamp_micros(),
         index_begin: index_begin.unwrap_or_default() as i32,
         index_end: index_end.unwrap_or_default() as i32,
         name: name.to_owned(),
@@ -108,7 +108,7 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: 
     Ok(response.id)
 }
 
-pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: Option<NaiveDateTime>, timestamp_end: Option<NaiveDateTime>, index_begin: Option<i32>, index_end: Option<i32>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -116,8 +116,8 @@ pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: 
         SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceUpdate {
         id,
-        timestamp_begin: timestamp_begin.map(|t| t.timestamp_nanos()),
-        timestamp_end: timestamp_end.map(|t| t.timestamp_nanos()),
+        timestamp_begin: timestamp_begin.map(|t| t.timestamp_micros()),
+        timestamp_end: timestamp_end.map(|t| t.timestamp_micros()),
         index_begin: index_begin.map(|i| i as i32),
         index_end: index_end.map(|i| i as i32),
         name: name.map(|s| s.to_owned()),

@@ -8,7 +8,7 @@ pub mod slice;
 pub mod log;
 
 use tonic::{Status, transport::Channel};
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use rmcs_resource_db::schema::value::{DataIndexing, DataType, DataValue, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
@@ -616,7 +616,7 @@ impl Resource {
         .await
     }
 
-    pub async fn read_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn read_data(&self, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>)
         -> Result<DataSchema, Status>
     {
         data::read_data(&self, device_id, model_id, timestamp, index)
@@ -624,7 +624,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_by_time(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>)
+    pub async fn list_data_by_time(&self, device_id: i64, model_id: i32, timestamp: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_time(&self, device_id, model_id, timestamp)
@@ -632,7 +632,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_last_time(&self, device_id: i64, model_id: i32, last: DateTime<Utc>)
+    pub async fn list_data_by_last_time(&self, device_id: i64, model_id: i32, last: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_last_time(&self, device_id, model_id, last)
@@ -640,7 +640,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_range_time(&self, device_id: i64, model_id: i32, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_by_range_time(&self, device_id: i64, model_id: i32, begin: NaiveDateTime, end: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_range_time(&self, device_id, model_id, begin, end)
@@ -648,7 +648,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_before(&self, device_id: i64, model_id: i32, before: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_before(&self, device_id: i64, model_id: i32, before: NaiveDateTime, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_before(&self, device_id, model_id, before, number)
@@ -656,7 +656,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_after(&self, device_id: i64, model_id: i32, after: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_after(&self, device_id: i64, model_id: i32, after: NaiveDateTime, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_after(&self, device_id, model_id, after, number)
@@ -672,7 +672,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn read_data_with_model(&self, model: DataModel, device_id: i64, timestamp: NaiveDateTime, index: Option<i32>)
         -> Result<DataSchema, Status>
     {
         data::read_data_with_model(&self, model, device_id, timestamp, index)
@@ -680,7 +680,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_with_model_by_time(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>)
+    pub async fn list_data_with_model_by_time(&self, model: DataModel, device_id: i64, timestamp: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_time(&self, model, device_id, timestamp)
@@ -688,7 +688,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_last_time(&self, model: DataModel, device_id: i64, last: DateTime<Utc>)
+    pub async fn list_data_with_model_by_last_time(&self, model: DataModel, device_id: i64, last: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_last_time(&self, model, device_id, last)
@@ -696,7 +696,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_range_time(&self, model: DataModel, device_id: i64, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_with_model_by_range_time(&self, model: DataModel, device_id: i64, begin: NaiveDateTime, end: NaiveDateTime)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_range_time(&self, model, device_id, begin, end)
@@ -704,7 +704,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_number_before(&self, model: DataModel, device_id: i64, before: DateTime<Utc>, number: u32)
+    pub async fn list_data_with_model_by_number_before(&self, model: DataModel, device_id: i64, before: NaiveDateTime, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_number_before(&self, model, device_id, before, number)
@@ -712,7 +712,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_with_model_by_number_after(&self, model: DataModel, device_id: i64, after: DateTime<Utc>, number: u32)
+    pub async fn list_data_with_model_by_number_after(&self, model: DataModel, device_id: i64, after: NaiveDateTime, number: u32)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_with_model_by_number_after(&self, model, device_id, after, number)
@@ -720,28 +720,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+    pub async fn create_data(&self, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
         data::create_data(&self, device_id, model_id, timestamp, index, data)
         .await
     }
 
-    pub async fn create_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>)
+    pub async fn create_data_with_model(&self, model: DataModel, device_id: i64, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
         data::create_data_with_model(&self, model, device_id, timestamp, index, data)
         .await
     }
 
-    pub async fn delete_data(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn delete_data(&self, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>)
         -> Result<(), Status>
     {
         data::delete_data(&self, device_id, model_id, timestamp, index)
         .await
     }
 
-    pub async fn delete_data_with_model(&self, model: DataModel, device_id: i64, timestamp: DateTime<Utc>, index: Option<u16>)
+    pub async fn delete_data_with_model(&self, model: DataModel, device_id: i64, timestamp: NaiveDateTime, index: Option<i32>)
         -> Result<(), Status>
     {
         data::delete_data_with_model(&self, model, device_id, timestamp, index)
@@ -788,7 +788,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_buffer(&self, device_id: i64, model_id: i32, timestamp: DateTime<Utc>, index: Option<u16>, data: Vec<DataValue>, status: &str)
+    pub async fn create_buffer(&self, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>, status: &str)
         -> Result<i32, Status>
     {
         buffer::create_buffer(&self, device_id, model_id, timestamp, index, data, status)
@@ -845,14 +845,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_slice(&self, device_id: i64, model_id: i32, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<u16>, index_end: Option<u16>, name: &str, description: Option<&str>)
+    pub async fn create_slice(&self, device_id: i64, model_id: i32, timestamp_begin: NaiveDateTime, timestamp_end: NaiveDateTime, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
         -> Result<i32, Status>
     {
         slice::create_slice(&self, device_id, model_id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
         .await
     }
 
-    pub async fn update_slice(&self, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<u16>, index_end: Option<u16>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_slice(&self, id: i32, timestamp_begin: Option<NaiveDateTime>, timestamp_end: Option<NaiveDateTime>, index_begin: Option<i32>, index_end: Option<i32>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         slice::update_slice(&self, id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
@@ -865,7 +865,7 @@ impl Resource {
         slice::delete_slice(&self, id).await
     }
 
-    pub async fn read_log(&self, timestamp: DateTime<Utc>, device_id: i64)
+    pub async fn read_log(&self, timestamp: NaiveDateTime, device_id: i64)
         -> Result<LogSchema, Status>
     {
         log::read_log(&self, timestamp, device_id)
@@ -873,7 +873,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+    pub async fn list_log_by_time(&self, timestamp: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_time(&self, timestamp, device_id, status)
@@ -881,7 +881,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+    pub async fn list_log_by_last_time(&self, last: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_last_time(&self, last, device_id, status)
@@ -889,7 +889,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<i64>, status: Option<&str>)
+    pub async fn list_log_by_range_time(&self, begin: NaiveDateTime, end: NaiveDateTime, device_id: Option<i64>, status: Option<&str>)
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log_by_range_time(&self, begin, end, device_id, status)
@@ -897,21 +897,21 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: i64, status: &str, value: ConfigValue)
+    pub async fn create_log(&self, timestamp: NaiveDateTime, device_id: i64, status: &str, value: ConfigValue)
         -> Result<(), Status>
     {
         log::create_log(&self, timestamp, device_id, status, value)
         .await
     }
 
-    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
+    pub async fn update_log(&self, timestamp: NaiveDateTime, device_id: i64, status: Option<&str>, value: Option<ConfigValue>)
         -> Result<(), Status>
     {
         log::update_log(&self, timestamp, device_id, status, value)
         .await
     }
 
-    pub async fn delete_log(&self, timestamp: DateTime<Utc>, device_id: i64)
+    pub async fn delete_log(&self, timestamp: NaiveDateTime, device_id: i64)
         -> Result<(), Status>
     {
         log::delete_log(&self, timestamp, device_id).await

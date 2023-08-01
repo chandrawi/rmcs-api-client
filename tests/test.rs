@@ -1,10 +1,9 @@
 #[cfg(test)]
 mod tests {
 
-    use std::str::FromStr;
     use std::process::{Command, Stdio};
     use std::time::{SystemTime, Duration};
-    use chrono::{DateTime, Utc};
+    use chrono::{Utc, NaiveDateTime};
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
     use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
@@ -185,8 +184,8 @@ mod tests {
         assert_ne!(user.public_key, pub_key);
 
         // create new access token and refresh token
-        let expire1 = DateTime::from_str("2023-01-01T00:00:00Z").unwrap();
-        let expire2 = DateTime::from_str("2023-01-01T12:00:00Z").unwrap();
+        let expire1 = NaiveDateTime::parse_from_str("2023-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
+        let expire2 = NaiveDateTime::parse_from_str("2023-01-01 12:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
         let auth_token = "rGKrHrDuWXt2CDbjmrt1SHbmea86wIQb";
         let (access_id1, _, auth_token1) = auth.create_access_token(user_id1, auth_token, expire1, &[192, 168, 0, 1]).await.unwrap();
         let access_id2 = access_id1 + 1;
@@ -206,7 +205,7 @@ mod tests {
         assert_eq!(user_tokens.len(), 3);
 
         // update token
-        let expire3 = DateTime::from_str("2023-01-01T18:00:00Z").unwrap();
+        let expire3 = NaiveDateTime::parse_from_str("2023-01-01 18:00:00", "%Y-%m-%d %H:%M:%S").unwrap();
         auth.update_access_token(access_id2, Some(expire3), None).await.unwrap();
         auth.update_auth_token(&auth_token1, Some(expire3), Some(&[192, 168, 0, 100])).await.unwrap();
 
@@ -399,7 +398,7 @@ mod tests {
         assert_eq!(group.description, "Sensor devices");
 
         // generate raw data and create buffers
-        let timestamp = DateTime::from_str("2023-05-07T07:08:48Z").unwrap();
+        let timestamp = NaiveDateTime::parse_from_str("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%6f").unwrap();
         let raw_1 = vec![I32(1231),I32(890)];
         let raw_2 = vec![I32(1452),I32(-341)];
         resource.create_buffer(device_id1, model_buf_id, timestamp, None, raw_1.clone(), "CONVERT").await.unwrap();
@@ -429,6 +428,7 @@ mod tests {
         let datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100).await.unwrap();
         let data = datas.into_iter().next().unwrap();
         assert_eq!(vec![F32(speed), F32(direction)], data.data);
+        assert_eq!(timestamp, data.timestamp);
 
         // delete data
         resource.delete_data(device_id1, model_id, timestamp, None).await.unwrap();
@@ -467,7 +467,7 @@ mod tests {
         // create system log
         resource.create_log(timestamp, device_id1, "UNKNOWN_ERROR", Str("testing success".to_owned())).await.unwrap();
         // read log
-        let logs = resource.list_log_by_range_time(timestamp, Utc::now(), None, None).await.unwrap();
+        let logs = resource.list_log_by_range_time(timestamp, Utc::now().naive_utc(), None, None).await.unwrap();
         let log = logs.into_iter().next().unwrap();
         assert_eq!(log.value, Str("testing success".to_owned()));
 
