@@ -5,9 +5,29 @@ mod tests {
     use std::time::{SystemTime, Duration};
     use chrono::{Utc, NaiveDateTime};
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
+    use sqlx::Error;
+    use sqlx::postgres::PgPoolOptions;
     use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
+
+    enum DBKind {
+        Auth,
+        Resource
+    }
+
+    async fn truncate_tables(db_kind: DBKind, db_url: &str) -> Result<(), Error>
+    {
+        let pool = PgPoolOptions::new().connect(db_url).await?;
+        let sql = match db_kind {
+            DBKind::Auth => "TRUNCATE TABLE \"token\", \"user_role\", \"user\", \"role_access\", \"role\", \"api_procedure\", \"api\";",
+            DBKind::Resource => "TRUNCATE TABLE \"system_log\", \"data_slice\", \"data_buffer\", \"data\", \"group_model_map\", \"group_device_map\", \"group_model\", \"group_device\", \"device_config\", \"device\", \"device_type_model\", \"device_type\", \"model_config\", \"model_type\", \"model\";"
+        };
+        sqlx::query(sql)
+            .execute(&pool)
+            .await?;
+        Ok(())
+    }
 
     fn start_server(server_kind: &str, port: &str)
     {
@@ -58,10 +78,12 @@ mod tests {
 
         // get address from env file
         dotenvy::dotenv().ok();
+        let db_url = std::env::var("DATABASE_AUTH_TEST_URL").unwrap();
         let addr = std::env::var("ADDRESS_AUTH").unwrap();
         let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
         let addr = String::from("http://") + &addr;
 
+        truncate_tables(DBKind::Auth, &db_url).await.unwrap();
         start_server("test_auth_server", &port);
 
         let auth = Auth::new(&addr).await;
@@ -269,10 +291,12 @@ mod tests {
 
         // get address from env file
         dotenvy::dotenv().ok();
+        let db_url = std::env::var("DATABASE_RESOURCE_TEST_URL").unwrap();
         let addr = std::env::var("ADDRESS_RESOURCE").unwrap();
         let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
         let addr = String::from("http://") + &addr;
 
+        truncate_tables(DBKind::Resource, &db_url).await.unwrap();
         start_server("test_resource_server", &port);
 
         let resource = Resource::new(&addr).await;
