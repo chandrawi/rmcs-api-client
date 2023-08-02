@@ -1,4 +1,5 @@
 use tonic::{Request, Status};
+use uuid::Uuid;
 use rmcs_resource_api::group::group_service_client::GroupServiceClient;
 use rmcs_resource_api::group::{
     GroupModelSchema, GroupDeviceSchema, GroupId, GroupName, GroupNameCategory, GroupCategory, GroupUpdate,
@@ -9,14 +10,14 @@ use crate::utility::TokenInterceptor;
 
 const GROUP_NOT_FOUND: &str = "requested group not found";
 
-pub(crate) async fn read_group_model(resource: &Resource, id: i32)
+pub(crate) async fn read_group_model(resource: &Resource, id: Uuid)
     -> Result<GroupModelSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_group_model(request)
         .await?
@@ -71,13 +72,13 @@ pub(crate) async fn list_group_model_by_name_category(resource: &Resource, name:
 }
 
 pub(crate) async fn create_group_model(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupModelSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
@@ -86,17 +87,17 @@ pub(crate) async fn create_group_model(resource: &Resource, name: &str, category
     let response = client.create_group_model(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_group_model(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_model(resource: &Resource, id: Uuid, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         category: category.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
@@ -106,58 +107,58 @@ pub(crate) async fn update_group_model(resource: &Resource, id: i32, name: Optio
     Ok(())
 }
 
-pub(crate) async fn delete_group_model(resource: &Resource, id: i32)
+pub(crate) async fn delete_group_model(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_group_model(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn add_group_model_member(resource: &Resource, id: i32, model_id: i32)
+pub(crate) async fn add_group_model_member(resource: &Resource, id: Uuid, model_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupModel {
-        id,
-        model_id
+        id: id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec()
     });
     client.add_group_model_member(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn remove_group_model_member(resource: &Resource, id: i32, model_id: i32)
+pub(crate) async fn remove_group_model_member(resource: &Resource, id: Uuid, model_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupModel {
-        id,
-        model_id
+        id: id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec()
     });
     client.remove_group_model_member(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn read_group_device(resource: &Resource, id: i32)
+pub(crate) async fn read_group_device(resource: &Resource, id: Uuid)
     -> Result<GroupDeviceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_group_device(request)
         .await?
@@ -212,13 +213,13 @@ pub(crate) async fn list_group_device_by_name_category(resource: &Resource, name
 }
 
 pub(crate) async fn create_group_device(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDeviceSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
@@ -227,17 +228,17 @@ pub(crate) async fn create_group_device(resource: &Resource, name: &str, categor
     let response = client.create_group_device(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_group_device(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_device(resource: &Resource, id: Uuid, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         category: category.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
@@ -247,58 +248,58 @@ pub(crate) async fn update_group_device(resource: &Resource, id: i32, name: Opti
     Ok(())
 }
 
-pub(crate) async fn delete_group_device(resource: &Resource, id: i32)
+pub(crate) async fn delete_group_device(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_group_device(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn add_group_device_member(resource: &Resource, id: i32, device_id: i64)
+pub(crate) async fn add_group_device_member(resource: &Resource, id: Uuid, device_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDevice {
-        id,
-        device_id
+        id: id.as_bytes().to_vec(),
+        device_id: device_id.as_bytes().to_vec()
     });
     client.add_group_device_member(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn remove_group_device_member(resource: &Resource, id: i32, device_id: i64)
+pub(crate) async fn remove_group_device_member(resource: &Resource, id: Uuid, device_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDevice {
-        id,
-        device_id
+        id: id.as_bytes().to_vec(),
+        device_id: device_id.as_bytes().to_vec()
     });
     client.remove_group_device_member(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn read_group_gateway(resource: &Resource, id: i32)
+pub(crate) async fn read_group_gateway(resource: &Resource, id: Uuid)
     -> Result<GroupDeviceSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_group_gateway(request)
         .await?
@@ -353,13 +354,13 @@ pub(crate) async fn list_group_gateway_by_name_category(resource: &Resource, nam
 }
 
 pub(crate) async fn create_group_gateway(resource: &Resource, name: &str, category: &str, description: Option<&str>)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDeviceSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
@@ -368,17 +369,17 @@ pub(crate) async fn create_group_gateway(resource: &Resource, name: &str, catego
     let response = client.create_group_gateway(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_group_gateway(resource: &Resource, id: i32, name: Option<&str>, category: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_group_gateway(resource: &Resource, id: Uuid, name: Option<&str>, category: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         category: category.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
@@ -388,44 +389,44 @@ pub(crate) async fn update_group_gateway(resource: &Resource, id: i32, name: Opt
     Ok(())
 }
 
-pub(crate) async fn delete_group_gateway(resource: &Resource, id: i32)
+pub(crate) async fn delete_group_gateway(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_group_gateway(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn add_group_gateway_member(resource: &Resource, id: i32, gateway_id: i64)
+pub(crate) async fn add_group_gateway_member(resource: &Resource, id: Uuid, gateway_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDevice {
-        id,
-        device_id: gateway_id
+        id: id.as_bytes().to_vec(),
+        device_id: gateway_id.as_bytes().to_vec()
     });
     client.add_group_gateway_member(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn remove_group_gateway_member(resource: &Resource, id: i32, gateway_id: i64)
+pub(crate) async fn remove_group_gateway_member(resource: &Resource, id: Uuid, gateway_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDevice {
-        id,
-        device_id: gateway_id
+        id: id.as_bytes().to_vec(),
+        device_id: gateway_id.as_bytes().to_vec()
     });
     client.remove_group_gateway_member(request)
         .await?;

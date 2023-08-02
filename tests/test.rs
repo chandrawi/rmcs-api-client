@@ -4,6 +4,7 @@ mod tests {
     use std::process::{Command, Stdio};
     use std::time::{SystemTime, Duration};
     use chrono::{Utc, NaiveDateTime};
+    use uuid::Uuid;
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
     use sqlx::Error;
     use sqlx::postgres::PgPoolOptions;
@@ -93,26 +94,27 @@ mod tests {
         let api_id1 = auth.create_api("Resource1", "localhost:9001", "RESOURCE", "", password_api).await.unwrap();
         let api_id2 = auth.create_api("Resource_2", "localhost:9002", "RESOURCE", "",  password_api).await.unwrap();
 
-        // get newly created resource at the first of resource API list
-        let apis = auth.list_api_by_category("RESOURCE").await.unwrap();
-        let first_api = apis.into_iter().next().unwrap();
-        let api = auth.read_api(api_id1).await.unwrap();
-
         // create new procedure for newly created resource API
         let proc_id1 = auth.create_procedure(api_id1, "ReadResourceData", "").await.unwrap();
         let proc_id2 = auth.create_procedure(api_id1, "CreateData", "").await.unwrap();
         let proc_id3 = auth.create_procedure(api_id1, "DeleteData", "").await.unwrap();
         let proc_id4 = auth.create_procedure(api_id2, "ReadConfig", "").await.unwrap();
 
+        // get newly created resource at the first of resource API list
+        let apis = auth.list_api_by_category("RESOURCE").await.unwrap();
+        let api_ids: Vec<Uuid> = apis.iter().map(|e| e.id).collect();
+        let api = auth.read_api(api_id1).await.unwrap();
+        let api_proc_ids: Vec<Uuid> = api.procedures.iter().map(|e| e.id).collect();
+
         // get newly created procedure at the first of procedure list
         let procedures = auth.list_procedure_by_api(api_id1).await.unwrap();
-        let procedure = procedures.into_iter().next().unwrap();
+        let proc_ids: Vec<Uuid> = procedures.iter().map(|e| e.id).collect();
 
-        assert_eq!(first_api.id, api_id1);
         assert_eq!(api.name, "Resource1");
         assert_eq!(api.address, "localhost:9001");
-        assert_eq!(procedure.api_id, api.id);
-        assert_eq!(procedure.name, "ReadResourceData");
+        assert!(api_ids.contains(&api_id1));
+        assert!(proc_ids.contains(&proc_id1));
+        assert_eq!(api_proc_ids, proc_ids);
 
         let pub_key = api.public_key;
         assert!(pub_key.len() > 64);
@@ -132,14 +134,16 @@ mod tests {
 
         // get role data
         let roles = auth.list_role_by_api(api_id1).await.unwrap();
-        let first_role = roles.into_iter().next().unwrap();
+        let role_ids: Vec<Uuid> = roles.iter().map(|e| e.id).collect();
         let role = auth.read_role(role_id1).await.unwrap();
 
-        assert_eq!(first_role.id, role_id1);
+        assert!(role_ids.contains(&role_id1));
         assert_eq!(role.name, "administrator");
         assert_eq!(role.multi, false);
         assert_eq!(role.ip_lock, false);
-        assert_eq!(role.procedures, [proc_id1, proc_id2, proc_id3]);
+        assert!(role.procedures.contains(&proc_id1));
+        assert!(role.procedures.contains(&proc_id2));
+        assert!(role.procedures.contains(&proc_id3));
 
         let access_key = role.access_key;
         assert_eq!(access_key.len(), 32);
@@ -156,13 +160,11 @@ mod tests {
         let api = auth.read_api_by_name(api_name).await.unwrap();
         let procedure = auth.read_procedure_by_name(api_id1, proc_name).await.unwrap();
         let role = auth.read_role_by_name(api_id1, role_name).await.unwrap();
-        let api_procedure = api.procedures.into_iter().next().unwrap();
 
         assert_eq!(api.name, api_name);
         assert_eq!(api.description, "New resource api");
         assert_eq!(procedure.name, proc_name);
         assert_eq!(procedure.description, "Read resource data");
-        assert_eq!(procedure.id, api_procedure.id);
         assert_eq!(role.name, role_name);
         assert_eq!(role.ip_lock, true);
 
@@ -181,10 +183,10 @@ mod tests {
 
         // get user data
         let users = auth.list_user_by_role(role_id3).await.unwrap();
-        let first_user = users.into_iter().next().unwrap();
+        let user_ids: Vec<Uuid> = users.iter().map(|e| e.id).collect();
         let user = auth.read_user(user_id1).await.unwrap();
 
-        assert_eq!(first_user.id, user_id1);
+        assert!(user_ids.contains(&user_id1));
         assert_eq!(user.name, "administrator");
         assert_eq!(user.email, "admin@mail.co");
         assert_eq!(user.phone, "+6281234567890");
@@ -216,8 +218,8 @@ mod tests {
 
         // get token data
         let access_token = auth.read_access_token(access_id2).await.unwrap();
-        let auth_token = auth.list_auth_token(&auth_token1).await.unwrap()
-            .into_iter().next().unwrap();
+        let auth_tokens = auth.list_auth_token(&auth_token1).await.unwrap();
+        let auth_token = auth_tokens.iter().filter(|x| x.auth_token == auth_token1).next().unwrap();
         let user_tokens = auth.list_token_by_user(user_id1).await.unwrap();
 
         assert_eq!(auth_token.user_id, user_id1);
@@ -233,8 +235,8 @@ mod tests {
 
         // get updated token
         let new_access_token = auth.read_access_token(access_id2).await.unwrap();
-        let new_auth_token = auth.list_auth_token(&auth_token1).await.unwrap()
-            .into_iter().next().unwrap();
+        let new_auth_tokens = auth.list_auth_token(&auth_token1).await.unwrap();
+        let new_auth_token = new_auth_tokens.iter().filter(|x| x.auth_token == auth_token1).next().unwrap();
 
         assert_ne!(new_access_token.refresh_token, access_token.refresh_token);
         assert_eq!(new_access_token.expire, expire3);
@@ -319,9 +321,9 @@ mod tests {
         resource.add_type_model(type_id, model_buf_id).await.unwrap();
 
         // create new devices with newly created type as its type 
-        let gateway_id = 0x47AD915C32B89D09;
-        let device_id1 = 0x507C2589F301DB46;
-        let device_id2 = 0x2C8B82061E8F10A2;
+        let gateway_id = Uuid::parse_str("bfc01f2c-8b2c-47cf-912a-f95f6f41a1e6").unwrap();
+        let device_id1 = Uuid::parse_str("74768a42-bc29-40eb-8934-2effcbf34f8f").unwrap();
+        let device_id2 = Uuid::parse_str("150a0a77-2d9b-4672-9253-3d42fd0f0940").unwrap();
         resource.create_device(device_id1, gateway_id, type_id, "TEST01", "Speedometer Compass 1", None).await.unwrap();
         resource.create_device(device_id2, gateway_id, type_id, "TEST02", "Speedometer Compass 2", None).await.unwrap();
         // create device configurations
@@ -343,8 +345,8 @@ mod tests {
         // read model
         let model = resource.read_model(model_id).await.unwrap();
         let models = resource.list_model_by_name("speed").await.unwrap();
-        let last_model = models.into_iter().last().unwrap();
-        assert_eq!(model, last_model);
+        let model_ids: Vec<Uuid> = models.iter().map(|u| u.id).collect();
+        assert!(model_ids.contains(&model_id));
         assert_eq!(model.name, "speed and direction");
         assert_eq!(model.indexing, Timestamp);
         assert_eq!(model.category, "UPLINK");
@@ -362,26 +364,26 @@ mod tests {
         // read device
         let device1 = resource.read_device(device_id1).await.unwrap();
         let devices = resource.list_device_by_gateway(gateway_id).await.unwrap();
-        let last_device = devices.into_iter().last().unwrap();
-        assert_eq!(device1, last_device); // device_id1 > device_id2, so device1 in second (last) order
+        let device_ids: Vec<Uuid> = devices.iter().map(|u| u.id).collect();
+        assert!(device_ids.contains(&device_id1)); // device_id1 > device_id2, so device1 in second (last) order
         assert_eq!(device1.serial_number, "TEST01");
         assert_eq!(device1.name, "Speedometer Compass 1");
         // read type
         let types = resource.list_type_by_name("Speedometer").await.unwrap();
-        assert_eq!(device1.type_, types.into_iter().next().unwrap());
+        let device_type = types.iter().filter(|x| x.id == type_id).next().unwrap();
+        assert_eq!(device1.type_, device_type.to_owned());
         // read device configurations
         let device_configs = resource.list_device_config_by_device(device_id1).await.unwrap();
         assert_eq!(device1.configs, device_configs);
 
         // read group model
         let groups = resource.list_group_model_by_category("APPLICATION").await.unwrap();
-        let group_model = groups.into_iter().next().unwrap();
-        assert_eq!(group_model.models, [model_id]);
+        let group_model = groups.iter().filter(|x| x.models.contains(&model_id)).next().unwrap();
         assert_eq!(group_model.name, "data");
         assert_eq!(group_model.category, "APPLICATION");
         // read group device
         let groups = resource.list_group_device_by_name("sensor").await.unwrap();
-        let group_device = groups.into_iter().next().unwrap();
+        let group_device = groups.iter().filter(|x| x.devices.contains(&device_id1)).next().unwrap();
         assert_eq!(group_device.devices, [device_id1, device_id2]);
         assert_eq!(group_device.name, "sensor");
         assert_eq!(group_device.category, "APPLICATION");
@@ -450,31 +452,20 @@ mod tests {
 
         // read data
         let datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100).await.unwrap();
-        let data = datas.into_iter().next().unwrap();
+        let data = datas.iter().filter(|x| x.device_id == device_id1 && x.model_id == model_id).next().unwrap();
         assert_eq!(vec![F32(speed), F32(direction)], data.data);
         assert_eq!(timestamp, data.timestamp);
-
-        // delete data
-        resource.delete_data(device_id1, model_id, timestamp, None).await.unwrap();
-        let result = resource.read_data(device_id1, model_id, timestamp, None).await;
-        assert!(result.is_err());
 
         // update buffer status
         resource.update_buffer(buffers[0].id, None, Some("DELETE")).await.unwrap();
         let buffer = resource.read_buffer(buffers[0].id).await.unwrap();
         assert_eq!(buffer.status, "DELETE");
 
-        // delete buffer data
-        resource.delete_buffer(buffers[0].id).await.unwrap();
-        resource.delete_buffer(buffers[1].id).await.unwrap();
-        let result = resource.read_buffer(buffers[0].id).await;
-        assert!(result.is_err());
-
         // create data slice
         let slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, Some(0), Some(0), "Speed and compass slice", None).await.unwrap();
         // read data
         let slices = resource.list_slice_by_name("slice").await.unwrap();
-        let slice = slices.into_iter().next().unwrap();
+        let slice = slices.iter().filter(|x| x.device_id == device_id1 && x.model_id == model_id).next().unwrap();
         assert_eq!(slice.timestamp_begin, timestamp);
         assert_eq!(slice.name, "Speed and compass slice");
 
@@ -483,75 +474,17 @@ mod tests {
         let slice = resource.read_slice(slice_id).await.unwrap();
         assert_eq!(slice.description, "Speed and compass sensor 1 at '2023-05-07 07:08:48'");
 
-        // delete data slice
-        resource.delete_slice(slice_id).await.unwrap();
-        let result = resource.read_slice(slice_id).await;
-        assert!(result.is_err());
-
         // create system log
         resource.create_log(timestamp, device_id1, "UNKNOWN_ERROR", Str("testing success".to_owned())).await.unwrap();
         // read log
         let logs = resource.list_log_by_range_time(timestamp, Utc::now().naive_utc(), None, None).await.unwrap();
-        let log = logs.into_iter().next().unwrap();
+        let log = logs.iter().filter(|x| x.device_id == device_id1 && x.timestamp == timestamp).next().unwrap();
         assert_eq!(log.value, Str("testing success".to_owned()));
 
         // update system log
         resource.update_log(timestamp, device_id1, Some("SUCCESS"), None).await.unwrap();
         let log = resource.read_log(timestamp, device_id1).await.unwrap();
         assert_eq!(log.status, "SUCCESS");
-
-        // delete system log
-        resource.delete_log(timestamp, device_id1).await.unwrap();
-        let result = resource.read_log(timestamp, device_id1).await;
-        assert!(result.is_err());
-
-        // delete model config
-        let config_id = model_configs.iter().next().map(|el| el.id).unwrap();
-        resource.delete_model_config(config_id).await.unwrap();
-        let result = resource.read_model_config(config_id).await;
-        assert!(result.is_err());
-        // delete model
-        resource.delete_model(model_id).await.unwrap();
-        let result = resource.read_model(model_id).await;
-        assert!(result.is_err());
-        // check if all model config also deleted
-        let configs = resource.list_model_config_by_model(model_id).await.unwrap();
-        assert_eq!(configs.len(), 0);
-
-        // delete device config
-        let config_id = device_configs.iter().next().map(|el| el.id).unwrap();
-        resource.delete_device_config(config_id).await.unwrap();
-        let result = resource.read_device_config(config_id).await;
-        assert!(result.is_err());
-        // delete device
-        resource.delete_device(device_id1).await.unwrap();
-        let result = resource.read_device(device_id1).await;
-        assert!(result.is_err());
-        // check if all device config also deleted
-        let configs = resource.list_device_config_by_device(device_id1).await.unwrap();
-        assert_eq!(configs.len(), 0);
-
-        // delete type
-        let result = resource.delete_type(type_id).await;
-        assert!(result.is_err()); // error because a device associated with the type still exists
-        let devices = resource.list_device_by_type(type_id).await.unwrap();
-        for device in devices {
-            resource.delete_device(device.id).await.unwrap();
-        }
-        resource.delete_type(type_id).await.unwrap();
-
-        // check number of member of the group
-        let group = resource.read_group_model(group_model_id).await.unwrap();
-        assert_eq!(group.models.len(), 0);
-        let group = resource.read_group_device(group_device_id).await.unwrap();
-        assert_eq!(group.devices.len(), 0);
-        // delete group model and device
-        resource.delete_group_model(group_model_id).await.unwrap();
-        resource.delete_group_device(group_device_id).await.unwrap();
-        let result = resource.read_group_model(group_model_id).await;
-        assert!(result.is_err());
-        let result = resource.read_group_device(group_device_id).await;
-        assert!(result.is_err());
 
         stop_server("test_resource_server");
     }

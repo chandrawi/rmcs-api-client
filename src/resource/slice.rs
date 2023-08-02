@@ -1,5 +1,6 @@
 use tonic::{Request, Status};
 use chrono::NaiveDateTime;
+use uuid::Uuid;
 use rmcs_resource_api::slice::slice_service_client::SliceServiceClient;
 use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceName, SliceDevice, SliceModel, SliceDeviceModel, SliceUpdate
@@ -39,14 +40,14 @@ pub(crate) async fn list_slice_by_name(resource: &Resource, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: i64)
+pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: Uuid)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceDevice {
-        device_id
+        device_id: device_id.as_bytes().to_vec()
     });
     let response = client.list_slice_by_device(request)
         .await?
@@ -54,14 +55,14 @@ pub(crate) async fn list_slice_by_device(resource: &Resource, device_id: i64)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: i32)
+pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: Uuid)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceModel {
-        model_id
+        model_id: model_id.as_bytes().to_vec()
     });
     let response = client.list_slice_by_model(request)
         .await?
@@ -69,15 +70,15 @@ pub(crate) async fn list_slice_by_model(resource: &Resource, model_id: i32)
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: i64, model_id: i32)
+pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: Uuid, model_id: Uuid)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceDeviceModel {
-        device_id,
-        model_id
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec()
     });
     let response = client.list_slice_by_device_model(request)
         .await?
@@ -85,7 +86,7 @@ pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: i
     Ok(response.results)
 }
 
-pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: i32, timestamp_begin: NaiveDateTime, timestamp_end: NaiveDateTime, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
+pub(crate) async fn create_slice(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp_begin: NaiveDateTime, timestamp_end: NaiveDateTime, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -93,8 +94,8 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: i64, model_id: 
         SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SliceSchema {
         id: 0,
-        device_id,
-        model_id,
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
         timestamp_begin: timestamp_begin.timestamp_micros(),
         timestamp_end: timestamp_end.timestamp_micros(),
         index_begin: index_begin.unwrap_or_default() as i32,

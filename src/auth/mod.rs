@@ -6,6 +6,7 @@ pub mod auth;
 
 use tonic::{Status, transport::Channel};
 use chrono::NaiveDateTime;
+use uuid::Uuid;
 use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_db::schema::auth_role::RoleSchema;
 use rmcs_auth_db::schema::auth_user::UserSchema;
@@ -44,7 +45,7 @@ impl Auth {
         self
     }
 
-    pub async fn api_login(&self, api_id: i32, password: &str)
+    pub async fn api_login(&self, api_id: Uuid, password: &str)
         -> Result<ApiLoginResponse, Status>
     {
         auth::api_login(&self, api_id, password).await
@@ -56,19 +57,19 @@ impl Auth {
         auth::user_login(&self, username, password).await
     }
 
-    pub async fn user_refresh(&self, api_id: i32, access_token: &str, refresh_token: &str)
+    pub async fn user_refresh(&self, api_id: Uuid, access_token: &str, refresh_token: &str)
         -> Result<UserRefreshResponse, Status>
     {
         auth::user_refresh(&self, api_id, access_token, refresh_token).await
     }
 
-    pub async fn user_logout(&self, user_id: i32, auth_token: &str)
+    pub async fn user_logout(&self, user_id: Uuid, auth_token: &str)
         -> Result<UserLogoutResponse, Status>
     {
         auth::user_logout(&self, user_id, auth_token).await
     }
 
-    pub async fn read_api(&self, id: i32)
+    pub async fn read_api(&self, id: Uuid)
         -> Result<ApiSchema, Status>
     {
         api::read_api(&self, id)
@@ -93,27 +94,27 @@ impl Auth {
     }
 
     pub async fn create_api(&self, name: &str, address: &str, category: &str, description: &str, password: &str)
-        -> Result<i32, Status>
+        -> Result<Uuid, Status>
     {
         api::create_api(&self, name, address, category, description, password)
         .await
     }
 
-    pub async fn update_api(&self, id: i32, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
+    pub async fn update_api(&self, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
         -> Result<(), Status>
     {
         api::update_api(&self, id, name, address, category, description, password, keys)
         .await
     }
 
-    pub async fn delete_api(&self, id: i32)
+    pub async fn delete_api(&self, id: Uuid)
         -> Result<(), Status>
     {
         api::delete_api(&self, id)
         .await
     }
 
-    pub async fn read_procedure(&self, id: i32)
+    pub async fn read_procedure(&self, id: Uuid)
         -> Result<ProcedureSchema, Status>
     {
         api::read_procedure(&self, id)
@@ -121,7 +122,7 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn read_procedure_by_name(&self, api_id: i32, name: &str)
+    pub async fn read_procedure_by_name(&self, api_id: Uuid, name: &str)
         -> Result<ProcedureSchema, Status>
     {
         api::read_procedure_by_name(&self, api_id, name)
@@ -129,7 +130,7 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn list_procedure_by_api(&self, api_id: i32)
+    pub async fn list_procedure_by_api(&self, api_id: Uuid)
         -> Result<Vec<ProcedureSchema>, Status>
     {
         api::list_procedure_by_api(&self, api_id)
@@ -137,28 +138,28 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_procedure(&self, api_id: i32, name: &str, description: &str)
-        -> Result<i32, Status>
+    pub async fn create_procedure(&self, api_id: Uuid, name: &str, description: &str)
+        -> Result<Uuid, Status>
     {
         api::create_procedure(&self, api_id, name, description)
         .await
     }
 
-    pub async fn update_procedure(&self, id: i32, name: Option<&str>, description: Option<&str>)
+    pub async fn update_procedure(&self, id: Uuid, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
         api::update_procedure(&self, id, name, description)
         .await
     }
 
-    pub async fn delete_procedure(&self, id: i32)
+    pub async fn delete_procedure(&self, id: Uuid)
         -> Result<(), Status>
     {
         api::delete_procedure(&self, id)
         .await
     }
 
-    pub async fn read_role(&self, id: i32)
+    pub async fn read_role(&self, id: Uuid)
         -> Result<RoleSchema, Status>
     {
         role::read_role(&self, id)
@@ -166,7 +167,7 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn read_role_by_name(&self, api_id: i32, name: &str)
+    pub async fn read_role_by_name(&self, api_id: Uuid, name: &str)
         -> Result<RoleSchema, Status>
     {
         role::read_role_by_name(&self, api_id, name)
@@ -174,7 +175,7 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn list_role_by_api(&self, api_id: i32)
+    pub async fn list_role_by_api(&self, api_id: Uuid)
         -> Result<Vec<RoleSchema>, Status>
     {
         role::list_role_by_api(&self, api_id)
@@ -182,7 +183,7 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_role_by_user(&self, user_id: i32)
+    pub async fn list_role_by_user(&self, user_id: Uuid)
         -> Result<Vec<RoleSchema>, Status>
     {
         role::list_role_by_user(&self, user_id)
@@ -190,42 +191,42 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_role(&self, api_id: i32, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
-        -> Result<i32, Status>
+    pub async fn create_role(&self, api_id: Uuid, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
+        -> Result<Uuid, Status>
     {
         role::create_role(&self, api_id, name, multi, ip_lock, access_duration, refresh_duration)
         .await
     }
 
-    pub async fn update_role(&self, id: i32, name: Option<&str>, multi: Option<bool>, ip_lock: Option<bool>, access_duration: Option<i32>, refresh_duration: Option<i32>)
+    pub async fn update_role(&self, id: Uuid, name: Option<&str>, multi: Option<bool>, ip_lock: Option<bool>, access_duration: Option<i32>, refresh_duration: Option<i32>)
         -> Result<(), Status>
     {
         role::update_role(&self, id, name, multi, ip_lock, access_duration, refresh_duration)
         .await
     }
 
-    pub async fn delete_role(&self, id: i32)
+    pub async fn delete_role(&self, id: Uuid)
         -> Result<(), Status>
     {
         role::delete_role(&self, id)
         .await
     }
 
-    pub async fn add_role_access(&self, id: i32, procedure_id: i32)
+    pub async fn add_role_access(&self, id: Uuid, procedure_id: Uuid)
         -> Result<(), Status>
     {
         role::add_role_access(&self, id, procedure_id)
         .await
     }
 
-    pub async fn remove_role_access(&self, id: i32, procedure_id: i32)
+    pub async fn remove_role_access(&self, id: Uuid, procedure_id: Uuid)
         -> Result<(), Status>
     {
         role::remove_role_access(&self, id, procedure_id)
         .await
     }
 
-    pub async fn read_user(&self, id: i32)
+    pub async fn read_user(&self, id: Uuid)
         -> Result<UserSchema, Status>
     {
         user::read_user(&self, id)
@@ -241,7 +242,7 @@ impl Auth {
         .map(|s| s.into())
     }
 
-    pub async fn list_user_by_role(&self, role_id: i32)
+    pub async fn list_user_by_role(&self, role_id: Uuid)
         -> Result<Vec<UserSchema>, Status>
     {
         user::list_user_by_role(&self, role_id)
@@ -250,34 +251,34 @@ impl Auth {
     }
 
     pub async fn create_user(&self, name: &str, email: &str, phone: &str, password: &str)
-        -> Result<i32, Status>
+        -> Result<Uuid, Status>
     {
         user::create_user(&self, name, email, phone, password)
         .await
     }
 
-    pub async fn update_user(&self, id: i32, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+    pub async fn update_user(&self, id: Uuid, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
         -> Result<(), Status>
     {
         user::update_user(&self, id, name, email, phone, password, keys)
         .await
     }
 
-    pub async fn delete_user(&self, id: i32)
+    pub async fn delete_user(&self, id: Uuid)
         -> Result<(), Status>
     {
         user::delete_user(&self, id)
         .await
     }
 
-    pub async fn add_user_role(&self, id: i32, role_id: i32)
+    pub async fn add_user_role(&self, id: Uuid, role_id: Uuid)
         -> Result<(), Status>
     {
         user::add_user_role(&self, id, role_id)
         .await
     }
 
-    pub async fn remove_user_role(&self, id: i32, role_id: i32)
+    pub async fn remove_user_role(&self, id: Uuid, role_id: Uuid)
         -> Result<(), Status>
     {
         user::remove_user_role(&self, id, role_id)
@@ -300,7 +301,7 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_token_by_user(&self, user_id: i32)
+    pub async fn list_token_by_user(&self, user_id: Uuid)
         -> Result<Vec<TokenSchema>, Status>
     {
         token::list_token_by_user(&self, user_id)
@@ -308,14 +309,14 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_access_token(&self, user_id: i32, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
+    pub async fn create_access_token(&self, user_id: Uuid, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
         -> Result<(i32, String, String), Status>
     {
         token::create_access_token(&self, user_id, auth_token, expire, ip)
         .await
     }
 
-    pub async fn create_auth_token(&self, user_id: i32, expire: NaiveDateTime, ip: &[u8], number: u32)
+    pub async fn create_auth_token(&self, user_id: Uuid, expire: NaiveDateTime, ip: &[u8], number: u32)
         -> Result<Vec<(i32, String, String)>, Status>
     {
         token::create_auth_token(&self, user_id, expire, ip, number)
@@ -350,7 +351,7 @@ impl Auth {
         .await
     }
 
-    pub async fn delete_token_by_user(&self, user_id: i32)
+    pub async fn delete_token_by_user(&self, user_id: Uuid)
         -> Result<(), Status>
     {
         token::delete_token_by_user(&self, user_id)

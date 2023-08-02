@@ -1,4 +1,5 @@
 use tonic::{Request, Status};
+use uuid::Uuid;
 use rmcs_auth_api::api::api_service_client::ApiServiceClient;
 use rmcs_auth_api::api::{
     ApiSchema, ApiId, ApiName, ApiCategory, ApiUpdate,
@@ -10,14 +11,14 @@ use crate::utility::TokenInterceptor;
 const API_NOT_FOUND: &str = "requested api not found";
 const PROC_NOT_FOUND: &str = "requested procedure not found";
 
-pub(crate) async fn read_api(auth: &Auth, id: i32)
+pub(crate) async fn read_api(auth: &Auth, id: Uuid)
     -> Result<ApiSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_api(request).await?.into_inner();
     Ok(response.result.ok_or(Status::not_found(API_NOT_FOUND))?)
@@ -54,13 +55,13 @@ pub(crate) async fn list_api_by_category(auth: &Auth, category: &str)
 }
 
 pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category: &str, description: &str, password: &str)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         name: name.to_owned(),
         address: address.to_owned(),
         category: category.to_owned(),
@@ -73,17 +74,17 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
     let response = client.create_api(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_api(auth: &Auth, id: i32, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         address: address.map(|s| s.to_owned()),
         category: category.map(|s| s.to_owned()),
@@ -96,28 +97,28 @@ pub(crate) async fn update_api(auth: &Auth, id: i32, name: Option<&str>, address
     Ok(())
 }
 
-pub(crate) async fn delete_api(auth: &Auth, id: i32)
+pub(crate) async fn delete_api(auth: &Auth, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_api(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn read_procedure(auth: &Auth, id: i32)
+pub(crate) async fn read_procedure(auth: &Auth, id: Uuid)
     -> Result<ProcedureSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_procedure(request)
         .await?
@@ -125,14 +126,14 @@ pub(crate) async fn read_procedure(auth: &Auth, id: i32)
     Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: i32, name: &str)
+pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: Uuid, name: &str)
     -> Result<ProcedureSchema, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureName {
-        api_id,
+        api_id: api_id.as_bytes().to_vec(),
         name: name.to_owned()
     });
     let response = client.read_procedure_by_name(request)
@@ -141,14 +142,14 @@ pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: i32, name: &str)
     Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: i32)
+pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: Uuid)
     -> Result<Vec<ProcedureSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiId {
-        id: api_id
+        id: api_id.as_bytes().to_vec()
     });
     let response = client.list_procedure_by_api(request)
         .await?
@@ -156,15 +157,15 @@ pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: i32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_procedure(auth: &Auth, api_id: i32, name: &str, description: &str)
-    -> Result<i32, Status>
+pub(crate) async fn create_procedure(auth: &Auth, api_id: Uuid, name: &str, description: &str)
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureSchema {
-        id: 0,
-        api_id,
+        id: Uuid::nil().as_bytes().to_vec(),
+        api_id: api_id.as_bytes().to_vec(),
         name: name.to_owned(),
         description: description.to_owned(),
         roles: Vec::new()
@@ -172,17 +173,17 @@ pub(crate) async fn create_procedure(auth: &Auth, api_id: i32, name: &str, descr
     let response = client.create_procedure(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_procedure(auth: &Auth, id: i32, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_procedure(auth: &Auth, id: Uuid, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
     });
@@ -191,14 +192,14 @@ pub(crate) async fn update_procedure(auth: &Auth, id: i32, name: Option<&str>, d
     Ok(())
 }
 
-pub(crate) async fn delete_procedure(auth: &Auth, id: i32)
+pub(crate) async fn delete_procedure(auth: &Auth, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_procedure(request)
         .await?;

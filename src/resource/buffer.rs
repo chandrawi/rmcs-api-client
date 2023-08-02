@@ -1,5 +1,6 @@
 use tonic::{Request, Status};
 use chrono::NaiveDateTime;
+use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
@@ -26,15 +27,15 @@ pub(crate) async fn read_buffer(resource: &Resource, id: i32)
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
+pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSelector {
-        device_id,
-        model_id,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: match status {
             Some(value) => match BufferStatus::from_str_name(value) {
                 Some(v) => Some(v.into()),
@@ -49,15 +50,15 @@ pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<i64
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
+pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
     -> Result<BufferSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSelector {
-        device_id,
-        model_id,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: match status {
             Some(value) => match BufferStatus::from_str_name(value) {
                 Some(v) => Some(v.into()),
@@ -72,15 +73,15 @@ pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<i64>
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
+pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BuffersSelector {
-        device_id,
-        model_id,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: match status {
             Some(value) => match BufferStatus::from_str_name(value) {
                 Some(v) => Some(v.into()),
@@ -96,15 +97,15 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_i
     Ok(response.results)
 }
 
-pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<i64>, model_id: Option<i32>, status: Option<&str>)
+pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BuffersSelector {
-        device_id,
-        model_id,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: match status {
             Some(value) => match BufferStatus::from_str_name(value) {
                 Some(v) => Some(v.into()),
@@ -120,7 +121,7 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
     Ok(response.results)
 }
 
-pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id: i32, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>, status: &str)
+pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>, status: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -128,8 +129,8 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: i64, model_id:
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(BufferSchema {
         id: 0,
-        device_id,
-        model_id,
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
         index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),

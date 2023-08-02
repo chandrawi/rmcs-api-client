@@ -1,4 +1,5 @@
 use tonic::{Request, Status};
+use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataIndexing, DataType, ConfigValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
@@ -12,14 +13,14 @@ use crate::utility::TokenInterceptor;
 const MODEL_NOT_FOUND: &str = "requested model not found";
 const CONF_NOT_FOUND: &str = "requested config not found";
 
-pub(crate) async fn read_model(resource: &Resource, id: i32)
+pub(crate) async fn read_model(resource: &Resource, id: Uuid)
     -> Result<ModelSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_model(request)
         .await?
@@ -74,13 +75,13 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
 }
 
 pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         indexing: Into::<common::DataIndexing>::into(indexing).into(),
         category: category.to_owned(),
         name: name.to_owned(),
@@ -91,17 +92,17 @@ pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, ca
     let response = client.create_model(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_model(resource: &Resource, id: i32, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_model(resource: &Resource, id: Uuid, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         indexing: indexing.map(|s| Into::<common::DataIndexing>::into(s).into()),
         category: category.map(|s| s.to_owned()),
         name: name.map(|s| s.to_owned()),
@@ -112,28 +113,28 @@ pub(crate) async fn update_model(resource: &Resource, id: i32, indexing: Option<
     Ok(())
 }
 
-pub(crate) async fn delete_model(resource: &Resource, id: i32)
+pub(crate) async fn delete_model(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_model(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn add_model_type(resource: &Resource, id: i32, types: &[DataType])
+pub(crate) async fn add_model_type(resource: &Resource, id: Uuid, types: &[DataType])
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelTypes {
-        id,
+        id: id.as_bytes().to_vec(),
         types: types.into_iter()
             .map(|s| Into::<common::DataType>::into(s.clone()).into())
             .collect()
@@ -143,14 +144,14 @@ pub(crate) async fn add_model_type(resource: &Resource, id: i32, types: &[DataTy
     Ok(())
 }
 
-pub(crate) async fn remove_model_type(resource: &Resource, id: i32)
+pub(crate) async fn remove_model_type(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.remove_model_type(request)
         .await?;
@@ -172,14 +173,14 @@ pub(crate) async fn read_model_config(resource: &Resource, id: i32)
     Ok(response.result.ok_or(Status::not_found(CONF_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: i32)
+pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: Uuid)
     -> Result<Vec<ConfigSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelId {
-        id: model_id
+        id: model_id.as_bytes().to_vec()
     });
     let response = client.list_model_config(request)
         .await?
@@ -187,7 +188,7 @@ pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: i3
     Ok(response.results)
 }
 
-pub(crate) async fn create_model_config(resource: &Resource, model_id: i32, index: i32, name: &str, value: ConfigValue, category: &str)
+pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, index: i32, name: &str, value: ConfigValue, category: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -195,7 +196,7 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: i32, inde
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ConfigSchema {
         id: 0,
-        model_id,
+        model_id: model_id.as_bytes().to_vec(),
         index,
         name: name.to_owned(),
         config_bytes: value.to_bytes(),

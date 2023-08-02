@@ -1,4 +1,5 @@
 use tonic::{Request, Status};
+use uuid::Uuid;
 use rmcs_resource_api::device::device_service_client::DeviceServiceClient;
 use rmcs_resource_api::device::{
     TypeSchema, TypeId, TypeName, TypeUpdate, TypeModel
@@ -8,14 +9,14 @@ use crate::utility::TokenInterceptor;
 
 const TYPE_NOT_FOUND: &str = "requested type not found";
 
-pub(crate) async fn read_type(resource: &Resource, id: i32)
+pub(crate) async fn read_type(resource: &Resource, id: Uuid)
     -> Result<TypeSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeId {
-        id
+        id: id.as_bytes().to_vec()
     });
     let response = client.read_type(request)
         .await?
@@ -39,13 +40,13 @@ pub(crate) async fn list_type_by_name(resource: &Resource, name: &str)
 }
 
 pub(crate) async fn create_type(resource: &Resource, name: &str, description: Option<&str>)
-    -> Result<i32, Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeSchema {
-        id: 0,
+        id: Uuid::nil().as_bytes().to_vec(),
         name: name.to_owned(),
         description: description.unwrap_or_default().to_owned(),
         models: Vec::new()
@@ -53,17 +54,17 @@ pub(crate) async fn create_type(resource: &Resource, name: &str, description: Op
     let response = client.create_type(request)
         .await?
         .into_inner();
-    Ok(response.id)
+    Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_type(resource: &Resource, id: i32, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_type(resource: &Resource, id: Uuid, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeUpdate {
-        id,
+        id: id.as_bytes().to_vec(),
         name: name.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
     });
@@ -72,44 +73,44 @@ pub(crate) async fn update_type(resource: &Resource, id: i32, name: Option<&str>
     Ok(())
 }
 
-pub(crate) async fn delete_type(resource: &Resource, id: i32)
+pub(crate) async fn delete_type(resource: &Resource, id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeId {
-        id
+        id: id.as_bytes().to_vec()
     });
     client.delete_type(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn add_type_model(resource: &Resource, id: i32, model_id: i32)
+pub(crate) async fn add_type_model(resource: &Resource, id: Uuid, model_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeModel {
-        id,
-        model_id
+        id: id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec()
     });
     client.add_type_model(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn remove_type_model(resource: &Resource, id: i32, model_id: i32)
+pub(crate) async fn remove_type_model(resource: &Resource, id: Uuid, model_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeModel {
-        id,
-        model_id
+        id: id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec()
     });
     client.remove_type_model(request)
         .await?;

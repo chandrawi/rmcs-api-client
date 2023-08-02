@@ -1,5 +1,6 @@
 use tonic::{Request, Status};
 use chrono::NaiveDateTime;
+use uuid::Uuid;
 use rmcs_auth_api::token::token_service_client::TokenServiceClient;
 use rmcs_auth_api::token::{
     TokenSchema, AccessId, AuthToken, UserId, AuthTokenCreate, TokenUpdate
@@ -39,14 +40,14 @@ pub(crate) async fn list_auth_token(auth: &Auth, auth_token: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_token_by_user(auth: &Auth, user_id: i32)
+pub(crate) async fn list_token_by_user(auth: &Auth, user_id: Uuid)
     -> Result<Vec<TokenSchema>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
-        user_id
+        user_id: user_id.as_bytes().to_vec()
     });
     let response = client.list_token_by_user(request)
         .await?
@@ -54,7 +55,7 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: i32)
     Ok(response.results)
 }
 
-pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
+pub(crate) async fn create_access_token(auth: &Auth, user_id: Uuid, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
     -> Result<(i32, String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -62,7 +63,7 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(TokenSchema {
         access_id: 0,
-        user_id,
+        user_id: user_id.as_bytes().to_vec(),
         refresh_token: String::new(),
         auth_token: auth_token.to_owned(),
         expire: expire.timestamp_micros(),
@@ -74,14 +75,14 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: i32, auth_token: &
     Ok((response.access_id, response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn create_auth_token(auth: &Auth, user_id: i32, expire: NaiveDateTime, ip: &[u8], number: u32)
+pub(crate) async fn create_auth_token(auth: &Auth, user_id: Uuid, expire: NaiveDateTime, ip: &[u8], number: u32)
     -> Result<Vec<(i32, String, String)>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(AuthTokenCreate {
-        user_id,
+        user_id: user_id.as_bytes().to_vec(),
         number,
         expire: expire.timestamp_micros(),
         ip: ip.to_vec()
@@ -162,14 +163,14 @@ pub(crate) async fn delete_auth_token(auth: &Auth, auth_token: &str)
     Ok(())
 }
 
-pub(crate) async fn delete_token_by_user(auth: &Auth, user_id: i32)
+pub(crate) async fn delete_token_by_user(auth: &Auth, user_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         TokenServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserId {
-        user_id
+        user_id: user_id.as_bytes().to_vec()
     });
     client.delete_token_by_user(request)
         .await?;
