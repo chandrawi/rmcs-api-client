@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-
+    use std::env;
     use std::process::{Command, Stdio};
     use std::time::{SystemTime, Duration};
     use chrono::{Utc, NaiveDateTime};
@@ -12,64 +12,87 @@ mod tests {
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
 
-    enum DBKind {
+    enum TestServerKind {
         Auth,
         Resource
     }
 
-    async fn truncate_tables(db_kind: DBKind, db_url: &str) -> Result<(), Error>
-    {
-        let pool = PgPoolOptions::new().connect(db_url).await?;
-        let sql = match db_kind {
-            DBKind::Auth => "TRUNCATE TABLE \"token\", \"user_role\", \"user\", \"role_access\", \"role\", \"api_procedure\", \"api\";",
-            DBKind::Resource => "TRUNCATE TABLE \"system_log\", \"data_slice\", \"data_buffer\", \"data\", \"group_model_map\", \"group_device_map\", \"group_model\", \"group_device\", \"device_config\", \"device\", \"device_type_model\", \"device_type\", \"model_config\", \"model_type\", \"model\";"
-        };
-        sqlx::query(sql)
-            .execute(&pool)
-            .await?;
-        Ok(())
+    struct TestServer {
+        kind: TestServerKind,
+        db_url: String,
+        address: String,
+        bin_name: String
     }
 
-    fn start_server(server_kind: &str, port: &str)
-    {
-        // start server using cargo run command
-        Command::new("cargo")
-            .args(["run", "-p", "rmcs-api-server", "--bin", server_kind])
-            .spawn()
-            .expect("running auth server failed");
-
-        // wait until server process is running
-        let mut count = 0;
-        let time_limit = SystemTime::now() + Duration::from_secs(30);
-        while SystemTime::now() < time_limit && count == 0 {
-            let ss_child = Command::new("ss")
-                .arg("-tulpn")
-                .stdout(Stdio::piped())
-                .spawn()
-                .unwrap();
-            let grep_child = Command::new("grep")
-                .args([port, "-c"])
-                .stdin(Stdio::from(ss_child.stdout.unwrap()))
-                .stdout(Stdio::piped())
-                .spawn()
-                .unwrap();
-            let output = grep_child.wait_with_output().unwrap();
-            count = String::from_utf8(output.stdout)
-                .unwrap()
-                .replace("\n", "")
-                .parse()
-                .unwrap_or(0);
-            std::thread::sleep(Duration::from_millis(10));
+    impl TestServer {
+        fn new(kind: TestServerKind) -> TestServer
+        {
+            dotenvy::dotenv().ok();
+            let (env_db, env_addr, bin_name) = match kind {
+                TestServerKind::Auth => ("DATABASE_AUTH_TEST_URL", "ADDRESS_AUTH", "test_auth_server"),
+                TestServerKind::Resource => ("DATABASE_RESOURCE_TEST_URL", "ADDRESS_RESOURCE", "test_resource_server")
+            };
+            let db_url = env::var(env_db).unwrap();
+            let address = String::from("http://") +  env::var(env_addr).unwrap().as_str();
+            let bin_name = String::from(bin_name);
+            TestServer { kind, db_url, address, bin_name }
         }
-    }
-
-    fn stop_server(server_kind: &str)
-    {
-        // stop server service
-        Command::new("killall")
-            .args([server_kind])
-            .spawn()
-            .expect("stopping auth server failed");
+        async fn truncate_tables(&self) -> Result<(), Error>
+        {
+            let pool = PgPoolOptions::new().connect(self.db_url.as_str()).await?;
+            let sql = match self.kind {
+                TestServerKind::Auth => "TRUNCATE TABLE \"token\", \"user_role\", \"user\", \"role_access\", \"role\", \"api_procedure\", \"api\";",
+                TestServerKind::Resource => "TRUNCATE TABLE \"system_log\", \"data_slice\", \"data_buffer\", \"data\", \"group_model_map\", \"group_device_map\", \"group_model\", \"group_device\", \"device_config\", \"device\", \"device_type_model\", \"device_type\", \"model_config\", \"model_type\", \"model\";"
+            };
+            sqlx::query(sql)
+                .execute(&pool)
+                .await?;
+            Ok(())
+        }
+        fn start_server(&self)
+        {
+            // start server using cargo run command
+            Command::new("cargo")
+                .args([
+                    "run", "-p", "rmcs-api-server", "--bin", self.bin_name.as_str(),
+                    "--", "--db-url", self.db_url.as_str()
+                ])
+                .spawn()
+                .expect("running auth server failed");
+    
+            // wait until server process is running
+            let port = String::from(":") + self.address.split(":").into_iter().last().unwrap();
+            let mut count = 0;
+            let time_limit = SystemTime::now() + Duration::from_secs(30);
+            while SystemTime::now() < time_limit && count == 0 {
+                let ss_child = Command::new("ss")
+                    .arg("-tulpn")
+                    .stdout(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+                let grep_child = Command::new("grep")
+                    .args([port.as_str(), "-c"])
+                    .stdin(Stdio::from(ss_child.stdout.unwrap()))
+                    .stdout(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+                let output = grep_child.wait_with_output().unwrap();
+                count = String::from_utf8(output.stdout)
+                    .unwrap()
+                    .replace("\n", "")
+                    .parse()
+                    .unwrap_or(0);
+                std::thread::sleep(Duration::from_millis(10));
+            }
+        }
+        fn stop_server(&self)
+        {
+            // stop server service
+            Command::new("killall")
+                .args([self.bin_name.as_str()])
+                .spawn()
+                .expect("stopping auth server failed");
+        }
     }
 
     #[tokio::test]
@@ -77,17 +100,12 @@ mod tests {
     {
         // std::env::set_var("RUST_BACKTRACE", "1");
 
-        // get address from env file
-        dotenvy::dotenv().ok();
-        let db_url = std::env::var("DATABASE_AUTH_TEST_URL").unwrap();
-        let addr = std::env::var("ADDRESS_AUTH").unwrap();
-        let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
-        let addr = String::from("http://") + &addr;
+        // start auth server
+        let auth_server = TestServer::new(TestServerKind::Auth);
+        auth_server.truncate_tables().await.unwrap();
+        auth_server.start_server();
 
-        truncate_tables(DBKind::Auth, &db_url).await.unwrap();
-        start_server("test_auth_server", &port);
-
-        let auth = Auth::new(&addr).await;
+        let auth = Auth::new(&auth_server.address).await;
 
         // create new resource API
         let password_api = "Ap1_P4s5w0rd";
@@ -283,7 +301,7 @@ mod tests {
         assert!(result_role.is_err());
         assert!(result_api.is_err());
 
-        stop_server("test_auth_server");
+        auth_server.stop_server();
     }
 
     #[tokio::test]
@@ -291,17 +309,12 @@ mod tests {
     {
         // std::env::set_var("RUST_BACKTRACE", "full");
 
-        // get address from env file
-        dotenvy::dotenv().ok();
-        let db_url = std::env::var("DATABASE_RESOURCE_TEST_URL").unwrap();
-        let addr = std::env::var("ADDRESS_RESOURCE").unwrap();
-        let port = String::from(":") + addr.split(":").into_iter().last().unwrap();
-        let addr = String::from("http://") + &addr;
+        // start resource server
+        let resource_server = TestServer::new(TestServerKind::Resource);
+        resource_server.truncate_tables().await.unwrap();
+        resource_server.start_server();
 
-        truncate_tables(DBKind::Resource, &db_url).await.unwrap();
-        start_server("test_resource_server", &port);
-
-        let resource = Resource::new(&addr).await;
+        let resource = Resource::new(&resource_server.address).await;
 
         // create new data model and add data types
         let model_id = resource.create_model(Timestamp, "UPLINK", "speed and direction", None).await.unwrap();
@@ -486,7 +499,7 @@ mod tests {
         let log = resource.read_log(timestamp, device_id1).await.unwrap();
         assert_eq!(log.status, "SUCCESS");
 
-        stop_server("test_resource_server");
+        resource_server.stop_server();
     }
 
 }
