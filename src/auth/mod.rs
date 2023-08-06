@@ -100,10 +100,10 @@ impl Auth {
         .await
     }
 
-    pub async fn update_api(&self, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
+    pub async fn update_api(&self, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<()>)
         -> Result<(), Status>
     {
-        api::update_api(&self, id, name, address, category, description, password, keys)
+        api::update_api(&self, id, name, address, category, description, password, access_key)
         .await
     }
 
@@ -257,10 +257,10 @@ impl Auth {
         .await
     }
 
-    pub async fn update_user(&self, id: Uuid, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+    pub async fn update_user(&self, id: Uuid, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>)
         -> Result<(), Status>
     {
-        user::update_user(&self, id, name, email, phone, password, keys)
+        user::update_user(&self, id, name, email, phone, password)
         .await
     }
 

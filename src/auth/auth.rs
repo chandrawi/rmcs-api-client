@@ -20,7 +20,6 @@ pub(crate) async fn api_login(auth: &Auth, api_id: Uuid, password: &str)
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(ApiKeyRequest {
-        api_id: api_id.as_bytes().to_vec()
     });
     // get transport public key of requested API and encrypt the password
     let response = client.api_login_key(request).await?.into_inner();
@@ -49,7 +48,6 @@ pub(crate) async fn user_login(auth: &Auth, username: &str, password: &str)
 {
     let mut client = AuthServiceClient::new(auth.channel.to_owned());
     let request = Request::new(UserKeyRequest {
-        username: username.to_owned()
     });
     // get transport public key of requested user and encrypt the password
     let response = client.user_login_key(request).await?.into_inner();

@@ -66,7 +66,6 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
         address: address.to_owned(),
         category: category.to_owned(),
         description: description.to_owned(),
-        public_key: Vec::new(),
         password: password.to_owned(),
         access_key: Vec::new(),
         procedures: Vec::new()
@@ -77,7 +76,7 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
     Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<()>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -90,7 +89,7 @@ pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, addres
         category: category.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned()),
         password: password.map(|s| s.to_owned()),
-        update_key: keys.is_some()
+        update_key: access_key.is_some()
     });
     client.update_api(request)
         .await?;

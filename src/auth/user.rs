@@ -66,7 +66,6 @@ pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &st
         email: email.to_owned(),
         phone: phone.to_owned(),
         password: password.to_owned(),
-        public_key: Vec::new(),
         roles: Vec::new()
     });
     let response = client.create_user(request)
@@ -75,7 +74,7 @@ pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &st
     Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_user(auth: &Auth, id: Uuid, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>, keys: Option<()>)
+pub(crate) async fn update_user(auth: &Auth, id: Uuid, name: Option<&str>, email: Option<&str>, phone: Option<&str>, password: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -86,8 +85,7 @@ pub(crate) async fn update_user(auth: &Auth, id: Uuid, name: Option<&str>, email
         name: name.map(|s| s.to_owned()),
         email: email.map(|s| s.to_owned()),
         phone: phone.map(|s| s.to_owned()),
-        password: password.map(|s| s.to_owned()),
-        update_key: keys.is_some()
+        password: password.map(|s| s.to_owned())
     });
     client.update_user(request)
         .await?;
