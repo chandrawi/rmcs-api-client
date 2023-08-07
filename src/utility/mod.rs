@@ -3,6 +3,7 @@ use pkcs8::DecodePublicKey;
 use spki::EncodePublicKey;
 use rand::thread_rng;
 use tonic::{Request, Status, service::Interceptor, metadata::MetadataValue};
+pub use rmcs_auth_db::utility::{generate_access_key, generate_token_string};
 
 pub(crate) fn generate_keys() -> Result<(RsaPrivateKey, RsaPublicKey), rsa::Error>
 {

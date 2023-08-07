@@ -54,7 +54,7 @@ pub(crate) async fn list_api_by_category(auth: &Auth, category: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category: &str, description: &str, password: &str)
+pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category: &str, description: &str, password: &str, access_key: &[u8])
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -67,7 +67,7 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
         category: category.to_owned(),
         description: description.to_owned(),
         password: password.to_owned(),
-        access_key: Vec::new(),
+        access_key: access_key.to_vec(),
         procedures: Vec::new()
     });
     let response = client.create_api(request)
@@ -76,7 +76,7 @@ pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category:
     Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<()>)
+pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<&[u8]>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -89,7 +89,7 @@ pub(crate) async fn update_api(auth: &Auth, id: Uuid, name: Option<&str>, addres
         category: category.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned()),
         password: password.map(|s| s.to_owned()),
-        update_key: access_key.is_some()
+        access_key: access_key.map(|v| v.to_vec())
     });
     client.update_api(request)
         .await?;

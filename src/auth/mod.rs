@@ -93,14 +93,14 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_api(&self, name: &str, address: &str, category: &str, description: &str, password: &str)
+    pub async fn create_api(&self, name: &str, address: &str, category: &str, description: &str, password: &str, access_key: &[u8])
         -> Result<Uuid, Status>
     {
-        api::create_api(&self, name, address, category, description, password)
+        api::create_api(&self, name, address, category, description, password, access_key)
         .await
     }
 
-    pub async fn update_api(&self, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<()>)
+    pub async fn update_api(&self, id: Uuid, name: Option<&str>, address: Option<&str>, category: Option<&str>, description: Option<&str>, password: Option<&str>, access_key: Option<&[u8]>)
         -> Result<(), Status>
     {
         api::update_api(&self, id, name, address, category, description, password, access_key)
