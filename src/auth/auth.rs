@@ -38,6 +38,8 @@ pub(crate) async fn api_login(auth: &Auth, api_id: Uuid, password: &str)
         public_key: pub_der
     });
     let mut response = client.api_login(request).await?.into_inner();
+    response.root_key = decrypt_message(&response.root_key, priv_key.clone())
+        .map_err(|_| Status::internal(DECRYPT_ERR))?;
     response.access_key = decrypt_message(&response.access_key, priv_key)
         .map_err(|_| Status::internal(DECRYPT_ERR))?;
     Ok(response)
