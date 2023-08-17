@@ -1,100 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use std::env;
-    use std::process::{Command, Stdio};
-    use std::time::{SystemTime, Duration};
     use chrono::{Utc, NaiveDateTime};
     use uuid::Uuid;
     use argon2::{Argon2, PasswordHash, PasswordVerifier};
-    use sqlx::Error;
-    use sqlx::postgres::PgPoolOptions;
     use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
     use rmcs_api_client::utility::generate_access_key;
-
-    enum TestServerKind {
-        Auth,
-        Resource
-    }
-
-    struct TestServer {
-        kind: TestServerKind,
-        db_url: String,
-        address: String,
-        bin_name: String
-    }
-
-    impl TestServer {
-        fn new(kind: TestServerKind) -> TestServer
-        {
-            dotenvy::dotenv().ok();
-            let (env_db, env_addr, bin_name) = match kind {
-                TestServerKind::Auth => ("DATABASE_URL_AUTH_TEST", "SERVER_ADDRESS_AUTH", "test_auth_server"),
-                TestServerKind::Resource => ("DATABASE_URL_RESOURCE_TEST", "SERVER_ADDRESS_RESOURCE", "test_resource_server")
-            };
-            let db_url = env::var(env_db).unwrap();
-            let address = env::var(env_addr).unwrap();
-            let bin_name = String::from(bin_name);
-            TestServer { kind, db_url, address, bin_name }
-        }
-        async fn truncate_tables(&self) -> Result<(), Error>
-        {
-            let pool = PgPoolOptions::new().connect(self.db_url.as_str()).await?;
-            let sql = match self.kind {
-                TestServerKind::Auth => "TRUNCATE TABLE \"token\", \"user_role\", \"user\", \"role_access\", \"role\", \"api_procedure\", \"api\";",
-                TestServerKind::Resource => "TRUNCATE TABLE \"system_log\", \"data_slice\", \"data_buffer\", \"data\", \"group_model_map\", \"group_device_map\", \"group_model\", \"group_device\", \"device_config\", \"device\", \"device_type_model\", \"device_type\", \"model_config\", \"model_type\", \"model\";"
-            };
-            sqlx::query(sql)
-                .execute(&pool)
-                .await?;
-            Ok(())
-        }
-        fn start_server(&self)
-        {
-            // start server using cargo run command
-            Command::new("cargo")
-                .args([
-                    "run", "-p", "rmcs-api-server", "--bin", self.bin_name.as_str(),
-                    "--", "--db-url", self.db_url.as_str()
-                ])
-                .spawn()
-                .expect("running auth server failed");
-    
-            // wait until server process is running
-            let port = String::from(":") + self.address.split(":").into_iter().last().unwrap();
-            let mut count = 0;
-            let time_limit = SystemTime::now() + Duration::from_secs(30);
-            while SystemTime::now() < time_limit && count == 0 {
-                let ss_child = Command::new("ss")
-                    .arg("-tulpn")
-                    .stdout(Stdio::piped())
-                    .spawn()
-                    .unwrap();
-                let grep_child = Command::new("grep")
-                    .args([port.as_str(), "-c"])
-                    .stdin(Stdio::from(ss_child.stdout.unwrap()))
-                    .stdout(Stdio::piped())
-                    .spawn()
-                    .unwrap();
-                let output = grep_child.wait_with_output().unwrap();
-                count = String::from_utf8(output.stdout)
-                    .unwrap()
-                    .replace("\n", "")
-                    .parse()
-                    .unwrap_or(0);
-                std::thread::sleep(Duration::from_millis(10));
-            }
-        }
-        fn stop_server(&self)
-        {
-            // stop server service
-            Command::new("killall")
-                .args([self.bin_name.as_str()])
-                .spawn()
-                .expect("stopping auth server failed");
-        }
-    }
+    use rmcs_api_client::utility::test::{TestServerKind, TestServer};
 
     #[tokio::test]
     async fn test_auth()

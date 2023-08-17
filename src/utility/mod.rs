@@ -1,3 +1,5 @@
+pub mod test;
+
 use rsa::{RsaPrivateKey, Pkcs1v15Encrypt, RsaPublicKey};
 use pkcs8::DecodePublicKey;
 use spki::EncodePublicKey;
@@ -36,7 +38,8 @@ pub(crate) fn encrypt_message(message: &[u8], pub_key: RsaPublicKey) -> Result<V
     pub_key.encrypt(&mut thread_rng(), Pkcs1v15Encrypt, message)
 }
 
-pub(crate) struct TokenInterceptor(pub(crate) String);
+#[derive(Debug, Clone)]
+pub struct TokenInterceptor(pub String);
 
 impl Interceptor for TokenInterceptor {
     fn call(&mut self, mut request: Request<()>) -> Result<Request<()>, Status> {
