@@ -15,7 +15,7 @@ pub struct TestServer {
     pub address: String,
     pub bin_name: String,
     pub secured: bool,
-    pub api_cred: Option<(String, String)>
+    pub api_cred: Option<(String, String, String)>
 }
 
 impl TestServer {
@@ -29,15 +29,25 @@ impl TestServer {
         };
         let db_url = env::var(env_db).unwrap();
         let address = env::var(env_addr).unwrap();
+        let scheme = address.split(":").next().unwrap();
+        let address = 
+            if vec!["http", "https"].contains(&scheme) { address } 
+            else { String::from("http://") + address.as_str() };
         let bin_name = String::from(bin_name);
         TestServer { kind, db_url, address, bin_name, secured: false, api_cred: None }
     }
 
     pub fn new_secured(kind: TestServerKind, api_id: Option<&str>, password: Option<&str>) -> TestServer
     {
+        dotenvy::dotenv().ok();
+        let auth_address = String::from("http://") + env::var("SERVER_ADDRESS_AUTH").unwrap().as_str();
+        let scheme = auth_address.split(":").next().unwrap();
+        let auth_address = 
+            if vec!["http", "https"].contains(&scheme) { auth_address } 
+            else { String::from("http://") + auth_address.as_str() };
         let server = TestServer::new(kind);
         let api_cred = match (api_id, password) {
-            (Some(id), Some(pw)) => Some((String::from(id), String::from(pw))),
+            (Some(id), Some(pw)) => Some((String::from(id), String::from(pw), auth_address)),
             _ => None
         };
         TestServer { kind: server.kind, db_url: server.db_url, address: server.address, bin_name: server.bin_name, secured: true, api_cred }
@@ -61,10 +71,11 @@ impl TestServer {
         // start server using cargo run command
         let args: Vec<&str> = if self.secured {
             match &self.api_cred {
-                Some((id, pw)) => vec![
+                Some((id, pw, addr)) => vec![
                     "run", "-p", "rmcs-api-server", "--bin", self.bin_name.as_str(),
                     "--", "--db-url", self.db_url.as_str(), "--secured",
-                    "--api-id", id.as_str(), "--password", pw.as_str()
+                    "--api-id", id.as_str(), "--password", pw.as_str(),
+                    "--auth-address", addr.as_str()
                 ],
                 None => vec![
                     "run", "-p", "rmcs-api-server", "--bin", self.bin_name.as_str(),
