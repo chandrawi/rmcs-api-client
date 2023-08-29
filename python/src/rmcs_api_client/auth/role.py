@@ -1,5 +1,5 @@
 from rmcs_auth_api import role_pb2, role_pb2_grpc
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
 from uuid import UUID
 import grpc
@@ -15,7 +15,7 @@ class RoleSchema:
     access_duration: int
     refresh_duration: int
     access_key: bytes
-    procedures: list[UUID]
+    procedures: List[UUID]
 
     def from_response(r):
         procedures = []

@@ -1,6 +1,6 @@
 from datetime import datetime
 from uuid import UUID
-from typing import Optional
+from typing import Optional, List, Tuple
 from . import api, role, user, token
 from .api import ApiSchema, ProcedureSchema
 from .role import RoleSchema
@@ -20,7 +20,7 @@ class Auth:
     def read_api_by_name(self, name: str) -> ApiSchema:
         return api.read_api_by_name(self, name)
 
-    def list_api_by_category(self, category: str) -> list[ApiSchema]:
+    def list_api_by_category(self, category: str) -> List[ApiSchema]:
         return api.list_api_by_category(self, category)
 
     def create_api(self, name: str, address: str, category: str, description: str, password: str, access_key: bytes) -> UUID:
@@ -38,7 +38,7 @@ class Auth:
     def read_procedure_by_name(self, api_id: UUID, name: str) -> ProcedureSchema:
         return api.read_procedure_by_name(self, api_id, name)
 
-    def list_procedure_by_api(self, api_id: UUID) -> list[ProcedureSchema]:
+    def list_procedure_by_api(self, api_id: UUID) -> List[ProcedureSchema]:
         return api.list_procedure_by_api(self, api_id)
 
     def create_procedure(self, api_id: UUID, name: str, description: str) -> UUID:
@@ -56,7 +56,7 @@ class Auth:
     def read_role_by_name(self, api_id: UUID, name: str) -> RoleSchema:
         return role.read_role_by_name(self, api_id, name)
 
-    def list_role_by_api(self, api_id: UUID) -> list[RoleSchema]:
+    def list_role_by_api(self, api_id: UUID) -> List[RoleSchema]:
         return role.list_role_by_api(self, api_id)
     
     def list_role_by_user(self, user_id: UUID):
@@ -83,7 +83,7 @@ class Auth:
     def read_user_by_name(self, name: str) -> UserSchema:
         return user.read_user_by_name(self, name)
 
-    def list_user_by_role(self, role_id: UUID) -> list[UserSchema]:
+    def list_user_by_role(self, role_id: UUID) -> List[UserSchema]:
         return user.list_user_by_role(self, role_id)
 
     def create_user(self, name: str, email: str, phone: str, password: str) -> UUID:
@@ -104,22 +104,22 @@ class Auth:
     def read_access_token(self, access_id: int) -> TokenSchema:
         return token.read_access_token(self, access_id)
 
-    def list_auth_token(self, auth_token: str) -> list[TokenSchema]:
+    def list_auth_token(self, auth_token: str) -> List[TokenSchema]:
         return token.list_auth_token(self, auth_token)
     
-    def list_token_by_user(self, user_id: UUID) -> list[TokenSchema]:
+    def list_token_by_user(self, user_id: UUID) -> List[TokenSchema]:
         return token.list_token_by_user(self, user_id)
 
-    def create_access_token(self, user_id: UUID, auth_token: str, expire: datetime, ip: bytes) -> tuple[int, str, str]:
+    def create_access_token(self, user_id: UUID, auth_token: str, expire: datetime, ip: bytes) -> Tuple[int, str, str]:
         return token.create_access_token(self, user_id, auth_token, expire, ip)
 
-    def create_auth_token(self, user_id: UUID, expire: datetime, ip: bytes, number: int) -> list[tuple[int, str, str]]:
+    def create_auth_token(self, user_id: UUID, expire: datetime, ip: bytes, number: int) -> List[Tuple[int, str, str]]:
         return token.create_auth_token(self, user_id, expire, ip, number)
 
-    def update_access_token(self, access_id: int, expire: Optional[datetime]=None, ip: Optional[bytes]=None) -> tuple[str, str]:
+    def update_access_token(self, access_id: int, expire: Optional[datetime]=None, ip: Optional[bytes]=None) -> Tuple[str, str]:
         return token.update_access_token(self, access_id, expire, ip)
 
-    def update_auth_token(self, auth_token: str, expire: Optional[datetime]=None, ip: Optional[bytes]=None) -> tuple[str, str]:
+    def update_auth_token(self, auth_token: str, expire: Optional[datetime]=None, ip: Optional[bytes]=None) -> Tuple[str, str]:
         return token.update_auth_token(self, auth_token, expire, ip)
 
     def delete_access_token(self, access_id: int):

@@ -1,5 +1,5 @@
 from rmcs_auth_api import user_pb2, user_pb2_grpc
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
 from uuid import UUID
 import grpc
@@ -26,7 +26,7 @@ class UserSchema:
     email: str
     phone: str
     password: str
-    roles: list[UserRoleSchema]
+    roles: List[UserRoleSchema]
 
     def from_response(r):
         user_roles = []
