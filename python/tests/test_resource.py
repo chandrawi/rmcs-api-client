@@ -5,10 +5,9 @@ SOURCE_PATH = os.path.join(os.getcwd(),"src")
 sys.path.append(SOURCE_PATH)
 
 from datetime import datetime
-import random
 import dotenv
 import pytest
-from rmcs_api_client.resource import Resource, DataIndexing, BufferStatus, DataType
+from rmcs_api_client.resource import Resource, DataIndexing, DataType
 from uuid import UUID
 
 def test_resource():
@@ -19,7 +18,7 @@ def test_resource():
     # create new data model and add data types
     model_id = resource.create_model(DataIndexing.TIMESTAMP, "UPLINK", "speed and direction", None)
     model_buf_id = resource.create_model(DataIndexing.TIMESTAMP, "UPLINK", "buffer 4", None)
-    resource.add_model_type(model_id, [DataType.F32, DataType.F32])
+    resource.add_model_type(model_id, [DataType.F64, DataType.F64])
     resource.add_model_type(model_buf_id, [DataType.U8, DataType.U8, DataType.U8, DataType.U8])
     # create scale, symbol, and threshold configurations for new created model
     resource.create_model_config(model_id, 0, "scale_0", "speed", "SCALE")
@@ -64,7 +63,7 @@ def test_resource():
     assert model.name == "speed and direction"
     assert model.indexing == DataIndexing.TIMESTAMP
     assert model.category == "UPLINK"
-    assert model.types == [DataType.F32, DataType.F32]
+    assert model.types == [DataType.F64, DataType.F64]
     # read model configurations
     model_configs = resource.list_model_config_by_model(model_id)
     config_vec =[]
@@ -140,6 +139,92 @@ def test_resource():
     resource.update_group_device(group_device_id, None, None, "Sensor devices")
     group = resource.read_group_device(group_device_id)
     assert group.description == "Sensor devices"
+
+    # generate raw data and create buffers
+    timestamp = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
+    raw_1 = [1231, 890]
+    raw_2 = [1452, -341]
+    resource.create_buffer(device_id1, model_buf_id, timestamp, None, raw_1, "CONVERT")
+    resource.create_buffer(device_id2, model_buf_id, timestamp, None, raw_2, "CONVERT")
+
+    # read buffer
+    buffers = resource.list_buffer_first(100, None, None, None)
+    assert buffers[0].data == raw_1
+    assert buffers[1].data == raw_2
+
+    # get model config value then convert buffer data
+    def conf_val(model_configs, name):
+        for config in model_configs:
+            if config.name == name:
+                return config.value
+    def convert(raw, coef0, coef1):
+        return (raw - coef0) * coef1
+    coef0 = conf_val(device_configs, "coef_0")
+    coef1 = conf_val(device_configs, "coef_1")
+    speed = convert(raw_1[0], coef0, coef1)
+    direction = convert(raw_1[1], coef0, coef1)
+    # create data
+    resource.create_data(device_id1, model_id, timestamp, None, [speed, direction])
+
+    # read data
+    datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100)
+    data_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, datas)
+    data = list(data_filter)[0]
+    assert [speed, direction] == data.data
+    assert timestamp == data.timestamp
+
+    # delete data
+    resource.delete_data(device_id1, model_id, timestamp, None)
+    with pytest.raises(Exception):
+        resource.read_data(device_id1, model_id, timestamp, None)
+
+    # update buffer status
+    resource.update_buffer(buffers[0].id, None, "DELETE")
+    buffer = resource.read_buffer(buffers[0].id)
+    assert buffer.status == "DELETE"
+
+    # delete buffer data
+    resource.delete_buffer(buffers[0].id)
+    resource.delete_buffer(buffers[1].id)
+    with pytest.raises(Exception):
+        resource.read_buffer(buffers[0].id)
+
+    # create data slice
+    slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, 0, 0, "Speed and compass slice", None)
+    # read data
+    slices = resource.list_slice_by_name("slice")
+    slice_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, slices)
+    slice = list(slice_filter)[0]
+    assert slice.timestamp_begin == timestamp
+    assert slice.name == "Speed and compass slice"
+
+    # update data slice
+    resource.update_slice(slice_id, None, None, None, None, None, "Speed and compass sensor 1 at '2023-05-07 07:08:48'")
+    slice = resource.read_slice(slice_id)
+    assert slice.description == "Speed and compass sensor 1 at '2023-05-07 07:08:48'"
+
+    # delete data slice
+    resource.delete_slice(slice_id)
+    with pytest.raises(Exception):
+        resource.read_slice(slice_id)
+
+    # create system log
+    resource.create_log(timestamp, device_id1, "UNKNOWN_ERROR", "testing success")
+    # read log
+    logs = resource.list_log_by_range_time(timestamp, datetime.now(), None, None)
+    log_filter = filter(lambda x: x.device_id == device_id1 and x.timestamp == timestamp, logs)
+    log = list(log_filter)[0]
+    assert log.value == "testing success"
+
+    # update system log
+    resource.update_log(timestamp, device_id1, "SUCCESS", None)
+    log = resource.read_log(timestamp, device_id1)
+    assert log.status == "SUCCESS"
+
+    # delete system log
+    resource.delete_log(timestamp, device_id1)
+    with pytest.raises(Exception):
+        resource.read_log(timestamp, device_id1)
 
     # delete model config
     config_id = model_configs[0].id
