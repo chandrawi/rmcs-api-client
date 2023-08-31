@@ -16,7 +16,7 @@ class DeviceConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType.from_int(r.config_type))
+        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
         return DeviceConfigSchema(r.id, UUID(bytes=r.device_id), r.name, value, r.category)
 
 
@@ -29,7 +29,7 @@ class GatewayConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType.from_int(r.config_type))
+        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
         return GatewayConfigSchema(r.id, UUID(bytes=r.gateway_id), r.name, value, r.category)
 
 

@@ -16,7 +16,7 @@ class ModelConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType.from_int(r.config_type))
+        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
         return ModelConfigSchema(r.id, UUID(bytes=r.model_id), r.index, r.name, value, r.category)
 
 
@@ -31,10 +31,10 @@ class ModelSchema:
     configs: List[List[ModelConfigSchema]]
 
     def from_response(r):
-        indexing = DataIndexing.from_int(r.indexing)
+        indexing = DataIndexing(r.indexing)
         types = []
         for ty in r.types:
-            types.append(DataType.from_int(ty))
+            types.append(DataType(ty))
         configs = []
         for conf_vec in r.configs:
             confs = []
