@@ -1,7 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 from typing import Optional, List, Tuple
-from . import api, role, user, token
+from . import auth, api, role, user, token
+from .auth import UserLogin, UserRefresh
 from .api import ApiSchema, ProcedureSchema
 from .role import RoleSchema
 from .user import UserSchema
@@ -13,6 +14,15 @@ class Auth:
     def __init__(self, address: str, auth_token: str = None):
         self.address = address
         self.auth_token = auth_token
+
+    def user_login(self, username: str, password: str) -> UserLogin:
+        return auth.user_login(self, username, password)
+
+    def user_refresh(self, api_id: UUID, access_token: str, refresh_token: str) -> UserRefresh:
+        return auth.user_refresh(self, api_id, access_token, refresh_token)
+
+    def user_logout(self, user_id: UUID, auth_token: str):
+        return auth.user_logout(self, user_id, auth_token)
 
     def read_api(self, id: UUID) -> ApiSchema:
         return api.read_api(self, id)
