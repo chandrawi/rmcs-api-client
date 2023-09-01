@@ -15,10 +15,10 @@ from .log import LogSchema
 
 class Resource:
 
-    def __init__(self, address: str, access_token: str = None, refresh_token: str = None):
+    def __init__(self, address: str, access_token: Optional[str] = None):
         self.address = address
-        self.access_token = access_token
-        self.refresh_token = refresh_token
+        self.metadata = [] if access_token == None \
+            else [("authorization", "Bearer " + access_token)]
 
     def read_model(self, id: UUID) -> ModelSchema:
         return _model.read_model(self, id)

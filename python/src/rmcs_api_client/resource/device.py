@@ -70,21 +70,21 @@ def read_device(resource, id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceId(id=id.bytes)
-        response = stub.ReadDevice(request)
+        response = stub.ReadDevice(request=request, metadata=resource.metadata)
         return DeviceSchema.from_response(response.result)
 
 def read_device_by_sn(resource, serial_number: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.SerialNumber(serial_number=serial_number)
-        response = stub.ReadDeviceBySn(request)
+        response = stub.ReadDeviceBySn(request=request, metadata=resource.metadata)
         return DeviceSchema.from_response(response.result)
 
 def list_device_by_gateway(resource, gateway_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.GatewayId(id=gateway_id.bytes)
-        response = stub.ListDeviceByGateway(request)
+        response = stub.ListDeviceByGateway(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceSchema.from_response(result))
         return ls
@@ -93,7 +93,7 @@ def list_device_by_type(resource, type_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.TypeId(id=type_id.bytes)
-        response = stub.ListDeviceByType(request)
+        response = stub.ListDeviceByType(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceSchema.from_response(result))
         return ls
@@ -102,7 +102,7 @@ def list_device_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceName(name=name)
-        response = stub.ListDeviceByName(request)
+        response = stub.ListDeviceByName(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceSchema.from_response(result))
         return ls
@@ -111,7 +111,7 @@ def list_device_by_gateway_type(resource, gateway_id: UUID, type_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceGatewayType(gateway_id=gateway_id.bytes, type_id=type_id.bytes)
-        response = stub.ListDeviceByGatewayType(request)
+        response = stub.ListDeviceByGatewayType(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceSchema.from_response(result))
         return ls
@@ -120,7 +120,7 @@ def list_device_by_gateway_name(resource, gateway_id: UUID, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceGatewayName(gateway_id=gateway_id.bytes, name=name)
-        response = stub.ListDeviceByGatewayName(request)
+        response = stub.ListDeviceByGatewayName(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceSchema.from_response(result))
         return ls
@@ -137,7 +137,7 @@ def create_device(resource, id: UUID, gateway_id: UUID, type_id: UUID, serial_nu
             description=description,
             device_type=type_schema
         )
-        stub.CreateDevice(request)
+        stub.CreateDevice(request=request, metadata=resource.metadata)
 
 def update_device(resource, id: UUID, gateway_id: Optional[UUID], type_id: Optional[UUID], serial_number: Optional[str], name: Optional[str], description: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
@@ -154,33 +154,33 @@ def update_device(resource, id: UUID, gateway_id: Optional[UUID], type_id: Optio
             description=description,
             type_id=type_bytes
         )
-        stub.UpdateDevice(request)
+        stub.UpdateDevice(request=request, metadata=resource.metadata)
 
 def delete_device(resource, id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceId(id=id.bytes)
-        stub.DeleteDevice(request)
+        stub.DeleteDevice(request=request, metadata=resource.metadata)
 
 def read_gateway(resource, id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.GatewayId(id=id.bytes)
-        response = stub.ReadGateway(request)
+        response = stub.ReadGateway(request=request, metadata=resource.metadata)
         return GatewaySchema.from_response(response.result)
 
 def read_gateway_by_sn(resource, serial_number: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.SerialNumber(serial_number=serial_number)
-        response = stub.ReadGatewayBySn(request)
+        response = stub.ReadGatewayBySn(request=request, metadata=resource.metadata)
         return GatewaySchema.from_response(response.result)
 
 def list_gateway_by_type(resource, type_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.TypeId(id=type_id.bytes)
-        response = stub.ListGatewayByType(request)
+        response = stub.ListGatewayByType(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GatewaySchema.from_response(result))
         return ls
@@ -189,7 +189,7 @@ def list_gateway_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.GatewayName(name=name)
-        response = stub.ListGatewayByName(request)
+        response = stub.ListGatewayByName(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GatewaySchema.from_response(result))
         return ls
@@ -205,7 +205,7 @@ def create_gateway(resource, id: UUID, type_id: UUID, serial_number: str, name: 
             description=description,
             device_type=type_schema
         )
-        response = stub.CreateGateway(request)
+        response = stub.CreateGateway(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
 def update_gateway(resource, id: UUID, type_id: Optional[UUID], serial_number: Optional[str], name: Optional[str], description: Optional[str]):
@@ -218,26 +218,26 @@ def update_gateway(resource, id: UUID, type_id: Optional[UUID], serial_number: O
             description=description,
             type_id=type_id.bytes
         )
-        stub.UpdateGateway(request)
+        stub.UpdateGateway(request=request, metadata=resource.metadata)
 
 def delete_gateway(resource, id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.GatewayId(id=id.bytes)
-        stub.DeleteGateway(request)
+        stub.DeleteGateway(request=request, metadata=resource.metadata)
 
 def read_device_config(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigId(id=id)
-        response = stub.ReadDeviceConfig(request)
+        response = stub.ReadDeviceConfig(request=request, metadata=resource.metadata)
         return DeviceConfigSchema.from_response(response.result)
 
 def list_device_config_by_device(resource, device_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.DeviceId(id=device_id.bytes)
-        response = stub.ListDeviceConfig(request)
+        response = stub.ListDeviceConfig(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DeviceConfigSchema.from_response(result))
         return ls
@@ -252,7 +252,7 @@ def create_device_config(resource, device_id: UUID, name: str, value: Union[int,
             config_type=ConfigType.from_value(value).value,
             category=category
         )
-        response = stub.CreateDeviceConfig(request)
+        response = stub.CreateDeviceConfig(request=request, metadata=resource.metadata)
         return response.id
 
 def update_device_config(resource, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
@@ -265,26 +265,26 @@ def update_device_config(resource, id: int, name: Optional[str], value: Union[in
             config_type=ConfigType.from_value(value).value,
             category=category
         )
-        stub.UpdateDeviceConfig(request)
+        stub.UpdateDeviceConfig(request=request, metadata=resource.metadata)
 
 def delete_device_config(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigId(id=id)
-        stub.DeleteDeviceConfig(request)
+        stub.DeleteDeviceConfig(request=request, metadata=resource.metadata)
 
 def read_gateway_config(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigId(id=id)
-        response = stub.ReadGatewayConfig(request)
+        response = stub.ReadGatewayConfig(request=request, metadata=resource.metadata)
         return GatewayConfigSchema.from_response(response.result)
 
 def list_gateway_config_by_gateway(resource, gateway_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.GatewayId(id=gateway_id.bytes)
-        response = stub.ListGatewayConfig(request)
+        response = stub.ListGatewayConfig(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GatewayConfigSchema.from_response(result))
         return ls
@@ -299,7 +299,7 @@ def create_gateway_config(resource, gateway_id: UUID, name: str, value: Union[in
             config_type=ConfigType.from_value(value).value,
             category=category
         )
-        response = stub.CreateGatewayConfig(request)
+        response = stub.CreateGatewayConfig(request=request, metadata=resource.metadata)
         return response.id
 
 def update_gateway_config(resource, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
@@ -312,10 +312,10 @@ def update_gateway_config(resource, id: int, name: Optional[str], value: Union[i
             config_type=ConfigType.from_value(value).value,
             category=category
         )
-        stub.UpdateGatewayConfig(request)
+        stub.UpdateGatewayConfig(request=request, metadata=resource.metadata)
 
 def delete_gateway_config(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigId(id=id)
-        stub.DeleteGatewayConfig(request)
+        stub.DeleteGatewayConfig(request=request, metadata=resource.metadata)

@@ -50,7 +50,7 @@ def read_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, in
             timestamp=int(timestamp.timestamp()*1000000),
             index=index
         )
-        response = stub.ReadData(request)
+        response = stub.ReadData(request=request, metadata=resource.metadata)
         return DataSchema.from_response(response.result)
 
 def list_data_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
@@ -61,7 +61,7 @@ def list_data_by_time(resource, device_id: UUID, model_id: UUID, timestamp: date
             model_id=model_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000)
         )
-        response = stub.ListDataByTime(request)
+        response = stub.ListDataByTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -74,7 +74,7 @@ def list_data_by_last_time(resource, device_id: UUID, model_id: UUID, last: date
             model_id=model_id.bytes,
             timestamp=int(last.timestamp()*1000000)
         )
-        response = stub.ListDataByLastTime(request)
+        response = stub.ListDataByLastTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -88,7 +88,7 @@ def list_data_by_range_time(resource, device_id: UUID, model_id: UUID, begin: da
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListDataByRangeTime(request)
+        response = stub.ListDataByRangeTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -102,7 +102,7 @@ def list_data_by_number_before(resource, device_id: UUID, model_id: UUID, before
             timestamp=int(before.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDataByNumberBefore(request)
+        response = stub.ListDataByNumberBefore(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -116,7 +116,7 @@ def list_data_by_number_after(resource, device_id: UUID, model_id: UUID, after: 
             timestamp=int(after.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDataByNumberAfter(request)
+        response = stub.ListDataByNumberAfter(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -125,7 +125,7 @@ def get_data_model(resource, model_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         request = data_pb2.ModelId(id=model_id.bytes)
-        response = stub.GetDataModel(request)
+        response = stub.GetDataModel(request=request, metadata=resource.metadata)
         return DataModel.from_response(response.result)
 
 def read_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0):
@@ -137,7 +137,7 @@ def read_data_with_model(resource, model: DataModel, device_id: UUID, timestamp:
             timestamp=int(timestamp.timestamp()*1000000),
             index=index
         )
-        response = stub.ReadDataWithModel(request)
+        response = stub.ReadDataWithModel(request=request, metadata=resource.metadata)
         return DataSchema.from_response(response.result)
 
 def list_data_with_model_by_time(resource, model: DataModel, device_id: UUID, timestamp: datetime):
@@ -148,7 +148,7 @@ def list_data_with_model_by_time(resource, model: DataModel, device_id: UUID, ti
             device_id=device_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000)
         )
-        response = stub.ListDataWithModelByTime(request)
+        response = stub.ListDataWithModelByTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -161,7 +161,7 @@ def list_data_with_model_by_last_time(resource, model: DataModel, device_id: UUI
             device_id=device_id.bytes,
             timestamp=int(last.timestamp()*1000000)
         )
-        response = stub.ListDataWithModelByLastTime(request)
+        response = stub.ListDataWithModelByLastTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -175,7 +175,7 @@ def list_data_with_model_by_range_time(resource, model: DataModel, device_id: UU
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListDataWithModelByRangeTime(request)
+        response = stub.ListDataWithModelByRangeTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -189,7 +189,7 @@ def list_data_with_model_by_number_before(resource, model: DataModel, device_id:
             timestamp=int(before.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDataWithModelByNumberBefore(request)
+        response = stub.ListDataWithModelByNumberBefore(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -203,7 +203,7 @@ def list_data_with_model_by_number_after(resource, model: DataModel, device_id: 
             timestamp=int(after.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDataWithModelByNumberAfter(request)
+        response = stub.ListDataWithModelByNumberAfter(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
@@ -221,7 +221,7 @@ def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, 
             data_bytes=pack_data_array(data),
             data_type=data_type
         )
-        stub.CreateData(request)
+        stub.CreateData(request=request, metadata=resource.metadata)
 
 def create_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]]):
     with grpc.insecure_channel(resource.address) as channel:
@@ -236,7 +236,7 @@ def create_data_with_model(resource, model: DataModel, device_id: UUID, timestam
             data_bytes=pack_data_array_model(data, model.types),
             data_type=data_type
         )
-        stub.CreateDataWithModel(request)
+        stub.CreateDataWithModel(request=request, metadata=resource.metadata)
 
 def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, index: int = 0):
     with grpc.insecure_channel(resource.address) as channel:
@@ -247,7 +247,7 @@ def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, 
             timestamp=int(timestamp.timestamp()*1000000),
             index=index
         )
-        stub.DeleteData(request)
+        stub.DeleteData(request=request, metadata=resource.metadata)
 
 def delete_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0):
     with grpc.insecure_channel(resource.address) as channel:
@@ -258,4 +258,4 @@ def delete_data_with_model(resource, model: DataModel, device_id: UUID, timestam
             timestamp=int(timestamp.timestamp()*1000000),
             index=index
         )
-        stub.DeleteDataWithModel(request)
+        stub.DeleteDataWithModel(request=request, metadata=resource.metadata)

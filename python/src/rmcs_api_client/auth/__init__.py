@@ -11,9 +11,10 @@ from .token import TokenSchema
 
 class Auth:
 
-    def __init__(self, address: str, auth_token: str = None):
+    def __init__(self, address: str, auth_token: Optional[str] = None):
         self.address = address
-        self.auth_token = auth_token
+        self.metadata = [] if auth_token == None \
+            else [("authorization", "Bearer " + auth_token)]
 
     def user_login(self, username: str, password: str) -> UserLogin:
         return auth.user_login(self, username, password)

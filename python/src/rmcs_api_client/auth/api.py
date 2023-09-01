@@ -40,21 +40,21 @@ def read_api(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiId(id=id.bytes)
-        response = stub.ReadApi(request)
+        response = stub.ReadApi(request=request, metadata=auth.metadata)
         return ApiSchema.from_response(response.result)
 
 def read_api_by_name(auth, name: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiName(name=name)
-        response = stub.ReadApiByName(request)
+        response = stub.ReadApiByName(request=request, metadata=auth.metadata)
         return ApiSchema.from_response(response.result)
 
 def list_api_by_category(auth, category: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiCategory(category=category)
-        response = stub.ListApiByCategory(request)
+        response = stub.ListApiByCategory(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(ApiSchema.from_response(result))
         return ls
@@ -70,7 +70,7 @@ def create_api(auth, name: str, address: str, category: str, description: str, p
             password=password,
             access_key=access_key
         )
-        response = stub.CreateApi(request)
+        response = stub.CreateApi(request=request, metadata=auth.metadata)
         return UUID(bytes=response.id)
 
 def update_api(auth, id: UUID, name: Optional[str], address: Optional[str], category: Optional[str], description: Optional[str], password: Optional[str], access_key: Optional[bytes]):
@@ -85,33 +85,33 @@ def update_api(auth, id: UUID, name: Optional[str], address: Optional[str], cate
             password=password,
             access_key=access_key
         )
-        stub.UpdateApi(request)
+        stub.UpdateApi(request=request, metadata=auth.metadata)
 
 def delete_api(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiId(id=id.bytes)
-        stub.DeleteApi(request)
+        stub.DeleteApi(request=request, metadata=auth.metadata)
 
 def read_procedure(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ProcedureId(id=id.bytes)
-        response = stub.ReadProcedure(request)
+        response = stub.ReadProcedure(request=request, metadata=auth.metadata)
         return ProcedureSchema.from_response(response.result)
 
 def read_procedure_by_name(auth, api_id: UUID, name: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ProcedureName(api_id=api_id.bytes, name=name)
-        response = stub.ReadProcedureByName(request)
+        response = stub.ReadProcedureByName(request=request, metadata=auth.metadata)
         return ProcedureSchema.from_response(response.result)
 
 def list_procedure_by_api(auth, api_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiId(id=api_id.bytes)
-        response = stub.ListProcedureByApi(request)
+        response = stub.ListProcedureByApi(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(ProcedureSchema.from_response(result))
         return ls
@@ -124,7 +124,7 @@ def create_procedure(auth, api_id: UUID, name: str, description: str):
             name=name,
             description=description
         )
-        response = stub.CreateProcedure(request)
+        response = stub.CreateProcedure(request=request, metadata=auth.metadata)
         return UUID(bytes=response.id)
 
 def update_procedure(auth, id: UUID, name: Optional[str], description: Optional[str]):
@@ -135,10 +135,10 @@ def update_procedure(auth, id: UUID, name: Optional[str], description: Optional[
             name=name,
             description=description
         )
-        stub.UpdateProcedure(request)
+        stub.UpdateProcedure(request=request, metadata=auth.metadata)
 
 def delete_procedure(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ProcedureId(id=id.bytes)
-        stub.DeleteProcedure(request)
+        stub.DeleteProcedure(request=request, metadata=auth.metadata)

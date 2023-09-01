@@ -87,7 +87,7 @@ def read_log(resource, timestamp: datetime, device_id: UUID):
             timestamp=int(timestamp.timestamp()*1000000),
             device_id=device_id.bytes
         )
-        response = stub.ReadLog(request)
+        response = stub.ReadLog(request=request, metadata=resource.metadata)
         return LogSchema.from_response(response.result)
 
 def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None):
@@ -102,7 +102,7 @@ def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=No
             device_id=device_bytes,
             status=stat
         )
-        response = stub.ListLogByTime(request)
+        response = stub.ListLogByTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
@@ -119,7 +119,7 @@ def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=No
             device_id=device_bytes,
             status=stat
         )
-        response = stub.ListLogByLastTime(request)
+        response = stub.ListLogByLastTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
@@ -137,7 +137,7 @@ def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: 
             device_id=device_bytes,
             status=stat
         )
-        response = stub.ListLogByRangeTime(request)
+        response = stub.ListLogByRangeTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
@@ -152,7 +152,7 @@ def create_log(resource, timestamp: datetime, device_id: UUID, status: str, valu
             log_bytes=pack_config(value),
             log_type=ConfigType.from_value(value).value
         )
-        stub.CreateLog(request)
+        stub.CreateLog(request=request, metadata=resource.metadata)
 
 def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[str], value: Union[int, float, str, None]):
     with grpc.insecure_channel(resource.address) as channel:
@@ -166,7 +166,7 @@ def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[
             log_bytes=pack_config(value),
             log_type=ConfigType.from_value(value).value
         )
-        stub.UpdateLog(request)
+        stub.UpdateLog(request=request, metadata=resource.metadata)
 
 def delete_log(resource, timestamp: datetime, device_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
@@ -175,4 +175,4 @@ def delete_log(resource, timestamp: datetime, device_id: UUID):
             timestamp=int(timestamp.timestamp()*1000000),
             device_id=device_id.bytes
         )
-        stub.DeleteLog(request)
+        stub.DeleteLog(request=request, metadata=resource.metadata)

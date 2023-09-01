@@ -27,21 +27,21 @@ def read_role(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleId(id=id.bytes)
-        response = stub.ReadRole(request)
+        response = stub.ReadRole(request=request, metadata=auth.metadata)
         return RoleSchema.from_response(response.result)
 
 def read_role_by_name(auth, api_id: UUID, name: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleName(api_id=api_id.bytes, name=name)
-        response = stub.ReadRoleByName(request)
+        response = stub.ReadRoleByName(request=request, metadata=auth.metadata)
         return RoleSchema.from_response(response.result)
 
 def list_role_by_api(auth, api_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.ApiId(api_id=api_id.bytes)
-        response = stub.ListRoleByApi(request)
+        response = stub.ListRoleByApi(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(RoleSchema.from_response(result))
         return ls
@@ -50,7 +50,7 @@ def list_role_by_user(auth, user_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.UserId(id=user_id.bytes)
-        response = stub.ListRoleByUser(request)
+        response = stub.ListRoleByUser(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(RoleSchema.from_response(result))
         return ls
@@ -66,7 +66,7 @@ def create_role(auth, api_id: UUID, name: str, multi: bool, ip_lock: bool, acces
             access_duration=access_duration,
             refresh_duration=refresh_duration
         )
-        response = stub.CreateRole(request)
+        response = stub.CreateRole(request=request, metadata=auth.metadata)
         return UUID(bytes=response.id)
 
 def update_role(auth, id: UUID, name: Optional[str], multi: Optional[bool], ip_lock: Optional[bool], access_duration: Optional[int], refresh_duration: Optional[int]):
@@ -80,22 +80,22 @@ def update_role(auth, id: UUID, name: Optional[str], multi: Optional[bool], ip_l
             access_duration=access_duration,
             refresh_duration=refresh_duration
         )
-        stub.UpdateRole(request)
+        stub.UpdateRole(request=request, metadata=auth.metadata)
 
 def delete_role(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleId(id=id.bytes)
-        stub.DeleteRole(request)
+        stub.DeleteRole(request=request, metadata=auth.metadata)
 
 def add_role_access(auth, id: UUID, procedure_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleAccess(id=id.bytes, procedure_id=procedure_id.bytes)
-        stub.AddRoleAccess(request)
+        stub.AddRoleAccess(request=request, metadata=auth.metadata)
 
 def remove_role_access(auth, id: UUID, procedure_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleAccess(id=id.bytes, procedure_id=procedure_id.bytes)
-        stub.RemoveRoleAccess(request)
+        stub.RemoveRoleAccess(request=request, metadata=auth.metadata)

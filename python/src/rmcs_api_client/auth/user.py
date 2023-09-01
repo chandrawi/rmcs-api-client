@@ -38,21 +38,21 @@ def read_user(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserId(id=id.bytes)
-        response = stub.ReadUser(request)
+        response = stub.ReadUser(request=request, metadata=auth.metadata)
         return UserSchema.from_response(response.result)
 
 def read_user_by_name(auth, name: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserName(name=name)
-        response = stub.ReadUserByName(request)
+        response = stub.ReadUserByName(request=request, metadata=auth.metadata)
         return UserSchema.from_response(response.result)
 
 def list_user_by_role(auth, role_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.RoleId(id=role_id.bytes)
-        response = stub.ListUserByRole(request)
+        response = stub.ListUserByRole(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(UserSchema.from_response(result))
         return ls
@@ -66,7 +66,7 @@ def create_user(auth, name: str, email: str, phone: str, password: str):
             phone=phone,
             password=password
         )
-        response = stub.CreateUser(request)
+        response = stub.CreateUser(request=request, metadata=auth.metadata)
         return UUID(bytes=response.id)
 
 def update_user(auth, id: UUID, name: Optional[str], email: Optional[str], phone: Optional[str], password: Optional[str]):
@@ -79,22 +79,22 @@ def update_user(auth, id: UUID, name: Optional[str], email: Optional[str], phone
             phone=phone,
             password=password
         )
-        stub.UpdateUser(request)
+        stub.UpdateUser(request=request, metadata=auth.metadata)
 
 def delete_user(auth, id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserId(id=id.bytes)
-        stub.DeleteUser(request)
+        stub.DeleteUser(request=request, metadata=auth.metadata)
 
 def add_user_role(auth, id: UUID, role_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserRole(user_id=id.bytes, role_id=role_id.bytes)
-        stub.AddUserRole(request)
+        stub.AddUserRole(request=request, metadata=auth.metadata)
 
 def remove_user_role(auth, id: UUID, role_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserRole(user_id=id.bytes, role_id=role_id.bytes)
-        stub.RemoveUserRole(request)
+        stub.RemoveUserRole(request=request, metadata=auth.metadata)

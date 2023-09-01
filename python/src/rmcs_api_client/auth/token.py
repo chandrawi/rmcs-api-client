@@ -23,14 +23,14 @@ def read_access_token(auth, access_id: int):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.AccessId(access_id=access_id)
-        response = stub.ReadAccessToken(request)
+        response = stub.ReadAccessToken(request=request, metadata=auth.metadata)
         return TokenSchema.from_response(response.result)
 
 def list_auth_token(auth, auth_token: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.AuthToken(auth_token=auth_token)
-        response = stub.ListAuthToken(request)
+        response = stub.ListAuthToken(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(TokenSchema.from_response(result))
         return ls
@@ -39,7 +39,7 @@ def list_token_by_user(auth, user_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.UserId(user_id=user_id.bytes)
-        response = stub.ListTokenByUser(request)
+        response = stub.ListTokenByUser(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(TokenSchema.from_response(result))
         return ls
@@ -53,7 +53,7 @@ def create_access_token(auth, user_id: UUID, auth_token: str, expire: datetime, 
             expire=int(expire.timestamp()*1000000),
             ip=ip
         )
-        response = stub.CreateAccessToken(request)
+        response = stub.CreateAccessToken(request=request, metadata=auth.metadata)
         return (response.access_id, response.refresh_token, response.auth_token)
 
 def create_auth_token(auth, user_id: UUID, expire: datetime, ip: bytes, number: int):
@@ -65,7 +65,7 @@ def create_auth_token(auth, user_id: UUID, expire: datetime, ip: bytes, number: 
             expire=int(expire.timestamp()*1000000),
             ip=ip
         )
-        response = stub.CreateAuthToken(request)
+        response = stub.CreateAuthToken(request=request, metadata=auth.metadata)
         tokens = []
         for token in response.tokens: tokens.append((token.access_id, token.refresh_token, token.auth_token))
         return tokens
@@ -78,7 +78,7 @@ def update_access_token(auth, access_id: int, expire: Optional[datetime], ip: Op
             expire=int(expire.timestamp()*1000000),
             ip=ip
         )
-        response = stub.UpdateAccessToken(request)
+        response = stub.UpdateAccessToken(request=request, metadata=auth.metadata)
         return (response.refresh_token, response.auth_token)
 
 def update_auth_token(auth, auth_token: str, expire: Optional[datetime], ip: Optional[bytes]):
@@ -89,23 +89,23 @@ def update_auth_token(auth, auth_token: str, expire: Optional[datetime], ip: Opt
             expire=int(expire.timestamp()*1000000),
             ip=ip
         )
-        response = stub.UpdateAuthToken(request)
+        response = stub.UpdateAuthToken(request=request, metadata=auth.metadata)
         return (response.refresh_token, response.auth_token)
 
 def delete_access_token(auth, access_id: int):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.AccessId(access_id=access_id)
-        stub.DeleteAccessToken(request)
+        stub.DeleteAccessToken(request=request, metadata=auth.metadata)
 
 def delete_auth_token(auth, auth_token: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.AuthToken(auth_token=auth_token)
-        stub.DeleteAuthToken(request)
+        stub.DeleteAuthToken(request=request, metadata=auth.metadata)
 
 def delete_token_by_user(auth, user_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = token_pb2_grpc.TokenServiceStub(channel)
         request = token_pb2.UserId(user_id=user_id.bytes)
-        stub.DeleteTokenByUser(request)
+        stub.DeleteTokenByUser(request=request, metadata=auth.metadata)

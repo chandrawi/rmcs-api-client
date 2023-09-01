@@ -28,14 +28,14 @@ def read_slice(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceId(id=id)
-        response = stub.ReadSlice(request)
+        response = stub.ReadSlice(request=request, metadata=resource.metadata)
         return SliceSchema.from_response(response.result)
 
 def list_slice_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceName(name=name)
-        response = stub.ListSliceByName(request)
+        response = stub.ListSliceByName(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -44,7 +44,7 @@ def list_slice_by_device(resource, device_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceDevice(device_id=device_id.bytes)
-        response = stub.ListSliceByDevice(request)
+        response = stub.ListSliceByDevice(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -53,7 +53,7 @@ def list_slice_by_model(resource, model_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceModel(model_id=model_id.bytes)
-        response = stub.ListSliceByModel(request)
+        response = stub.ListSliceByModel(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -62,7 +62,7 @@ def list_slice_by_device_model(resource, device_id: UUID, model_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceDeviceModel(device_id=device_id.bytes, model_id=model_id.bytes)
-        response = stub.ListSliceByDeviceModel(request)
+        response = stub.ListSliceByDeviceModel(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -80,7 +80,7 @@ def create_slice(resource, device_id: UUID, model_id: UUID, timestamp_begin: dat
             name=name,
             description=description
         )
-        response = stub.CreateSlice(request)
+        response = stub.CreateSlice(request=request, metadata=resource.metadata)
         return response.id
 
 def update_slice(resource, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], index_begin: Optional[int], index_end: Optional[int], name: Optional[str], description: Optional[str]):
@@ -99,10 +99,10 @@ def update_slice(resource, id: int, timestamp_begin: Optional[datetime], timesta
             name=name,
             description=description
         )
-        stub.UpdateSlice(request)
+        stub.UpdateSlice(request=request, metadata=resource.metadata)
 
 def delete_slice(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceId(id=id)
-        stub.DeleteSlice(request)
+        stub.DeleteSlice(request=request, metadata=resource.metadata)

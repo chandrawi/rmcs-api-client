@@ -64,7 +64,7 @@ def read_buffer(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         request = buffer_pb2.BufferId(id=id)
-        response = stub.ReadBuffer(request)
+        response = stub.ReadBuffer(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
 def read_buffer_first(resource, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None):
@@ -79,7 +79,7 @@ def read_buffer_first(resource, device_id: Optional[UUID]=None, model_id: Option
             model_id=model_bytes,
             status=status
         )
-        response = stub.ReadBufferFirst(request)
+        response = stub.ReadBufferFirst(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
 def read_buffer_last(resource, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None):
@@ -94,7 +94,7 @@ def read_buffer_last(resource, device_id: Optional[UUID]=None, model_id: Optiona
             model_id=model_bytes,
             status=status
         )
-        response = stub.ReadBufferLast(request)
+        response = stub.ReadBufferLast(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
 def list_buffer_first(resource, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None):
@@ -110,7 +110,7 @@ def list_buffer_first(resource, number: int, device_id: Optional[UUID]=None, mod
             status=status,
             number=number
         )
-        response = stub.ListBufferFirst(request)
+        response = stub.ListBufferFirst(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls
@@ -128,7 +128,7 @@ def list_buffer_last(resource, number: int, device_id: Optional[UUID]=None, mode
             status=status,
             number=number
         )
-        response = stub.ListBufferLast(request)
+        response = stub.ListBufferLast(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls
@@ -147,7 +147,7 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
             data_type=data_type,
             status=BufferStatus.from_str(status).value
         )
-        response = stub.CreateBuffer(request)
+        response = stub.CreateBuffer(request=request, metadata=resource.metadata)
         return response.id
 
 def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[str]):
@@ -164,10 +164,10 @@ def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, 
             data_type=data_type,
             status=stat
         )
-        stub.UpdateBuffer(request)
+        stub.UpdateBuffer(request=request, metadata=resource.metadata)
 
 def delete_buffer(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         request = buffer_pb2.BufferId(id=id)
-        stub.DeleteBuffer(request)
+        stub.DeleteBuffer(request=request, metadata=resource.metadata)
