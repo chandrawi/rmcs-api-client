@@ -1,7 +1,7 @@
 import os
 import sys
 
-SOURCE_PATH = os.path.join(os.getcwd(),"src")
+SOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"src")
 sys.path.append(SOURCE_PATH)
 
 from datetime import datetime
@@ -9,11 +9,19 @@ import dotenv
 import pytest
 from rmcs_api_client.resource import Resource, DataIndexing, DataType
 from uuid import UUID
+import utility
 
 def test_resource():
     dotenv.load_dotenv()
     address = os.getenv('SERVER_ADDRESS_RESOURCE')
+    db_resource_url_test = os.getenv("DATABASE_URL_RESOURCE_TEST")
     resource = Resource(address)
+
+    # truncate resource tables before testing
+    utility.truncate_tables_resource(db_resource_url_test)
+
+    # start resource server for testing
+    utility.start_resource_server()
 
     # create new data model and add data types
     model_id = resource.create_model(DataIndexing.TIMESTAMP, "UPLINK", "speed and direction", None)
@@ -272,3 +280,6 @@ def test_resource():
         resource.read_group_model(group_model_id)
     with pytest.raises(Exception):
         resource.read_group_device(group_device_id)
+
+    # stop auth server
+    utility.stop_resource_server()

@@ -1,7 +1,7 @@
 import os
 import sys
 
-SOURCE_PATH = os.path.join(os.getcwd(),"src")
+SOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),"src")
 sys.path.append(SOURCE_PATH)
 
 from datetime import datetime
@@ -10,11 +10,19 @@ import dotenv
 import pytest
 from argon2 import PasswordHasher
 from rmcs_api_client.auth import Auth
+import utility
 
 def test_auth():
     dotenv.load_dotenv()
     address = os.getenv('SERVER_ADDRESS_AUTH')
+    db_auth_url_test = os.getenv("DATABASE_URL_AUTH_TEST")
     auth = Auth(address)
+
+    # truncate auth tables before testing
+    utility.truncate_tables_auth(db_auth_url_test)
+
+    # start auth server for testing
+    utility.start_auth_server()
 
     # create new resource API
     password_api = "Ap1_P4s5w0rd"
@@ -203,3 +211,6 @@ def test_auth():
         auth.read_procedure(proc_id4)
     with pytest.raises(Exception):
         auth.read_api(api_id2)
+
+    # stop auth server
+    utility.stop_auth_server()
