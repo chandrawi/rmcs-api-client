@@ -8,7 +8,7 @@ use rmcs_resource_api::buffer::{
     BufferSchema, BufferId, BufferSelector, BuffersSelector, BufferUpdate, BufferStatus
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const BUFFER_NOT_FOUND: &str = "requested buffer not found";
 

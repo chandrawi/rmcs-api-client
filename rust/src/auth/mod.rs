@@ -11,7 +11,7 @@ use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_db::schema::auth_role::RoleSchema;
 use rmcs_auth_db::schema::auth_user::UserSchema;
 use rmcs_auth_db::schema::auth_token::TokenSchema;
-use rmcs_auth_api::auth::{ApiLoginResponse, UserLoginResponse, UserRefreshResponse, UserLogoutResponse};
+use rmcs_auth_api::auth::{UserLoginResponse, UserRefreshResponse, UserLogoutResponse};
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -43,12 +43,6 @@ impl Auth {
     pub fn with_token(mut self, auth_token: &str) -> Self {
         self.auth_token = auth_token.to_owned();
         self
-    }
-
-    pub async fn api_login(&self, api_id: Uuid, password: &str)
-        -> Result<ApiLoginResponse, Status>
-    {
-        auth::api_login(&self, api_id, password).await
     }
 
     pub async fn user_login(&self, username: &str, password: &str)

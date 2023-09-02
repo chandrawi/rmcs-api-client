@@ -10,7 +10,7 @@ use rmcs_resource_api::data::{
     DataIdModel, DataTimeModel, DataRangeModel, DataNumberModel, DataSchemaModel
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const DATA_NOT_FOUND: &str = "requested data not found";
 

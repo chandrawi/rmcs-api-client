@@ -6,7 +6,7 @@ use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceName, SliceDevice, SliceModel, SliceDeviceModel, SliceUpdate
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const SLICE_NOT_FOUND: &str = "requested slice not found";
 

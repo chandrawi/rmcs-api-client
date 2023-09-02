@@ -8,6 +8,7 @@ rmcs-auth-api = { path = "../../rmcs-auth-api/rust" }
 rmcs-auth-db = { path = "../../rmcs-auth-db" }
 rmcs-resource-api = { path = "../../rmcs-resource-api/rust" }
 rmcs-resource-db = { path = "../../rmcs-resource-db" }
+rmcs-api-server = { path = "../../rmcs-api-server" }
 sqlx = { version = "0.7.1", features = ["runtime-tokio-rustls", "postgres", "migrate", "uuid"] }
 tokio = { version = "1.32.0", features = ["rt-multi-thread", "macros"] }
 prost = "0.11.9"

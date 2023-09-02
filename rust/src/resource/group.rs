@@ -6,7 +6,7 @@ use rmcs_resource_api::group::{
     GroupModel, GroupDevice
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const GROUP_NOT_FOUND: &str = "requested group not found";
 

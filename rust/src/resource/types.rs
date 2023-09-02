@@ -5,7 +5,7 @@ use rmcs_resource_api::device::{
     TypeSchema, TypeId, TypeName, TypeUpdate, TypeModel
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const TYPE_NOT_FOUND: &str = "requested type not found";
 

@@ -8,7 +8,7 @@ use rmcs_resource_api::log::{
     LogSchema, LogId, LogTime, LogRange, LogUpdate, LogStatus
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const LOG_NOT_FOUND: &str = "requested log not found";
 

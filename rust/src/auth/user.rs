@@ -5,7 +5,7 @@ use rmcs_auth_api::user::{
     UserSchema, UserId, UserName, RoleId, UserUpdate, UserRole
 };
 use crate::auth::Auth;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const USER_NOT_FOUND: &str = "requested user not found";
 

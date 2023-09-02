@@ -5,7 +5,7 @@ use rmcs_auth_api::role::{
     RoleSchema, RoleId, RoleName, ApiId, UserId, RoleUpdate, RoleAccess
 };
 use crate::auth::Auth;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const ROLE_NOT_FOUND: &str = "requested role not found";
 

@@ -6,7 +6,7 @@ use rmcs_auth_api::token::{
     TokenSchema, AccessId, AuthToken, UserId, AuthTokenCreate, TokenUpdate
 };
 use crate::auth::Auth;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const TOKEN_NOT_FOUND: &str = "requested token not found";
 

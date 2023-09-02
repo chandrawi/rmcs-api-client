@@ -6,7 +6,7 @@ use rmcs_auth_api::api::{
     ProcedureSchema, ProcedureId, ProcedureName, ProcedureUpdate
 };
 use crate::auth::Auth;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const API_NOT_FOUND: &str = "requested api not found";
 const PROC_NOT_FOUND: &str = "requested procedure not found";

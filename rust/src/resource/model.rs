@@ -8,7 +8,7 @@ use rmcs_resource_api::model::{
     ConfigSchema, ConfigId, ConfigUpdate
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const MODEL_NOT_FOUND: &str = "requested model not found";
 const CONF_NOT_FOUND: &str = "requested config not found";

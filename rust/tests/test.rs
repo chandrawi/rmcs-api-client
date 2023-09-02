@@ -6,7 +6,7 @@ mod tests {
     use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
     use rmcs_resource_db::{ConfigValue::{*, self}, DataIndexing::*, DataType::*, DataValue::*};
     use rmcs_api_client::{Auth, Resource};
-    use rmcs_api_client::utility::generate_access_key;
+    use rmcs_auth_db::utility::generate_access_key;
     use rmcs_api_client::utility::test::{TestServerKind, TestServer};
 
     #[tokio::test]

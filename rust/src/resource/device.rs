@@ -10,7 +10,7 @@ use rmcs_resource_api::device::{
     TypeSchema, TypeId
 };
 use crate::resource::Resource;
-use crate::utility::TokenInterceptor;
+use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const DEVICE_NOT_FOUND: &str = "requested device not found";
 const GATEWAY_NOT_FOUND: &str = "requested gateway not found";
