@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::ConfigValue;
 use rmcs_resource_api::common;
@@ -12,7 +12,7 @@ use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const LOG_NOT_FOUND: &str = "requested log not found";
 
-pub(crate) async fn read_log(resource: &Resource, timestamp: NaiveDateTime, device_id: Uuid)
+pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid)
     -> Result<LogSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -28,7 +28,7 @@ pub(crate) async fn read_log(resource: &Resource, timestamp: NaiveDateTime, devi
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: NaiveDateTime, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -51,7 +51,7 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: NaiveDateTi
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_last_time(resource: &Resource, last: NaiveDateTime, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -74,7 +74,7 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: NaiveDateTi
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: NaiveDateTime, end: NaiveDateTime, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -98,7 +98,7 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: NaiveDate
     Ok(response.results)
 }
 
-pub(crate) async fn create_log(resource: &Resource, timestamp: NaiveDateTime, device_id: Uuid, status: &str, value: ConfigValue)
+pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: &str, value: ConfigValue)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -116,7 +116,7 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: NaiveDateTime, de
     Ok(())
 }
 
-pub(crate) async fn update_log(resource: &Resource, timestamp: NaiveDateTime, device_id: Uuid, status: Option<&str>, value: Option<ConfigValue>)
+pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<&str>, value: Option<ConfigValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -140,7 +140,7 @@ pub(crate) async fn update_log(resource: &Resource, timestamp: NaiveDateTime, de
     Ok(())
 }
 
-pub(crate) async fn delete_log(resource: &Resource, timestamp: NaiveDateTime, device_id: Uuid)
+pub(crate) async fn delete_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

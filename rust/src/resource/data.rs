@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_db::schema::data::DataModel;
@@ -14,7 +14,7 @@ use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const DATA_NOT_FOUND: &str = "requested data not found";
 
-pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>)
+pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
     -> Result<DataSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -32,7 +32,7 @@ pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uu
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_data_by_time(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: NaiveDateTime)
+pub(crate) async fn list_data_by_time(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -49,7 +49,7 @@ pub(crate) async fn list_data_by_time(resource: &Resource, device_id: Uuid, mode
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: Uuid, model_id: Uuid, last: NaiveDateTime)
+pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -66,7 +66,7 @@ pub(crate) async fn list_data_by_last_time(resource: &Resource, device_id: Uuid,
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: NaiveDateTime, end: NaiveDateTime)
+pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -84,7 +84,7 @@ pub(crate) async fn list_data_by_range_time(resource: &Resource, device_id: Uuid
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: Uuid, model_id: Uuid, before: NaiveDateTime, number: u32)
+pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: Uuid, model_id: Uuid, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -102,7 +102,7 @@ pub(crate) async fn list_data_by_number_before(resource: &Resource, device_id: U
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: Uuid, model_id: Uuid, after: NaiveDateTime, number: u32)
+pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: Uuid, model_id: Uuid, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -135,7 +135,7 @@ pub(crate) async fn get_data_model(resource: &Resource, model_id: Uuid)
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>)
+pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
     -> Result<DataSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -153,7 +153,7 @@ pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, 
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: NaiveDateTime)
+pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -170,7 +170,7 @@ pub(crate) async fn list_data_with_model_by_time(resource: &Resource, model: Dat
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model: DataModel, device_id: Uuid, last: NaiveDateTime)
+pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model: DataModel, device_id: Uuid, last: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -187,7 +187,7 @@ pub(crate) async fn list_data_with_model_by_last_time(resource: &Resource, model
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, model: DataModel, device_id: Uuid, begin: NaiveDateTime, end: NaiveDateTime)
+pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, model: DataModel, device_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -205,7 +205,7 @@ pub(crate) async fn list_data_with_model_by_range_time(resource: &Resource, mode
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, model: DataModel, device_id: Uuid, before: NaiveDateTime, number: u32)
+pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, model: DataModel, device_id: Uuid, before: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -223,7 +223,7 @@ pub(crate) async fn list_data_with_model_by_number_before(resource: &Resource, m
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, model: DataModel, device_id: Uuid, after: NaiveDateTime, number: u32)
+pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, model: DataModel, device_id: Uuid, after: DateTime<Utc>, number: u32)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -241,7 +241,7 @@ pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, mo
     Ok(response.results)
 }
 
-pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>)
+pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -262,7 +262,7 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
     Ok(())
 }
 
-pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>, data: Vec<DataValue>)
+pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -283,7 +283,7 @@ pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel
     Ok(())
 }
 
-pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>)
+pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -300,7 +300,7 @@ pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: 
     Ok(())
 }
 
-pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: NaiveDateTime, index: Option<i32>)
+pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

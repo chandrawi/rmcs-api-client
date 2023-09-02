@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use rmcs_auth_api::token::token_service_client::TokenServiceClient;
 use rmcs_auth_api::token::{
@@ -55,7 +55,7 @@ pub(crate) async fn list_token_by_user(auth: &Auth, user_id: Uuid)
     Ok(response.results)
 }
 
-pub(crate) async fn create_access_token(auth: &Auth, user_id: Uuid, auth_token: &str, expire: NaiveDateTime, ip: &[u8])
+pub(crate) async fn create_access_token(auth: &Auth, user_id: Uuid, auth_token: &str, expire: DateTime<Utc>, ip: &[u8])
     -> Result<(i32, String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -75,7 +75,7 @@ pub(crate) async fn create_access_token(auth: &Auth, user_id: Uuid, auth_token: 
     Ok((response.access_id, response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn create_auth_token(auth: &Auth, user_id: Uuid, expire: NaiveDateTime, ip: &[u8], number: u32)
+pub(crate) async fn create_auth_token(auth: &Auth, user_id: Uuid, expire: DateTime<Utc>, ip: &[u8], number: u32)
     -> Result<Vec<(i32, String, String)>, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -97,7 +97,7 @@ pub(crate) async fn create_auth_token(auth: &Auth, user_id: Uuid, expire: NaiveD
     )
 }
 
-pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
+pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
     -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
@@ -116,7 +116,7 @@ pub(crate) async fn update_access_token(auth: &Auth, access_id: i32, expire: Opt
     Ok((response.refresh_token, response.auth_token))
 }
 
-pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Option<NaiveDateTime>, ip: Option<&[u8]>)
+pub(crate) async fn update_auth_token(auth: &Auth, auth_token: &str, expire: Option<DateTime<Utc>>, ip: Option<&[u8]>)
     -> Result<(String, String), Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
