@@ -32,8 +32,8 @@ class Resource:
     def list_model_by_name_category(self, name: str, category: str) -> List[ModelSchema]:
         return _model.list_model_by_name_category(self, name, category)
 
-    def create_model(self, indexing: DataIndexing, category: str, name: str, description: str) -> UUID:
-        return _model.create_model(self, indexing, category, name, description)
+    def create_model(self, id: UUID, indexing: DataIndexing, category: str, name: str, description: str) -> UUID:
+        return _model.create_model(self, id, indexing, category, name, description)
 
     def update_model(self, id: UUID, indexing: Optional[DataIndexing], category: Optional[str], name: Optional[str], description: Optional[str]):
         return _model.update_model(self, id, indexing, category, name, description)
@@ -149,8 +149,8 @@ class Resource:
     def list_type_by_name(self, name: str) -> List[TypeSchema]:
         return _types.list_type_by_name(self, name)
 
-    def create_type(self, name: str, description: str) -> UUID:
-        return _types.create_type(self, name, description)
+    def create_type(self, id: UUID, name: str, description: str) -> UUID:
+        return _types.create_type(self, id, name, description)
 
     def update_type(self, id: UUID, name: Optional[str], description: Optional[str]):
         return _types.update_type(self, id, name, description)
@@ -176,8 +176,8 @@ class Resource:
     def list_group_model_by_name_category(self, name: str, category: str) -> List[GroupModelSchema]:
         return _group.list_group_model_by_name_category(self, name, category)
 
-    def create_group_model(self, name: str, category: str, description: str) -> UUID:
-        return _group.create_group_model(self, name, category, description)
+    def create_group_model(self, id: UUID, name: str, category: str, description: str) -> UUID:
+        return _group.create_group_model(self, id, name, category, description)
 
     def update_group_model(self, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
         return _group.update_group_model(self, id, name, category, description)
@@ -203,8 +203,8 @@ class Resource:
     def list_group_device_by_name_category(self, name: str, category: str) -> List[GroupDeviceSchema]:
         return _group.list_group_device_by_name_category(self, name, category)
 
-    def create_group_device(self, name: str, category: str, description: str) -> UUID:
-        return _group.create_group_device(self, name, category, description)
+    def create_group_device(self, id: UUID, name: str, category: str, description: str) -> UUID:
+        return _group.create_group_device(self, id, name, category, description)
 
     def update_group_device(self, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
         return _group.update_group_device(self, id, name, category, description)
@@ -230,8 +230,8 @@ class Resource:
     def list_group_gateway_by_name_category(self, name: str, category: str) -> List[GroupGatewaySchema]:
         return _group.list_group_gateway_by_name_category(self, name, category)
 
-    def create_group_gateway(self, name: str, category: str, description: str) -> UUID:
-        return _group.create_group_gateway(self, name, category, description)
+    def create_group_gateway(self, id: UUID, name: str, category: str, description: str) -> UUID:
+        return _group.create_group_gateway(self, id, name, category, description)
 
     def update_group_gateway(self, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
         return _group.update_group_gateway(self, id, name, category, description)

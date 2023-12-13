@@ -57,10 +57,11 @@ def list_user_by_role(auth, role_id: UUID):
         for result in response.results: ls.append(UserSchema.from_response(result))
         return ls
 
-def create_user(auth, name: str, email: str, phone: str, password: str):
+def create_user(auth, id: UUID, name: str, email: str, phone: str, password: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.UserSchema(
+            id=id.bytes,
             name=name,
             email=email,
             phone=phone,

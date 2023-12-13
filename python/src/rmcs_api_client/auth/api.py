@@ -59,10 +59,11 @@ def list_api_by_category(auth, category: str):
         for result in response.results: ls.append(ApiSchema.from_response(result))
         return ls
 
-def create_api(auth, name: str, address: str, category: str, description: str, password: str, access_key: bytes):
+def create_api(auth, id: UUID, name: str, address: str, category: str, description: str, password: str, access_key: bytes):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ApiSchema(
+            id=id.bytes,
             name=name,
             address=address,
             category=category,
@@ -116,10 +117,11 @@ def list_procedure_by_api(auth, api_id: UUID):
         for result in response.results: ls.append(ProcedureSchema.from_response(result))
         return ls
 
-def create_procedure(auth, api_id: UUID, name: str, description: str):
+def create_procedure(auth, id: UUID, api_id: UUID, name: str, description: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
         request = api_pb2.ProcedureSchema(
+            id=id.bytes,
             api_id=api_id.bytes,
             name=name,
             description=description

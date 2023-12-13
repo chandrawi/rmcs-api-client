@@ -137,7 +137,8 @@ def create_device(resource, id: UUID, gateway_id: UUID, type_id: UUID, serial_nu
             description=description,
             device_type=type_schema
         )
-        stub.CreateDevice(request=request, metadata=resource.metadata)
+        response = stub.CreateDevice(request=request, metadata=resource.metadata)
+        return UUID(bytes=response.id)
 
 def update_device(resource, id: UUID, gateway_id: Optional[UUID], type_id: Optional[UUID], serial_number: Optional[str], name: Optional[str], description: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
@@ -203,7 +204,7 @@ def create_gateway(resource, id: UUID, type_id: UUID, serial_number: str, name: 
             serial_number=serial_number,
             name=name,
             description=description,
-            device_type=type_schema
+            gateway_type=type_schema
         )
         response = stub.CreateGateway(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)

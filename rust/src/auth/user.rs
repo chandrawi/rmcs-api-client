@@ -54,14 +54,14 @@ pub(crate) async fn list_user_by_role(auth: &Auth, role_id: Uuid)
     Ok(response.results)
 }
 
-pub(crate) async fn create_user(auth: &Auth, name: &str, email: &str, phone: &str, password: &str)
+pub(crate) async fn create_user(auth: &Auth, id: Uuid, name: &str, email: &str, phone: &str, password: &str)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(UserSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         email: email.to_owned(),
         phone: phone.to_owned(),

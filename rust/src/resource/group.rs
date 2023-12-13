@@ -71,14 +71,14 @@ pub(crate) async fn list_group_model_by_name_category(resource: &Resource, name:
     Ok(response.results)
 }
 
-pub(crate) async fn create_group_model(resource: &Resource, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_model(resource: &Resource, id: Uuid, name: &str, category: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupModelSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
@@ -212,14 +212,14 @@ pub(crate) async fn list_group_device_by_name_category(resource: &Resource, name
     Ok(response.results)
 }
 
-pub(crate) async fn create_group_device(resource: &Resource, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_device(resource: &Resource, id: Uuid, name: &str, category: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDeviceSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
@@ -353,14 +353,14 @@ pub(crate) async fn list_group_gateway_by_name_category(resource: &Resource, nam
     Ok(response.results)
 }
 
-pub(crate) async fn create_group_gateway(resource: &Resource, name: &str, category: &str, description: Option<&str>)
+pub(crate) async fn create_group_gateway(resource: &Resource, id: Uuid, name: &str, category: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(GroupDeviceSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),

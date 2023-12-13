@@ -34,8 +34,8 @@ class Auth:
     def list_api_by_category(self, category: str) -> List[ApiSchema]:
         return api.list_api_by_category(self, category)
 
-    def create_api(self, name: str, address: str, category: str, description: str, password: str, access_key: bytes) -> UUID:
-        return api.create_api(self, name, address, category, description, password, access_key)
+    def create_api(self, id: UUID, name: str, address: str, category: str, description: str, password: str, access_key: bytes) -> UUID:
+        return api.create_api(self, id, name, address, category, description, password, access_key)
 
     def update_api(self, id: UUID, name: Optional[str]=None, address: Optional[str]=None, category: Optional[str]=None, description: Optional[str]=None, password: Optional[str]=None, access_key: Optional[bytes]=None):
         return api.update_api(self, id, name, address, category, description, password, access_key)
@@ -52,8 +52,8 @@ class Auth:
     def list_procedure_by_api(self, api_id: UUID) -> List[ProcedureSchema]:
         return api.list_procedure_by_api(self, api_id)
 
-    def create_procedure(self, api_id: UUID, name: str, description: str) -> UUID:
-        return api.create_procedure(self, api_id, name, description)
+    def create_procedure(self, id: UUID, api_id: UUID, name: str, description: str) -> UUID:
+        return api.create_procedure(self, id, api_id, name, description)
 
     def update_procedure(self, id: UUID, name: Optional[str], description: Optional[str]):
         return api.update_procedure(self, id, name, description)
@@ -73,8 +73,8 @@ class Auth:
     def list_role_by_user(self, user_id: UUID):
         return role.list_role_by_user(self, user_id)
 
-    def create_role(self, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int) -> UUID:
-        return role.create_role(self, api_id, name, multi, ip_lock, access_duration, refresh_duration)
+    def create_role(self, id: UUID, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int) -> UUID:
+        return role.create_role(self, id, api_id, name, multi, ip_lock, access_duration, refresh_duration)
 
     def update_role(self, id: UUID, name: Optional[str]=None, multi: Optional[bool]=None, ip_lock: Optional[bool]=None, access_duration: Optional[int]=None, refresh_duration: Optional[int]=None):
         return role.update_role(self, id, name, multi, ip_lock, access_duration, refresh_duration)
@@ -97,8 +97,8 @@ class Auth:
     def list_user_by_role(self, role_id: UUID) -> List[UserSchema]:
         return user.list_user_by_role(self, role_id)
 
-    def create_user(self, name: str, email: str, phone: str, password: str) -> UUID:
-        return user.create_user(self, name, email, phone, password)
+    def create_user(self, id: UUID, name: str, email: str, phone: str, password: str) -> UUID:
+        return user.create_user(self, id, name, email, phone, password)
 
     def update_user(self, id: UUID, name: Optional[str]=None, email: Optional[str]=None, phone: Optional[str]=None, password: Optional[str]=None):
         return user.update_user(self, id, name, email, phone, password)

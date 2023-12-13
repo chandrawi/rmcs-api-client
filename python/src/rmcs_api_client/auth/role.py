@@ -55,10 +55,11 @@ def list_role_by_user(auth, user_id: UUID):
         for result in response.results: ls.append(RoleSchema.from_response(result))
         return ls
 
-def create_role(auth, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int):
+def create_role(auth, id: UUID, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)
         request = role_pb2.RoleSchema(
+            id=id.bytes,
             api_id=api_id.bytes,
             name=name,
             multi=multi,

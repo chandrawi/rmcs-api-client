@@ -5,6 +5,7 @@ SOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 sys.path.append(SOURCE_PATH)
 
 from datetime import datetime
+import uuid
 import dotenv
 import pytest
 from rmcs_api_client.resource import Resource, DataIndexing, DataType
@@ -24,8 +25,8 @@ def test_resource():
     utility.start_resource_server()
 
     # create new data model and add data types
-    model_id = resource.create_model(DataIndexing.TIMESTAMP, "UPLINK", "speed and direction", None)
-    model_buf_id = resource.create_model(DataIndexing.TIMESTAMP, "UPLINK", "buffer 4", None)
+    model_id = resource.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "speed and direction", None)
+    model_buf_id = resource.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "buffer 4", None)
     resource.add_model_type(model_id, [DataType.F64, DataType.F64])
     resource.add_model_type(model_buf_id, [DataType.U8, DataType.U8, DataType.U8, DataType.U8])
     # create scale, symbol, and threshold configurations for new created model
@@ -36,7 +37,7 @@ def test_resource():
     model_cfg_id = resource.create_model_config(model_id, 0, "upper_threshold", 250, "THRESHOLD")
 
     # Create new type and link it to newly created model
-    type_id = resource.create_type("Speedometer Compass", None)
+    type_id = resource.create_type(uuid.uuid4(), "Speedometer Compass", None)
     resource.add_type_model(type_id, model_id)
     resource.add_type_model(type_id, model_buf_id)
 
@@ -55,10 +56,10 @@ def test_resource():
     device_cfg_id = resource.create_device_config(device_id2, "period", 120, "NETWORK")
 
     # create new group and register newly created models as its member
-    group_model_id = resource.create_group_model("data", "APPLICATION", None)
+    group_model_id = resource.create_group_model(uuid.uuid4(), "data", "APPLICATION", None)
     resource.add_group_model_member(group_model_id, model_id)
     # create new group and register newly created devices as its member
-    group_device_id = resource.create_group_device("sensor", "APPLICATION", None)
+    group_device_id = resource.create_group_device(uuid.uuid4(), "sensor", "APPLICATION", None)
     resource.add_group_device_member(group_device_id, device_id1)
     resource.add_group_device_member(group_device_id, device_id2)
 

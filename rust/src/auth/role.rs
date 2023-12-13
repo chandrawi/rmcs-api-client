@@ -70,14 +70,14 @@ pub(crate) async fn list_role_by_user(auth: &Auth, user_id: Uuid)
     Ok(response.results)
 }
 
-pub(crate) async fn create_role(auth: &Auth, api_id: Uuid, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
+pub(crate) async fn create_role(auth: &Auth, id: Uuid, api_id: Uuid, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         RoleServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(RoleSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         api_id: api_id.as_bytes().to_vec(),
         name: name.to_owned(),
         multi,

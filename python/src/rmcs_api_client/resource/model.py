@@ -77,10 +77,11 @@ def list_model_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls
 
-def create_model(resource, indexing: DataIndexing, category: str, name: str, description: str):
+def create_model(resource, id: UUID, indexing: DataIndexing, category: str, name: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ModelSchema(
+            id=id.bytes,
             indexing=indexing.value,
             category=category,
             name=name,

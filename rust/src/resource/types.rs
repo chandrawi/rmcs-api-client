@@ -39,14 +39,14 @@ pub(crate) async fn list_type_by_name(resource: &Resource, name: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn create_type(resource: &Resource, name: &str, description: Option<&str>)
+pub(crate) async fn create_type(resource: &Resource, id: Uuid, name: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(TypeSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         description: description.unwrap_or_default().to_owned(),
         models: Vec::new()

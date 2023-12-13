@@ -54,14 +54,14 @@ pub(crate) async fn list_api_by_category(auth: &Auth, category: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn create_api(auth: &Auth, name: &str, address: &str, category: &str, description: &str, password: &str, access_key: &[u8])
+pub(crate) async fn create_api(auth: &Auth, id: Uuid, name: &str, address: &str, category: &str, description: &str, password: &str, access_key: &[u8])
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ApiSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         address: address.to_owned(),
         category: category.to_owned(),
@@ -156,14 +156,14 @@ pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: Uuid)
     Ok(response.results)
 }
 
-pub(crate) async fn create_procedure(auth: &Auth, api_id: Uuid, name: &str, description: &str)
+pub(crate) async fn create_procedure(auth: &Auth, id: Uuid, api_id: Uuid, name: &str, description: &str)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(auth.auth_token.clone());
     let mut client = 
         ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
     let request = Request::new(ProcedureSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         api_id: api_id.as_bytes().to_vec(),
         name: name.to_owned(),
         description: description.to_owned(),

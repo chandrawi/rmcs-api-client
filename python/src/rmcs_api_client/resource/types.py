@@ -34,10 +34,11 @@ def list_type_by_name(resource, name: str):
         for result in response.results: ls.append(TypeSchema.from_response(result))
         return ls
 
-def create_type(resource, name: str, description: str):
+def create_type(resource, id: UUID, name: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.TypeSchema(
+            id=id.bytes,
             name=name,
             description=description
         )

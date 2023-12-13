@@ -6,6 +6,7 @@ sys.path.append(SOURCE_PATH)
 
 from datetime import datetime
 import random
+import uuid
 import dotenv
 import pytest
 from argon2 import PasswordHasher
@@ -27,14 +28,14 @@ def test_auth():
     # create new resource API
     password_api = "Ap1_P4s5w0rd"
     access_key = random.randbytes(32)
-    api_id1 = auth.create_api("Resource1", "localhost:9001", "RESOURCE", "", password_api, access_key)
-    api_id2 = auth.create_api("Resource_2", "localhost:9002", "RESOURCE", "", password_api, access_key)
+    api_id1 = auth.create_api(uuid.uuid4(), "Resource1", "localhost:9001", "RESOURCE", "", password_api, access_key)
+    api_id2 = auth.create_api(uuid.uuid4(), "Resource_2", "localhost:9002", "RESOURCE", "", password_api, access_key)
 
     # create new procedure for newly created resource API
-    proc_id1 = auth.create_procedure(api_id1, "ReadResourceData", "")
-    proc_id2 = auth.create_procedure(api_id1, "CreateData", "")
-    proc_id3 = auth.create_procedure(api_id1, "DeleteData", "")
-    proc_id4 = auth.create_procedure(api_id2, "ReadConfig", "")
+    proc_id1 = auth.create_procedure(uuid.uuid4(), api_id1, "ReadResourceData", "")
+    proc_id2 = auth.create_procedure(uuid.uuid4(), api_id1, "CreateData", "")
+    proc_id3 = auth.create_procedure(uuid.uuid4(), api_id1, "DeleteData", "")
+    proc_id4 = auth.create_procedure(uuid.uuid4(), api_id2, "ReadConfig", "")
 
     # get newly created resource at the first of resource API list
     apis = auth.list_api_by_category("RESOURCE")
@@ -58,13 +59,13 @@ def test_auth():
     assert PasswordHasher().verify(api.password, password_api)
 
     # create new role and add access to the procedure
-    role_id1 = auth.create_role(api_id1, "administrator", False, False, 900, 28800)
+    role_id1 = auth.create_role(uuid.uuid4(), api_id1, "administrator", False, False, 900, 28800)
     auth.add_role_access(role_id1, proc_id1)
     auth.add_role_access(role_id1, proc_id2)
     auth.add_role_access(role_id1, proc_id3)
-    role_id2 = auth.create_role(api_id1, "user", True, False, 900, 604800)
+    role_id2 = auth.create_role(uuid.uuid4(), api_id1, "user", True, False, 900, 604800)
     auth.add_role_access(role_id2, proc_id1)
-    role_id3 = auth.create_role(api_id2, "user", True, False, 900, 604800)
+    role_id3 = auth.create_role(uuid.uuid4(), api_id2, "user", True, False, 900, 604800)
     auth.add_role_access(role_id3, proc_id4)
 
     # get role data
@@ -108,10 +109,10 @@ def test_auth():
     # create new user and add associated roles
     password_admin = "Adm1n_P4s5w0rd"
     password_user = "Us3r_P4s5w0rd"
-    user_id1 = auth.create_user("administrator", "admin@mail.co", "+6281234567890", password_admin)
+    user_id1 = auth.create_user(uuid.uuid4(), "administrator", "admin@mail.co", "+6281234567890", password_admin)
     auth.add_user_role(user_id1, role_id1)
     auth.add_user_role(user_id1, role_id3)
-    user_id2 = auth.create_user("username", "user@mail.co", "+6281234567890", password_user)
+    user_id2 = auth.create_user(uuid.uuid4(), "username", "user@mail.co", "+6281234567890", password_user)
     auth.add_user_role(user_id2, role_id2)
     auth.add_user_role(user_id2, role_id3)
 

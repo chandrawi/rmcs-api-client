@@ -124,7 +124,7 @@ pub(crate) async fn list_device_by_gateway_name(resource: &Resource, gateway_id:
 }
 
 pub(crate) async fn create_device(resource: &Resource, id: Uuid, gateway_id: Uuid, type_id: Uuid, serial_number: &str, name: &str, description: Option<&str>)
-    -> Result<(), Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -145,7 +145,7 @@ pub(crate) async fn create_device(resource: &Resource, id: Uuid, gateway_id: Uui
     });
     client.create_device(request)
         .await?;
-    Ok(())
+    Ok(id)
 }
 
 pub(crate) async fn update_device(resource: &Resource, id: Uuid, gateway_id: Option<Uuid>, type_id: Option<Uuid>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)
@@ -242,7 +242,7 @@ pub(crate) async fn list_gateway_by_name(resource: &Resource, name: &str)
 }
 
 pub(crate) async fn create_gateway(resource: &Resource, id: Uuid, type_id: Uuid, serial_number: &str, name: &str, description: Option<&str>)
-    -> Result<(), Status>
+    -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
@@ -262,7 +262,7 @@ pub(crate) async fn create_gateway(resource: &Resource, id: Uuid, type_id: Uuid,
     });
     client.create_gateway(request)
         .await?;
-    Ok(())
+    Ok(id)
 }
 
 pub(crate) async fn update_gateway(resource: &Resource, id: Uuid, type_id: Option<Uuid>, serial_number: Option<&str>, name: Option<&str>, description: Option<&str>)

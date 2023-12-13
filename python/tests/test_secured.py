@@ -5,6 +5,7 @@ SOURCE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 sys.path.append(SOURCE_PATH)
 
 import random
+import uuid
 import dotenv
 import pytest
 import string
@@ -16,8 +17,7 @@ ACCESSES = [
     ("read_model", ["admin", "user"]),
     ("create_model", ["admin"]),
     ("delete_model", ["admin"]),
-    ("add_model_type", ["admin"]),
-    ("remove_model_type", ["admin"])
+    ("change_model_type", ["admin"])
 ]
 
 ROLES = ["admin", "user"]
@@ -61,6 +61,7 @@ def test_secured():
     # create api and procedures
     api_password = "".join(random.choice(string.printable) for i in range(8))
     api_id = auth_root.create_api(
+        id=uuid.uuid4(),
         name="resource api",
         address="localhost",
         category="RESOURCE",
@@ -71,6 +72,7 @@ def test_secured():
     proc_map = []
     for (procedure_name, _) in ACCESSES:
         proc_id = auth_root.create_procedure(
+            id=uuid.uuid4(),
             api_id=api_id,
             name=procedure_name,
             description=""
@@ -81,6 +83,7 @@ def test_secured():
     role_map = []
     for name in ROLES:
         role_id = auth_root.create_role(
+            id=uuid.uuid4(),
             api_id=api_id,
             name=name,
             multi=False,
@@ -106,6 +109,7 @@ def test_secured():
     user_roles = []
     for (name, password, role) in USERS:
         user_id = auth_root.create_user(
+            id=uuid.uuid4(),
             name=name,
             email="",
             phone="",
@@ -137,8 +141,9 @@ def test_secured():
 
     # try to create model using user service and admin service, user should failed and admin should success
     with pytest.raises(Exception):
-        res_user.create_model(DataIndexing.TIMESTAMP, "UPLINK", "name", "")
+        res_user.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "name", "")
     model_id = res_admin.create_model(
+        id=uuid.uuid4(),
         indexing=DataIndexing.TIMESTAMP,
         category="UPLINK",
         name="name",

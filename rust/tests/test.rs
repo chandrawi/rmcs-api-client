@@ -24,14 +24,14 @@ mod tests {
         // create new resource API
         let password_api = "Ap1_P4s5w0rd";
         let access_key = generate_access_key();
-        let api_id1 = auth.create_api("Resource1", "localhost:9001", "RESOURCE", "", password_api, &access_key).await.unwrap();
-        let api_id2 = auth.create_api("Resource_2", "localhost:9002", "RESOURCE", "",  password_api, &access_key).await.unwrap();
+        let api_id1 = auth.create_api(Uuid::new_v4(), "Resource1", "localhost:9001", "RESOURCE", "", password_api, &access_key).await.unwrap();
+        let api_id2 = auth.create_api(Uuid::new_v4(), "Resource_2", "localhost:9002", "RESOURCE", "",  password_api, &access_key).await.unwrap();
 
         // create new procedure for newly created resource API
-        let proc_id1 = auth.create_procedure(api_id1, "ReadResourceData", "").await.unwrap();
-        let proc_id2 = auth.create_procedure(api_id1, "CreateData", "").await.unwrap();
-        let proc_id3 = auth.create_procedure(api_id1, "DeleteData", "").await.unwrap();
-        let proc_id4 = auth.create_procedure(api_id2, "ReadConfig", "").await.unwrap();
+        let proc_id1 = auth.create_procedure(Uuid::new_v4(), api_id1, "ReadResourceData", "").await.unwrap();
+        let proc_id2 = auth.create_procedure(Uuid::new_v4(), api_id1, "CreateData", "").await.unwrap();
+        let proc_id3 = auth.create_procedure(Uuid::new_v4(), api_id1, "DeleteData", "").await.unwrap();
+        let proc_id4 = auth.create_procedure(Uuid::new_v4(), api_id2, "ReadConfig", "").await.unwrap();
 
         // get newly created resource at the first of resource API list
         let apis = auth.list_api_by_category("RESOURCE").await.unwrap();
@@ -54,13 +54,13 @@ mod tests {
         assert!(Argon2::default().verify_password(password_api.as_bytes(), &parsed_hash).is_ok());
 
         // create new role and add access to the procedure
-        let role_id1 = auth.create_role(api_id1, "administrator", false, false, 900, 28800).await.unwrap();
+        let role_id1 = auth.create_role(Uuid::new_v4(), api_id1, "administrator", false, false, 900, 28800).await.unwrap();
         auth.add_role_access(role_id1, proc_id1).await.unwrap();
         auth.add_role_access(role_id1, proc_id2).await.unwrap();
         auth.add_role_access(role_id1, proc_id3).await.unwrap();
-        let role_id2 = auth.create_role(api_id1, "user", true, false, 900, 604800).await.unwrap();
+        let role_id2 = auth.create_role(Uuid::new_v4(), api_id1, "user", true, false, 900, 604800).await.unwrap();
         auth.add_role_access(role_id2, proc_id1).await.unwrap();
-        let role_id3 = auth.create_role(api_id2, "user", true, false, 900, 604800).await.unwrap();
+        let role_id3 = auth.create_role(Uuid::new_v4(), api_id2, "user", true, false, 900, 604800).await.unwrap();
         auth.add_role_access(role_id3, proc_id4).await.unwrap();
 
         // get role data
@@ -104,10 +104,10 @@ mod tests {
         // create new user and add associated roles
         let password_admin = "Adm1n_P4s5w0rd";
         let password_user = "Us3r_P4s5w0rd";
-        let user_id1 = auth.create_user("administrator", "admin@mail.co", "+6281234567890", password_admin).await.unwrap();
+        let user_id1 = auth.create_user(Uuid::new_v4(), "administrator", "admin@mail.co", "+6281234567890", password_admin).await.unwrap();
         auth.add_user_role(user_id1, role_id1).await.unwrap();
         auth.add_user_role(user_id1, role_id3).await.unwrap();
-        let user_id2 = auth.create_user("username", "user@mail.co", "+6281234567890", password_user).await.unwrap();
+        let user_id2 = auth.create_user(Uuid::new_v4(), "username", "user@mail.co", "+6281234567890", password_user).await.unwrap();
         auth.add_user_role(user_id2, role_id2).await.unwrap();
         auth.add_user_role(user_id2, role_id3).await.unwrap();
 
@@ -226,8 +226,8 @@ mod tests {
         let resource = Resource::new(&resource_server.address).await;
 
         // create new data model and add data types
-        let model_id = resource.create_model(Timestamp, "UPLINK", "speed and direction", None).await.unwrap();
-        let model_buf_id = resource.create_model(Timestamp, "UPLINK", "buffer 4", None).await.unwrap();
+        let model_id = resource.create_model(Uuid::new_v4(), Timestamp, "UPLINK", "speed and direction", None).await.unwrap();
+        let model_buf_id = resource.create_model(Uuid::new_v4(), Timestamp, "UPLINK", "buffer 4", None).await.unwrap();
         resource.add_model_type(model_id, &[F32T,F32T]).await.unwrap();
         resource.add_model_type(model_buf_id, &[U8T,U8T,U8T,U8T]).await.unwrap();
         // create scale, symbol, and threshold configurations for new created model
@@ -238,7 +238,7 @@ mod tests {
         let model_cfg_id = resource.create_model_config(model_id, 0, "upper_threshold", Int(250), "THRESHOLD").await.unwrap();
 
         // Create new type and link it to newly created model
-        let type_id = resource.create_type("Speedometer Compass", None).await.unwrap();
+        let type_id = resource.create_type(Uuid::new_v4(), "Speedometer Compass", None).await.unwrap();
         resource.add_type_model(type_id, model_id).await.unwrap();
         resource.add_type_model(type_id, model_buf_id).await.unwrap();
 
@@ -257,10 +257,10 @@ mod tests {
         let device_cfg_id = resource.create_device_config(device_id2, "period", Int(120), "NETWORK").await.unwrap();
 
         // create new group and register newly created models as its member
-        let group_model_id = resource.create_group_model("data", "APPLICATION", None).await.unwrap();
+        let group_model_id = resource.create_group_model(Uuid::new_v4(), "data", "APPLICATION", None).await.unwrap();
         resource.add_group_model_member(group_model_id, model_id).await.unwrap();
         // create new group and register newly created devices as its member
-        let group_device_id = resource.create_group_device("sensor", "APPLICATION", None).await.unwrap();
+        let group_device_id = resource.create_group_device(Uuid::new_v4(), "sensor", "APPLICATION", None).await.unwrap();
         resource.add_group_device_member(group_device_id, device_id1).await.unwrap();
         resource.add_group_device_member(group_device_id, device_id2).await.unwrap();
 

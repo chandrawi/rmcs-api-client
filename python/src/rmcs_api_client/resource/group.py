@@ -80,10 +80,11 @@ def list_group_model_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(GroupModelSchema.from_response(result))
         return ls
 
-def create_group_model(resource, name: str, category: str, description: str):
+def create_group_model(resource, id: UUID, name: str, category: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupModelSchema(
+            id=id.bytes,
             name=name,
             category=category,
             description=description
@@ -154,10 +155,11 @@ def list_group_device_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(GroupDeviceSchema.from_response(result))
         return ls
 
-def create_group_device(resource, name: str, category: str, description: str):
+def create_group_device(resource, id: UUID, name: str, category: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupDeviceSchema(
+            id=id.bytes,
             name=name,
             category=category,
             description=description
@@ -228,10 +230,11 @@ def list_group_gateway_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(GroupGatewaySchema.from_response(result))
         return ls
 
-def create_group_gateway(resource, name: str, category: str, description: str):
+def create_group_gateway(resource, id: UUID, name: str, category: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupDeviceSchema(
+            id=id.bytes,
             name=name,
             category=category,
             description=description

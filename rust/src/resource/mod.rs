@@ -87,10 +87,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_model(&self, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
+    pub async fn create_model(&self, id: Uuid, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        model::create_model(&self, indexing, category, name, description)
+        model::create_model(&self, id, indexing, category, name, description)
         .await
     }
 
@@ -216,7 +216,7 @@ impl Resource {
     }
 
     pub async fn create_device(&self, id: Uuid, gateway_id: Uuid, type_id: Uuid, serial_number: &str, name: &str, description: Option<&str>)
-        -> Result<(), Status>
+        -> Result<Uuid, Status>
     {
         device::create_device(&self, id, gateway_id, type_id, serial_number, name, description)
         .await
@@ -269,7 +269,7 @@ impl Resource {
     }
 
     pub async fn create_gateway(&self, id: Uuid, type_id: Uuid, serial_number: &str, name: &str, description: Option<&str>)
-        -> Result<(), Status>
+        -> Result<Uuid, Status>
     {
         device::create_gateway(&self, id, type_id, serial_number, name, description)
         .await
@@ -379,10 +379,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_type(&self, name: &str, description: Option<&str>)
+    pub async fn create_type(&self, id: Uuid, name: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        types::create_type(&self, name, description)
+        types::create_type(&self, id, name, description)
         .await
     }
 
@@ -446,10 +446,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_group_model(&self, name: &str, category: &str, description: Option<&str>)
+    pub async fn create_group_model(&self, id: Uuid, name: &str, category: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        group::create_group_model(&self, name, category, description)
+        group::create_group_model(&self, id, name, category, description)
         .await
     }
 
@@ -513,10 +513,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_group_device(&self, name: &str, category: &str, description: Option<&str>)
+    pub async fn create_group_device(&self, id: Uuid, name: &str, category: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        group::create_group_device(&self, name, category, description)
+        group::create_group_device(&self, id, name, category, description)
         .await
     }
 
@@ -582,10 +582,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_group_gateway(&self, name: &str, category: &str, description: Option<&str>)
+    pub async fn create_group_gateway(&self, id: Uuid, name: &str, category: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        group::create_group_gateway(&self, name, category, description)
+        group::create_group_gateway(&self, id, name, category, description)
         .await
     }
 

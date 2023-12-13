@@ -74,14 +74,14 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
     Ok(response.results)
 }
 
-pub(crate) async fn create_model(resource: &Resource, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
+pub(crate) async fn create_model(resource: &Resource, id: Uuid, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelSchema {
-        id: Uuid::nil().as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         indexing: Into::<common::DataIndexing>::into(indexing).into(),
         category: category.to_owned(),
         name: name.to_owned(),
