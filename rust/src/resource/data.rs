@@ -14,7 +14,7 @@ use rmcs_api_server::utility::interceptor::TokenInterceptor;
 
 const DATA_NOT_FOUND: &str = "requested data not found";
 
-pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<DataSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -23,8 +23,7 @@ pub(crate) async fn read_data(resource: &Resource, device_id: Uuid, model_id: Uu
     let request = Request::new(DataId {
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
-        timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32
+        timestamp: timestamp.timestamp_micros()
     });
     let response = client.read_data(request)
         .await?
@@ -135,7 +134,7 @@ pub(crate) async fn get_data_model(resource: &Resource, model_id: Uuid)
     Ok(response.result.ok_or(Status::not_found(DATA_NOT_FOUND))?)
 }
 
-pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<DataSchema, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -144,8 +143,7 @@ pub(crate) async fn read_data_with_model(resource: &Resource, model: DataModel, 
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id: device_id.as_bytes().to_vec(),
-        timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32
+        timestamp: timestamp.timestamp_micros()
     });
     let response = client.read_data_with_model(request)
         .await?
@@ -241,7 +239,7 @@ pub(crate) async fn list_data_with_model_by_number_after(resource: &Resource, mo
     Ok(response.results)
 }
 
-pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
+pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -251,7 +249,6 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
             Into::<common::DataType>::into(el).into()
@@ -262,7 +259,7 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
     Ok(())
 }
 
-pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
+pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -272,7 +269,6 @@ pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel
         model: Some(model.into()),
         device_id: device_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
             Into::<common::DataType>::into(el).into()
@@ -283,7 +279,7 @@ pub(crate) async fn create_data_with_model(resource: &Resource, model: DataModel
     Ok(())
 }
 
-pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -292,15 +288,14 @@ pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: 
     let request = Request::new(DataId {
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
-        timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32
+        timestamp: timestamp.timestamp_micros()
     });
     client.delete_data(request)
         .await?;
     Ok(())
 }
 
-pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -309,8 +304,7 @@ pub(crate) async fn delete_data_with_model(resource: &Resource, model: DataModel
     let request = Request::new(DataIdModel {
         model: Some(model.into()),
         device_id: device_id.as_bytes().to_vec(),
-        timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32
+        timestamp: timestamp.timestamp_micros()
     });
     client.delete_data_with_model(request)
         .await?;

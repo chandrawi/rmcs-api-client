@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 import dotenv
 import pytest
-from rmcs_api_client.resource import Resource, DataIndexing, DataType
+from rmcs_api_client.resource import Resource, DataType
 from uuid import UUID
 import utility
 
@@ -25,8 +25,8 @@ def test_resource():
     utility.start_resource_server()
 
     # create new data model and add data types
-    model_id = resource.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "speed and direction", None)
-    model_buf_id = resource.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "buffer 4", None)
+    model_id = resource.create_model(uuid.uuid4(), "UPLINK", "speed and direction", None)
+    model_buf_id = resource.create_model(uuid.uuid4(), "UPLINK", "buffer 4", None)
     resource.add_model_type(model_id, [DataType.F64, DataType.F64])
     resource.add_model_type(model_buf_id, [DataType.U8, DataType.U8, DataType.U8, DataType.U8])
     # create scale, symbol, and threshold configurations for new created model
@@ -70,7 +70,6 @@ def test_resource():
     for model in models: model_ids.append(model.id)
     assert model_id in model_ids
     assert model.name == "speed and direction"
-    assert model.indexing == DataIndexing.TIMESTAMP
     assert model.category == "UPLINK"
     assert model.types == [DataType.F64, DataType.F64]
     # read model configurations
@@ -115,7 +114,7 @@ def test_resource():
     assert group_device.category == "APPLICATION"
 
     # update model
-    resource.update_model(model_buf_id, None, None, "buffer 2 integer", "Model for store 2 i32 temporary data")
+    resource.update_model(model_buf_id, None, "buffer 2 integer", "Model for store 2 i32 temporary data")
     resource.remove_model_type(model_buf_id)
     resource.add_model_type(model_buf_id, [DataType.I32, DataType.I32])
     model = resource.read_model(model_buf_id)
@@ -153,8 +152,8 @@ def test_resource():
     timestamp = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
     raw_1 = [1231, 890]
     raw_2 = [1452, -341]
-    resource.create_buffer(device_id1, model_buf_id, timestamp, None, raw_1, "CONVERT")
-    resource.create_buffer(device_id2, model_buf_id, timestamp, None, raw_2, "CONVERT")
+    resource.create_buffer(device_id1, model_buf_id, timestamp, raw_1, "CONVERT")
+    resource.create_buffer(device_id2, model_buf_id, timestamp, raw_2, "CONVERT")
 
     # read buffer
     buffers = resource.list_buffer_first(100, None, None, None)
@@ -173,7 +172,7 @@ def test_resource():
     speed = convert(raw_1[0], coef0, coef1)
     direction = convert(raw_1[1], coef0, coef1)
     # create data
-    resource.create_data(device_id1, model_id, timestamp, None, [speed, direction])
+    resource.create_data(device_id1, model_id, timestamp, [speed, direction])
 
     # read data
     datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100)
@@ -183,13 +182,14 @@ def test_resource():
     assert timestamp == data.timestamp
 
     # delete data
-    resource.delete_data(device_id1, model_id, timestamp, None)
+    resource.delete_data(device_id1, model_id, timestamp)
     with pytest.raises(Exception):
-        resource.read_data(device_id1, model_id, timestamp, None)
+        resource.read_data(device_id1, model_id, timestamp)
 
     # update buffer status
     resource.update_buffer(buffers[0].id, None, "DELETE")
     buffer = resource.read_buffer(buffers[0].id)
+    assert buffers[0].data == buffer.data
     assert buffer.status == "DELETE"
 
     # delete buffer data
@@ -199,7 +199,7 @@ def test_resource():
         resource.read_buffer(buffers[0].id)
 
     # create data slice
-    slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, 0, 0, "Speed and compass slice", None)
+    slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, "Speed and compass slice", None)
     # read data
     slices = resource.list_slice_by_name("slice")
     slice_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, slices)
@@ -208,7 +208,7 @@ def test_resource():
     assert slice.name == "Speed and compass slice"
 
     # update data slice
-    resource.update_slice(slice_id, None, None, None, None, None, "Speed and compass sensor 1 at '2023-05-07 07:08:48'")
+    resource.update_slice(slice_id, None, None, None, "Speed and compass sensor 1 at '2023-05-07 07:08:48'")
     slice = resource.read_slice(slice_id)
     assert slice.description == "Speed and compass sensor 1 at '2023-05-07 07:08:48'"
 

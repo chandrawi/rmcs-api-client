@@ -121,7 +121,7 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
     Ok(response.results)
 }
 
-pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>, status: &str)
+pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, status: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -132,7 +132,6 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
-        index: index.unwrap_or(0) as i32,
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
             Into::<common::DataType>::into(el).into()

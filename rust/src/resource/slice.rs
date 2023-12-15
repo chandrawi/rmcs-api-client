@@ -86,7 +86,7 @@ pub(crate) async fn list_slice_by_device_model(resource: &Resource, device_id: U
     Ok(response.results)
 }
 
-pub(crate) async fn create_slice(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
+pub(crate) async fn create_slice(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, name: &str, description: Option<&str>)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -98,8 +98,6 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: Uuid, model_id:
         model_id: model_id.as_bytes().to_vec(),
         timestamp_begin: timestamp_begin.timestamp_micros(),
         timestamp_end: timestamp_end.timestamp_micros(),
-        index_begin: index_begin.unwrap_or_default() as i32,
-        index_end: index_end.unwrap_or_default() as i32,
         name: name.to_owned(),
         description: description.unwrap_or_default().to_owned()
     });
@@ -109,7 +107,7 @@ pub(crate) async fn create_slice(resource: &Resource, device_id: Uuid, model_id:
     Ok(response.id)
 }
 
-pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<i32>, index_end: Option<i32>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -119,8 +117,6 @@ pub(crate) async fn update_slice(resource: &Resource, id: i32, timestamp_begin: 
         id,
         timestamp_begin: timestamp_begin.map(|t| t.timestamp_micros()),
         timestamp_end: timestamp_end.map(|t| t.timestamp_micros()),
-        index_begin: index_begin.map(|i| i as i32),
-        index_end: index_end.map(|i| i as i32),
         name: name.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())
     });

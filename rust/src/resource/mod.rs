@@ -10,7 +10,7 @@ pub mod log;
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use rmcs_resource_db::schema::value::{DataIndexing, DataType, DataValue, ConfigValue};
+use rmcs_resource_db::schema::value::{DataType, DataValue, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
@@ -87,17 +87,17 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_model(&self, id: Uuid, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
+    pub async fn create_model(&self, id: Uuid, category: &str, name: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
-        model::create_model(&self, id, indexing, category, name, description)
+        model::create_model(&self, id, category, name, description)
         .await
     }
 
-    pub async fn update_model(&self, id: Uuid, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_model(&self, id: Uuid, category: Option<&str>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
-        model::update_model(&self, id, indexing, category, name, description)
+        model::update_model(&self, id, category, name, description)
         .await
     }
 
@@ -617,10 +617,10 @@ impl Resource {
         .await
     }
 
-    pub async fn read_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+    pub async fn read_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<DataSchema, Status>
     {
-        data::read_data(&self, device_id, model_id, timestamp, index)
+        data::read_data(&self, device_id, model_id, timestamp)
         .await
         .map(|s| s.into())
     }
@@ -673,10 +673,10 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+    pub async fn read_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<DataSchema, Status>
     {
-        data::read_data_with_model(&self, model, device_id, timestamp, index)
+        data::read_data_with_model(&self, model, device_id, timestamp)
         .await
         .map(|s| s.into())
     }
@@ -721,31 +721,31 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
+    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
-        data::create_data(&self, device_id, model_id, timestamp, index, data)
+        data::create_data(&self, device_id, model_id, timestamp, data)
         .await
     }
 
-    pub async fn create_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>)
+    pub async fn create_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
-        data::create_data_with_model(&self, model, device_id, timestamp, index, data)
+        data::create_data_with_model(&self, model, device_id, timestamp, data)
         .await
     }
 
-    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<(), Status>
     {
-        data::delete_data(&self, device_id, model_id, timestamp, index)
+        data::delete_data(&self, device_id, model_id, timestamp)
         .await
     }
 
-    pub async fn delete_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>)
+    pub async fn delete_data_with_model(&self, model: DataModel, device_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<(), Status>
     {
-        data::delete_data_with_model(&self, model, device_id, timestamp, index)
+        data::delete_data_with_model(&self, model, device_id, timestamp)
         .await
     }
 
@@ -789,10 +789,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, index: Option<i32>, data: Vec<DataValue>, status: &str)
+    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, status: &str)
         -> Result<i32, Status>
     {
-        buffer::create_buffer(&self, device_id, model_id, timestamp, index, data, status)
+        buffer::create_buffer(&self, device_id, model_id, timestamp, data, status)
         .await
     }
 
@@ -846,17 +846,17 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_slice(&self, device_id: Uuid, model_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, index_begin: Option<i32>, index_end: Option<i32>, name: &str, description: Option<&str>)
+    pub async fn create_slice(&self, device_id: Uuid, model_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, name: &str, description: Option<&str>)
         -> Result<i32, Status>
     {
-        slice::create_slice(&self, device_id, model_id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+        slice::create_slice(&self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
         .await
     }
 
-    pub async fn update_slice(&self, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, index_begin: Option<i32>, index_end: Option<i32>, name: Option<&str>, description: Option<&str>)
+    pub async fn update_slice(&self, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, name: Option<&str>, description: Option<&str>)
         -> Result<(), Status>
     {
-        slice::update_slice(&self, id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+        slice::update_slice(&self, id, timestamp_begin, timestamp_end, name, description)
         .await
     }
 

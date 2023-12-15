@@ -1,6 +1,6 @@
 use tonic::{Request, Status};
 use uuid::Uuid;
-use rmcs_resource_db::schema::value::{DataIndexing, DataType, ConfigValue};
+use rmcs_resource_db::schema::value::{DataType, ConfigValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
@@ -74,7 +74,7 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
     Ok(response.results)
 }
 
-pub(crate) async fn create_model(resource: &Resource, id: Uuid, indexing: DataIndexing, category: &str, name: &str, description: Option<&str>)
+pub(crate) async fn create_model(resource: &Resource, id: Uuid, category: &str, name: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -82,7 +82,6 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, indexing: DataIn
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelSchema {
         id: id.as_bytes().to_vec(),
-        indexing: Into::<common::DataIndexing>::into(indexing).into(),
         category: category.to_owned(),
         name: name.to_owned(),
         description: description.unwrap_or("").to_owned(),
@@ -95,7 +94,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, indexing: DataIn
     Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_model(resource: &Resource, id: Uuid, indexing: Option<DataIndexing>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_model(resource: &Resource, id: Uuid, category: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -103,7 +102,6 @@ pub(crate) async fn update_model(resource: &Resource, id: Uuid, indexing: Option
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(ModelUpdate {
         id: id.as_bytes().to_vec(),
-        indexing: indexing.map(|s| Into::<common::DataIndexing>::into(s).into()),
         category: category.map(|s| s.to_owned()),
         name: name.map(|s| s.to_owned()),
         description: description.map(|s| s.to_owned())

@@ -3,12 +3,6 @@ from typing import Union, List
 from struct import pack, unpack
 
 
-class DataIndexing(Enum):
-    TIMESTAMP = 0
-    INDEX = 1
-    TIMESTAMP_INDEX = 2
-
-
 class ConfigType(Enum):
     NULL = 0
     INT = 1

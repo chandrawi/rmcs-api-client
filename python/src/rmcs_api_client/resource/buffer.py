@@ -47,7 +47,6 @@ class BufferSchema:
     device_id: UUID
     model_id: UUID
     timestamp: datetime
-    index: int
     data: List[Union[bool, int, float, str]]
     status: str
 
@@ -57,7 +56,7 @@ class BufferSchema:
         for ty in r.data_type: types.append(DataType(ty))
         data = unpack_data_array(r.data_bytes, types)
         status = BufferStatus(r.status).to_str()
-        return BufferSchema(r.id, UUID(bytes=r.device_id), UUID(bytes=r.model_id), timestamp, r.index, data, status)
+        return BufferSchema(r.id, UUID(bytes=r.device_id), UUID(bytes=r.model_id), timestamp, data, status)
 
 
 def read_buffer(resource, id: int):
@@ -133,7 +132,7 @@ def list_buffer_last(resource, number: int, device_id: Optional[UUID]=None, mode
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls
 
-def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]], status: str):
+def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         data_type = []
@@ -142,7 +141,6 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
             device_id=device_id.bytes,
             model_id=model_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000),
-            index=index,
             data_bytes=pack_data_array(data),
             data_type=data_type,
             status=BufferStatus.from_str(status).value
@@ -153,14 +151,18 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
 def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
-        if data == None: data = list()
+        data_bytes = None
+        data_list = list()
+        if data != None: 
+            data_bytes = pack_data_array(data)
+            data_list = data
         data_type = []
-        for d in data: data_type.append(DataType.from_value(d).value)
+        for d in data_list: data_type.append(DataType.from_value(d).value)
         stat = None
         if status != None: stat = BufferStatus.from_str(status).value
         request = buffer_pb2.BufferUpdate(
             id=id,
-            data_bytes=pack_data_array(data),
+            data_bytes=data_bytes,
             data_type=data_type,
             status=stat
         )

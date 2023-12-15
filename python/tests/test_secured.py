@@ -10,7 +10,7 @@ import dotenv
 import pytest
 import string
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, DataIndexing, DataType
+from rmcs_api_client.resource import Resource, DataType
 import utility
 
 ACCESSES = [
@@ -141,10 +141,9 @@ def test_secured():
 
     # try to create model using user service and admin service, user should failed and admin should success
     with pytest.raises(Exception):
-        res_user.create_model(uuid.uuid4(), DataIndexing.TIMESTAMP, "UPLINK", "name", "")
+        res_user.create_model(uuid.uuid4(), "UPLINK", "name", "")
     model_id = res_admin.create_model(
         id=uuid.uuid4(),
-        indexing=DataIndexing.TIMESTAMP,
         category="UPLINK",
         name="name",
         description=""
@@ -158,7 +157,6 @@ def test_secured():
 
     # read created model using user service
     model = res_user.read_model(model_id)
-    assert model.indexing == DataIndexing.TIMESTAMP
     assert model.category == "UPLINK"
     assert model.name == "name"
 

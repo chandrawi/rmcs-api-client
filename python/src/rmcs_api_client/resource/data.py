@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 import grpc
-from .common import DataIndexing, DataType, pack_data_array, pack_data_array_model, unpack_data_array
+from .common import DataType, pack_data_array, pack_data_array_model, unpack_data_array
 
 
 @dataclass
@@ -12,7 +12,6 @@ class DataSchema:
     device_id: UUID
     model_id: UUID
     timestamp: datetime
-    index: int
     data: List[Union[bool, int, float, str]]
 
     def from_response(r):
@@ -20,35 +19,32 @@ class DataSchema:
         types = []
         for ty in r.data_type: types.append(DataType(ty))
         data = unpack_data_array(r.data_bytes, types)
-        return DataSchema(UUID(bytes=r.device_id), UUID(bytes=r.model_id), timestamp, r.index, data)
+        return DataSchema(UUID(bytes=r.device_id), UUID(bytes=r.model_id), timestamp, data)
 
 
 @dataclass
 class DataModel:
     id: UUID
-    indexing: DataIndexing
     types: List[DataType]
 
     def from_response(r):
-        indexing = DataIndexing(r.indexing)
         types = []
         for ty in r.types: types.append(DataType(ty))
-        return DataModel(UUID(bytes=r.id), indexing, types)
+        return DataModel(UUID(bytes=r.id), types)
 
     def to_request(self):
         types = []
         for ty in self.types: types.append(ty.value)
-        return data_pb2.DataModel(id=self.id.bytes, indexing=self.indexing.value, types=types)
+        return data_pb2.DataModel(id=self.id.bytes, types=types)
 
 
-def read_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, index: int = 0):
+def read_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         request = data_pb2.DataId(
             device_id=device_id.bytes,
             model_id=model_id.bytes,
-            timestamp=int(timestamp.timestamp()*1000000),
-            index=index
+            timestamp=int(timestamp.timestamp()*1000000)
         )
         response = stub.ReadData(request=request, metadata=resource.metadata)
         return DataSchema.from_response(response.result)
@@ -128,14 +124,13 @@ def get_data_model(resource, model_id: UUID):
         response = stub.GetDataModel(request=request, metadata=resource.metadata)
         return DataModel.from_response(response.result)
 
-def read_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0):
+def read_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         request = data_pb2.DataIdModel(
             model=model.to_request(),
             device_id=device_id.bytes,
-            timestamp=int(timestamp.timestamp()*1000000),
-            index=index
+            timestamp=int(timestamp.timestamp()*1000000)
         )
         response = stub.ReadDataWithModel(request=request, metadata=resource.metadata)
         return DataSchema.from_response(response.result)
@@ -208,7 +203,7 @@ def list_data_with_model_by_number_after(resource, model: DataModel, device_id: 
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
 
-def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]]):
+def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         data_type = []
@@ -217,13 +212,12 @@ def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, 
             device_id=device_id.bytes,
             model_id=model_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000),
-            index=index,
             data_bytes=pack_data_array(data),
             data_type=data_type
         )
         stub.CreateData(request=request, metadata=resource.metadata)
 
-def create_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]]):
+def create_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         data_type = []
@@ -232,30 +226,27 @@ def create_data_with_model(resource, model: DataModel, device_id: UUID, timestam
             model=model.to_request(),
             device_id=device_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000),
-            index=index,
             data_bytes=pack_data_array_model(data, model.types),
             data_type=data_type
         )
         stub.CreateDataWithModel(request=request, metadata=resource.metadata)
 
-def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, index: int = 0):
+def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         request = data_pb2.DataId(
             device_id=device_id.bytes,
             model_id=model_id.bytes,
-            timestamp=int(timestamp.timestamp()*1000000),
-            index=index
+            timestamp=int(timestamp.timestamp()*1000000)
         )
         stub.DeleteData(request=request, metadata=resource.metadata)
 
-def delete_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0):
+def delete_data_with_model(resource, model: DataModel, device_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
         request = data_pb2.DataId(
             model=model.to_request(),
             device_id=device_id.bytes,
-            timestamp=int(timestamp.timestamp()*1000000),
-            index=index
+            timestamp=int(timestamp.timestamp()*1000000)
         )
         stub.DeleteDataWithModel(request=request, metadata=resource.metadata)

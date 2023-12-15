@@ -3,7 +3,7 @@ from typing import Optional, Union, List
 from dataclasses import dataclass
 from uuid import UUID
 import grpc
-from .common import DataIndexing, ConfigType, DataType, pack_config, unpack_config
+from .common import ConfigType, DataType, pack_config, unpack_config
 
 
 @dataclass
@@ -23,7 +23,6 @@ class ModelConfigSchema:
 @dataclass
 class ModelSchema:
     id: UUID
-    indexing: DataIndexing
     category: str
     name: str
     description: str
@@ -31,7 +30,6 @@ class ModelSchema:
     configs: List[List[ModelConfigSchema]]
 
     def from_response(r):
-        indexing = DataIndexing(r.indexing)
         types = []
         for ty in r.types:
             types.append(DataType(ty))
@@ -40,7 +38,7 @@ class ModelSchema:
             confs = []
             for conf in conf_vec.configs: confs.append(ModelConfigSchema.from_response(conf))
             configs.append(confs)
-        return ModelSchema(UUID(bytes=r.id), indexing, r.category, r.name, r.description, types, configs)
+        return ModelSchema(UUID(bytes=r.id), r.category, r.name, r.description, types, configs)
 
 
 def read_model(resource, id: UUID):
@@ -77,12 +75,11 @@ def list_model_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls
 
-def create_model(resource, id: UUID, indexing: DataIndexing, category: str, name: str, description: str):
+def create_model(resource, id: UUID, category: str, name: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ModelSchema(
             id=id.bytes,
-            indexing=indexing.value,
             category=category,
             name=name,
             description=description,
@@ -90,14 +87,11 @@ def create_model(resource, id: UUID, indexing: DataIndexing, category: str, name
         response = stub.CreateModel(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_model(resource, id: UUID, indexing: Optional[DataIndexing], category: Optional[str], name: Optional[str], description: Optional[str]):
+def update_model(resource, id: UUID, category: Optional[str], name: Optional[str], description: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
-        model_indexing = None
-        if indexing != None: model_indexing = indexing.value
         request = model_pb2.ModelUpdate(
             id=id.bytes,
-            indexing=model_indexing,
             category=category,
             name=name,
             description=description

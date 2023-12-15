@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Optional, Union, List
 from . import model as _model, device as _device, types as _types, group as _group
 from . import data as _data, buffer as _buffer, slice as _slice, log as _log
-from .common import DataIndexing, DataType
+from .common import DataType
 from .model import ModelSchema, ModelConfigSchema
 from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConfigSchema
 from .types import TypeSchema
@@ -32,11 +32,11 @@ class Resource:
     def list_model_by_name_category(self, name: str, category: str) -> List[ModelSchema]:
         return _model.list_model_by_name_category(self, name, category)
 
-    def create_model(self, id: UUID, indexing: DataIndexing, category: str, name: str, description: str) -> UUID:
-        return _model.create_model(self, id, indexing, category, name, description)
+    def create_model(self, id: UUID, category: str, name: str, description: str) -> UUID:
+        return _model.create_model(self, id, category, name, description)
 
-    def update_model(self, id: UUID, indexing: Optional[DataIndexing], category: Optional[str], name: Optional[str], description: Optional[str]):
-        return _model.update_model(self, id, indexing, category, name, description)
+    def update_model(self, id: UUID, category: Optional[str], name: Optional[str], description: Optional[str]):
+        return _model.update_model(self, id, category, name, description)
 
     def delete_model(self, id: UUID):
         return _model.delete_model(self, id)
@@ -245,8 +245,8 @@ class Resource:
     def remove_group_gateway_member(self, id: UUID, gateway_id: UUID):
         return _group.remove_group_gateway_member(self, id, gateway_id)
 
-    def read_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, index: int = 0) -> DataSchema:
-        return _data.read_data(self, device_id, model_id, timestamp, index)
+    def read_data(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> DataSchema:
+        return _data.read_data(self, device_id, model_id, timestamp)
 
     def list_data_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[DataSchema]:
         return _data.list_data_by_time(self, device_id, model_id, timestamp)
@@ -266,8 +266,8 @@ class Resource:
     def get_data_model(self, model_id: UUID):
         return _data.get_data_model(self, model_id)
 
-    def read_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0) -> DataSchema:
-        return _data.read_data_with_model(self, model, device_id, timestamp, index)
+    def read_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime) -> DataSchema:
+        return _data.read_data_with_model(self, model, device_id, timestamp)
 
     def list_data_with_model_by_time(self, model: DataModel, device_id: UUID, timestamp: datetime) -> List[DataSchema]:
         return _data.list_data_with_model_by_time(self, model, device_id, timestamp)
@@ -284,17 +284,17 @@ class Resource:
     def list_data_with_model_by_number_after(self, model: DataModel, device_id: UUID, after: datetime, number: int) -> List[DataSchema]:
         return _data.list_data_with_model_by_number_after(self, model, device_id, after, number)
 
-    def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]]):
-        return _data.create_data(self, device_id, model_id, timestamp, index, data)
+    def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
+        return _data.create_data(self, device_id, model_id, timestamp, data)
 
-    def create_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]]):
-        return _data.create_data_with_model(self, model, device_id, timestamp, index, data)
+    def create_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
+        return _data.create_data_with_model(self, model, device_id, timestamp, data)
 
-    def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, index: int = 0):
-        return _data.delete_data(self, device_id, model_id, timestamp, index)
+    def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
+        return _data.delete_data(self, device_id, model_id, timestamp)
 
-    def delete_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime, index: int = 0):
-        return _data.delete_data_with_model(self, model, device_id, timestamp, index)
+    def delete_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime):
+        return _data.delete_data_with_model(self, model, device_id, timestamp)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
@@ -311,8 +311,8 @@ class Resource:
     def list_buffer_last(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_last(self, number, device_id, model_id, status)
 
-    def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, index: int, data: List[Union[int, float, str, bool, None]], status: str) -> int:
-        return _buffer.create_buffer(self, device_id, model_id, timestamp, index, data, status)
+    def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: str) -> int:
+        return _buffer.create_buffer(self, device_id, model_id, timestamp, data, status)
 
     def update_buffer(self, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[str]):
         return _buffer.update_buffer(self, id, data, status)
@@ -335,11 +335,11 @@ class Resource:
     def list_slice_by_device_model(self, device_id: UUID, model_id: UUID) -> List[SliceSchema]:
         return _slice.list_slice_by_device_model(self, device_id, model_id)
 
-    def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, index_begin: int, index_end: int, name: str, description: str) -> int:
-        return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+    def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
+        return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
 
-    def update_slice(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], index_begin: Optional[int], index_end: Optional[int], name: Optional[str], description: Optional[str]):
-        return _slice.update_slice(self, id, timestamp_begin, timestamp_end, index_begin, index_end, name, description)
+    def update_slice(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
+        return _slice.update_slice(self, id, timestamp_begin, timestamp_end, name, description)
 
     def delete_slice(self, id: int):
         return _slice.delete_slice(self, id)
