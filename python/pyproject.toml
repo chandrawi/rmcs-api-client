@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rmcs_api_client"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
   { name="Chandra Wijaya Sentosa", email="chandra.w.sentosa@gmail.com" },
 ]
