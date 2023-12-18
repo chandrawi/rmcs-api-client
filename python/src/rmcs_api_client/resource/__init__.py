@@ -299,6 +299,9 @@ class Resource:
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
 
+    def read_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, status: Optional[str]=None) -> BufferSchema:
+        return _buffer.read_buffer_by_time(self, device_id, model_id, timestamp, status)
+
     def read_buffer_first(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> BufferSchema:
         return _buffer.read_buffer_first(self, device_id, model_id, status)
 

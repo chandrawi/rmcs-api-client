@@ -66,6 +66,18 @@ def read_buffer(resource, id: int):
         response = stub.ReadBuffer(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
+def read_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime, status: Optional[str]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferTime(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000),
+            status=status
+        )
+        response = stub.ReadBufferByTime(request=request, metadata=resource.metadata)
+        return BufferSchema.from_response(response.result)
+
 def read_buffer_first(resource, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)

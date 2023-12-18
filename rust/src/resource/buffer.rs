@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
-    BufferSchema, BufferId, BufferSelector, BuffersSelector, BufferUpdate, BufferStatus
+    BufferSchema, BufferId, BufferTime, BufferSelector, BuffersSelector, BufferUpdate, BufferStatus
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -22,6 +22,30 @@ pub(crate) async fn read_buffer(resource: &Resource, id: i32)
         id
     });
     let response = client.read_buffer(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
+}
+
+pub(crate) async fn read_buffer_by_time(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, status: Option<&str>)
+    -> Result<BufferSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferTime {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: timestamp.timestamp_micros(),
+        status: match status {
+            Some(value) => match BufferStatus::from_str_name(value) {
+                Some(v) => Some(v.into()),
+                None => None
+            },
+            None => None
+        }
+    });
+    let response = client.read_buffer_by_time(request)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
