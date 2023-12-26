@@ -90,7 +90,7 @@ def read_log(resource, timestamp: datetime, device_id: UUID):
         response = stub.ReadLog(request=request, metadata=resource.metadata)
         return LogSchema.from_response(response.result)
 
-def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None):
+def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None
@@ -107,7 +107,7 @@ def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=No
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None):
+def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None
@@ -124,7 +124,7 @@ def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=No
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None):
+def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None
@@ -142,7 +142,7 @@ def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: 
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def create_log(resource, timestamp: datetime, device_id: UUID, status: str, value: Union[int, float, str, None]):
+def create_log(resource, timestamp: datetime, device_id: UUID, status: Union[str, int], value: Union[int, float, str, None]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         request = log_pb2.LogSchema(
@@ -154,7 +154,7 @@ def create_log(resource, timestamp: datetime, device_id: UUID, status: str, valu
         )
         stub.CreateLog(request=request, metadata=resource.metadata)
 
-def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[str], value: Union[int, float, str, None]):
+def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[Union[str, int]], value: Union[int, float, str, None]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         stat = None

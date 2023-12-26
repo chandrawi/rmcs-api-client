@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::ConfigValue;
 use rmcs_resource_api::common;
 use rmcs_resource_api::log::log_service_client::LogServiceClient;
 use rmcs_resource_api::log::{
-    LogSchema, LogId, LogTime, LogRange, LogUpdate, LogStatus
+    LogSchema, LogId, LogTime, LogRange, LogUpdate
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -28,7 +28,7 @@ pub(crate) async fn read_log(resource: &Resource, timestamp: DateTime<Utc>, devi
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_id: Option<Uuid>, status: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -37,13 +37,7 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     let request = Request::new(LogTime {
         timestamp: timestamp.timestamp_micros(),
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
-        status: match status {
-            Some(value) => match LogStatus::from_str_name(value) {
-                Some(v) => Some(v.into()),
-                None => None
-            },
-            None => None
-        }
+        status: status.map(|i| i as i32)
     });
     let response = client.list_log_by_time(request)
         .await?
@@ -51,7 +45,7 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, status: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -60,13 +54,7 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Ut
     let request = Request::new(LogTime {
         timestamp: last.timestamp_micros(),
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
-        status: match status {
-            Some(value) => match LogStatus::from_str_name(value) {
-                Some(v) => Some(v.into()),
-                None => None
-            },
-            None => None
-        }
+        status: status.map(|i| i as i32)
     });
     let response = client.list_log_by_last_time(request)
         .await?
@@ -74,7 +62,7 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, status: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -84,13 +72,7 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<
         begin: begin.timestamp_micros(),
         end: end.timestamp_micros(),
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
-        status: match status {
-            Some(value) => match LogStatus::from_str_name(value) {
-                Some(v) => Some(v.into()),
-                None => None
-            },
-            None => None
-        }
+        status: status.map(|i| i as i32)
     });
     let response = client.list_log_by_range_time(request)
         .await?
@@ -98,7 +80,7 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<
     Ok(response.results)
 }
 
-pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: &str, value: ConfigValue)
+pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: i16, value: ConfigValue)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -107,7 +89,7 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, de
     let request = Request::new(LogSchema {
         timestamp: timestamp.timestamp_micros(),
         device_id: device_id.as_bytes().to_vec(),
-        status: LogStatus::from_str_name(status).unwrap_or_default().into(),
+        status: status as i32,
         log_bytes: value.to_bytes(),
         log_type: Into::<common::ConfigType>::into(value.get_type()).into()
     });
@@ -116,7 +98,7 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, de
     Ok(())
 }
 
-pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<&str>, value: Option<ConfigValue>)
+pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<i16>, value: Option<ConfigValue>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -125,13 +107,7 @@ pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, de
     let request = Request::new(LogUpdate {
         timestamp: timestamp.timestamp_micros(),
         device_id: device_id.as_bytes().to_vec(),
-        status: match status {
-            Some(value) => match LogStatus::from_str_name(value) {
-                Some(v) => Some(v.into()),
-                None => None
-            },
-            None => None
-        },
+        status: status.map(|i| i as i32),
         log_bytes: value.clone().map(|s| s.to_bytes()),
         log_type: value.map(|s| Into::<common::ConfigType>::into(s.get_type()).into())
     });

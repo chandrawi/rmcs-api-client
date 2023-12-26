@@ -15,9 +15,9 @@ use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 use rmcs_resource_db::schema::data::{DataSchema, DataModel};
-use rmcs_resource_db::schema::buffer::BufferSchema;
+use rmcs_resource_db::schema::buffer::{BufferSchema, BufferStatus};
 use rmcs_resource_db::schema::slice::SliceSchema;
-use rmcs_resource_db::schema::log::LogSchema;
+use rmcs_resource_db::schema::log::{LogSchema, LogStatus};
 
 #[derive(Debug, Clone)]
 pub struct Resource {
@@ -757,57 +757,57 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn read_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, status: Option<&str>)
+    pub async fn read_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, status: Option<BufferStatus>)
         -> Result<BufferSchema, Status>
     {
-        buffer::read_buffer_by_time(&self, device_id, model_id, timestamp, status)
+        buffer::read_buffer_by_time(&self, device_id, model_id, timestamp, status.map(|s| s.into()))
         .await
         .map(|s| s.into())
     }
 
-    pub async fn read_buffer_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
+    pub async fn read_buffer_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<BufferSchema, Status>
     {
-        buffer::read_buffer_first(&self, device_id, model_id, status)
+        buffer::read_buffer_first(&self, device_id, model_id, status.map(|s| s.into()))
         .await
         .map(|s| s.into())
     }
 
-    pub async fn read_buffer_last(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
+    pub async fn read_buffer_last(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<BufferSchema, Status>
     {
-        buffer::read_buffer_last(&self, device_id, model_id, status)
+        buffer::read_buffer_last(&self, device_id, model_id, status.map(|s| s.into()))
         .await
         .map(|s| s.into())
     }
 
-    pub async fn list_buffer_first(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
+    pub async fn list_buffer_first(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<Vec<BufferSchema>, Status>
     {
-        buffer::list_buffer_first(&self, number, device_id, model_id, status)
+        buffer::list_buffer_first(&self, number, device_id, model_id, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_last(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<&str>)
+    pub async fn list_buffer_last(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<Vec<BufferSchema>, Status>
     {
-        buffer::list_buffer_last(&self, number, device_id, model_id, status)
+        buffer::list_buffer_last(&self, number, device_id, model_id, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, status: &str)
+    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, status: BufferStatus)
         -> Result<i32, Status>
     {
-        buffer::create_buffer(&self, device_id, model_id, timestamp, data, status)
+        buffer::create_buffer(&self, device_id, model_id, timestamp, data, status.into())
         .await
     }
 
-    pub async fn update_buffer(&self, id: i32, data: Option<Vec<DataValue>>, status: Option<&str>)
+    pub async fn update_buffer(&self, id: i32, data: Option<Vec<DataValue>>, status: Option<BufferStatus>)
         -> Result<(), Status>
     {
-        buffer::update_buffer(&self, id, data, status)
+        buffer::update_buffer(&self, id, data, status.map(|s| s.into()))
         .await
     }
 
@@ -882,41 +882,41 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+    pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, status: Option<LogStatus>)
         -> Result<Vec<LogSchema>, Status>
     {
-        log::list_log_by_time(&self, timestamp, device_id, status)
+        log::list_log_by_time(&self, timestamp, device_id, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+    pub async fn list_log_by_last_time(&self, last: DateTime<Utc>, device_id: Option<Uuid>, status: Option<LogStatus>)
         -> Result<Vec<LogSchema>, Status>
     {
-        log::list_log_by_last_time(&self, last, device_id, status)
+        log::list_log_by_last_time(&self, last, device_id, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, status: Option<&str>)
+    pub async fn list_log_by_range_time(&self, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, status: Option<LogStatus>)
         -> Result<Vec<LogSchema>, Status>
     {
-        log::list_log_by_range_time(&self, begin, end, device_id, status)
+        log::list_log_by_range_time(&self, begin, end, device_id, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: &str, value: ConfigValue)
+    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: LogStatus, value: ConfigValue)
         -> Result<(), Status>
     {
-        log::create_log(&self, timestamp, device_id, status, value)
+        log::create_log(&self, timestamp, device_id, status.into(), value)
         .await
     }
 
-    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<&str>, value: Option<ConfigValue>)
+    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<LogStatus>, value: Option<ConfigValue>)
         -> Result<(), Status>
     {
-        log::update_log(&self, timestamp, device_id, status, value)
+        log::update_log(&self, timestamp, device_id, status.map(|s| s.into()), value)
         .await
     }
 

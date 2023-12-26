@@ -299,25 +299,25 @@ class Resource:
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
 
-    def read_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, status: Optional[str]=None) -> BufferSchema:
+    def read_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, status: Optional[Union[str, int]]=None) -> BufferSchema:
         return _buffer.read_buffer_by_time(self, device_id, model_id, timestamp, status)
 
-    def read_buffer_first(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> BufferSchema:
+    def read_buffer_first(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> BufferSchema:
         return _buffer.read_buffer_first(self, device_id, model_id, status)
 
-    def read_buffer_last(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> BufferSchema:
+    def read_buffer_last(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> BufferSchema:
         return _buffer.read_buffer_last(self, device_id, model_id, status)
 
-    def list_buffer_first(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> List[BufferSchema]:
+    def list_buffer_first(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_first(self, number, device_id, model_id, status)
 
-    def list_buffer_last(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[str]=None) -> List[BufferSchema]:
+    def list_buffer_last(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_last(self, number, device_id, model_id, status)
 
-    def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: str) -> int:
+    def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: Union[str, int]) -> int:
         return _buffer.create_buffer(self, device_id, model_id, timestamp, data, status)
 
-    def update_buffer(self, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[str]):
+    def update_buffer(self, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[Union[str, int]]):
         return _buffer.update_buffer(self, id, data, status)
 
     def delete_buffer(self, id: int):
@@ -350,19 +350,19 @@ class Resource:
     def read_log(self, timestamp: datetime, device_id: UUID) -> LogSchema:
         return _log.read_log(self, timestamp, device_id)
 
-    def list_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None) -> List[LogSchema]:
+    def list_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[LogSchema]:
         return _log.list_log_by_time(self, timestamp, device_id, status)
 
-    def list_log_by_last_time(self, last: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None) -> List[LogSchema]:
+    def list_log_by_last_time(self, last: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[LogSchema]:
         return _log.list_log_by_last_time(self, last, device_id, status)
 
-    def list_log_by_range_time(self, begin: datetime, end: datetime, device_id: Optional[UUID]=None, status: Optional[str]=None) -> List[LogSchema]:
+    def list_log_by_range_time(self, begin: datetime, end: datetime, device_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[LogSchema]:
         return _log.list_log_by_range_time(self, begin, end, device_id, status)
 
-    def create_log(self, timestamp: datetime, device_id: UUID, status: str, value: List[Union[int, float, str, bool, None]]):
+    def create_log(self, timestamp: datetime, device_id: UUID, status: Union[str, int], value: List[Union[int, float, str, bool, None]]):
         return _log.create_log(self, timestamp, device_id, status, value)
 
-    def update_log(self, timestamp: datetime, device_id: UUID, status: Optional[str], value: List[Union[int, float, str, bool, None]]):
+    def update_log(self, timestamp: datetime, device_id: UUID, status: Optional[Union[str, int]], value: List[Union[int, float, str, bool, None]]):
         return _log.update_log(self, timestamp, device_id, status, value)
 
     def delete_log(self, timestamp: datetime, device_id: UUID):

@@ -152,8 +152,8 @@ def test_resource():
     timestamp = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
     raw_1 = [1231, 890]
     raw_2 = [1452, -341]
-    resource.create_buffer(device_id1, model_buf_id, timestamp, raw_1, "CONVERT")
-    resource.create_buffer(device_id2, model_buf_id, timestamp, raw_2, "CONVERT")
+    resource.create_buffer(device_id1, model_buf_id, timestamp, raw_1, "ANALYSIS_1")
+    resource.create_buffer(device_id2, model_buf_id, timestamp, raw_2, "ANALYSIS_1")
 
     # read buffer
     buffers = resource.list_buffer_first(100, None, None, None)
