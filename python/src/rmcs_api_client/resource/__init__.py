@@ -9,7 +9,7 @@ from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConf
 from .types import TypeSchema
 from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
 from .data import DataSchema, DataModel
-from .buffer import BufferStatus, BufferSchema
+from .buffer import BufferSchema
 from .slice import SliceSchema
 from .log import LogSchema
 

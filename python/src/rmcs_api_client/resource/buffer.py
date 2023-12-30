@@ -8,38 +8,56 @@ import grpc
 from .common import DataType, pack_data_array, unpack_data_array
 
 
-class BufferStatus(Enum):
-    DEFAULT = 0
-    ERROR = 1
-    CONVERT = 2
-    ANALYZE_GATEWAY = 3
-    ANALYZE_SERVER = 4
-    TRANSFER_GATEWAY = 5
-    TRANSFER_SERVER = 6
-    BACKUP = 7
-    DELETE = 8
+def status_to_int(status: Union[int, str]) -> Union[int, None]:
+    if type(status) == str:
+        if status == "DEFAULT": return 0
+        elif status == "ERROR": return 1
+        elif status == "DELETE": return 2
+        elif status == "HOLD": return 3
+        elif status == "SEND_UPLINK": return 4
+        elif status == "SEND_DOWNLINK": return 5
+        elif status == "TRANSFER_LOCAL": return 6
+        elif status == "TRANSFER_GATEWAY": return 7
+        elif status == "TRANSFER_SERVER": return 8
+        elif status == "BACKUP": return 9
+        elif status == "RESTORE": return 10
+        elif status == "ANALYSIS_1": return 11
+        elif status == "ANALYSIS_2": return 12
+        elif status == "ANALYSIS_3": return 13
+        elif status == "ANALYSIS_4": return 14
+        elif status == "ANALYSIS_5": return 15
+        elif status == "ANALYSIS_6": return 16
+        elif status == "ANALYSIS_7": return 17
+        elif status == "ANALYSIS_8": return 18
+        elif status == "ANALYSIS_9": return 19
+        elif status == "ANALYSIS_10": return 20
+        else: return None
+    elif type(status) == int:
+        return status
 
-    def from_str(status: str):
-        if status == "ERROR": return BufferStatus.ERROR
-        elif status == "CONVERT": return BufferStatus.CONVERT
-        elif status == "ANALYZE_GATEWAY": return BufferStatus.ANALYZE_GATEWAY
-        elif status == "ANALYZE_SERVER": return BufferStatus.ANALYZE_SERVER
-        elif status == "TRANSFER_GATEWAY": return BufferStatus.TRANSFER_GATEWAY
-        elif status == "TRANSFER_SERVER": return BufferStatus.TRANSFER_SERVER
-        elif status == "BACKUP": return BufferStatus.BACKUP
-        elif status == "DELETE": return BufferStatus.DELETE
-        else: return BufferStatus.DEFAULT
-
-    def to_str(self):
-        if self == BufferStatus.ERROR : return "ERROR"
-        elif self == BufferStatus.CONVERT : return "CONVERT"
-        elif self == BufferStatus.ANALYZE_GATEWAY : return "ANALYZE_GATEWAY"
-        elif self == BufferStatus.ANALYZE_SERVER : return "ANALYZE_SERVER"
-        elif self == BufferStatus.TRANSFER_GATEWAY : return "TRANSFER_GATEWAY"
-        elif self == BufferStatus.TRANSFER_SERVER : return "TRANSFER_SERVER"
-        elif self == BufferStatus.BACKUP : return "BACKUP"
-        elif self == BufferStatus.DELETE : return "DELETE"
-        else: return "DEFAULT"
+def int_to_status(code: int) -> Union[str, int]:
+        if code == 0: return "DEFAULT"
+        elif code == 1: return "ERROR"
+        elif code == 2: return "DELETE"
+        elif code == 3: return "HOLD"
+        elif code == 4: return "SEND_UPLINK"
+        elif code == 5: return "SEND_DOWNLINK"
+        elif code == 6: return "TRANSFER_LOCAL"
+        elif code == 7: return "TRANSFER_GATEWAY"
+        elif code == 8: return "TRANSFER_SERVER"
+        elif code == 9: return "BACKUP"
+        elif code == 10: return "RESTORE"
+        elif code == 11: return "ANALYSIS_1"
+        elif code == 12: return "ANALYSIS_2"
+        elif code == 13: return "ANALYSIS_3"
+        elif code == 14: return "ANALYSIS_4"
+        elif code == 15: return "ANALYSIS_5"
+        elif code == 16: return "ANALYSIS_6"
+        elif code == 17: return "ANALYSIS_7"
+        elif code == 18: return "ANALYSIS_8"
+        elif code == 19: return "ANALYSIS_9"
+        elif code == 20: return "ANALYSIS_10"
+        else: return code
 
 @dataclass
 class BufferSchema:
@@ -48,14 +66,14 @@ class BufferSchema:
     model_id: UUID
     timestamp: datetime
     data: List[Union[bool, int, float, str]]
-    status: str
+    status: Union[str, int]
 
     def from_response(r):
         timestamp = datetime.fromtimestamp(r.timestamp/1000000.0)
         types = []
         for ty in r.data_type: types.append(DataType(ty))
         data = unpack_data_array(r.data_bytes, types)
-        status = BufferStatus(r.status).to_str()
+        status = int_to_status(r.status)
         return BufferSchema(r.id, UUID(bytes=r.device_id), UUID(bytes=r.model_id), timestamp, data, status)
 
 
@@ -73,7 +91,7 @@ def read_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: da
             device_id=device_id.bytes,
             model_id=model_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000),
-            status=status
+            status=status_to_int(status)
         )
         response = stub.ReadBufferByTime(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
@@ -88,7 +106,7 @@ def read_buffer_first(resource, device_id: Optional[UUID]=None, model_id: Option
         request = buffer_pb2.BufferSelector(
             device_id=device_bytes,
             model_id=model_bytes,
-            status=status
+            status=status_to_int(status)
         )
         response = stub.ReadBufferFirst(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
@@ -103,7 +121,7 @@ def read_buffer_last(resource, device_id: Optional[UUID]=None, model_id: Optiona
         request = buffer_pb2.BufferSelector(
             device_id=device_bytes,
             model_id=model_bytes,
-            status=status
+            status=status_to_int(status)
         )
         response = stub.ReadBufferLast(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
@@ -118,7 +136,7 @@ def list_buffer_first(resource, number: int, device_id: Optional[UUID]=None, mod
         request = buffer_pb2.BuffersSelector(
             device_id=device_bytes,
             model_id=model_bytes,
-            status=status,
+            status=status_to_int(status),
             number=number
         )
         response = stub.ListBufferFirst(request=request, metadata=resource.metadata)
@@ -136,7 +154,7 @@ def list_buffer_last(resource, number: int, device_id: Optional[UUID]=None, mode
         request = buffer_pb2.BuffersSelector(
             device_id=device_bytes,
             model_id=model_bytes,
-            status=status,
+            status=status_to_int(status),
             number=number
         )
         response = stub.ListBufferLast(request=request, metadata=resource.metadata)
@@ -155,7 +173,7 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
             timestamp=int(timestamp.timestamp()*1000000),
             data_bytes=pack_data_array(data),
             data_type=data_type,
-            status=BufferStatus.from_str(status).value
+            status=status_to_int(status)
         )
         response = stub.CreateBuffer(request=request, metadata=resource.metadata)
         return response.id
@@ -171,7 +189,7 @@ def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, 
         data_type = []
         for d in data_list: data_type.append(DataType.from_value(d).value)
         stat = None
-        if status != None: stat = BufferStatus.from_str(status).value
+        if status != None: stat = status_to_int(status)
         request = buffer_pb2.BufferUpdate(
             id=id,
             data_bytes=data_bytes,
