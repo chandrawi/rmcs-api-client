@@ -31,6 +31,8 @@ def status_to_int(status: Union[int, str]) -> Union[int, None]:
         elif status == "ANALYSIS_8": return 18
         elif status == "ANALYSIS_9": return 19
         elif status == "ANALYSIS_10": return 20
+        elif status == "EXTERNAL_INPUT": return 21
+        elif status == "EXTERNAL_OUTPUT": return 22
         else: return None
     elif type(status) == int:
         return status
@@ -57,6 +59,8 @@ def int_to_status(code: int) -> Union[str, int]:
         elif code == 18: return "ANALYSIS_8"
         elif code == 19: return "ANALYSIS_9"
         elif code == 20: return "ANALYSIS_10"
+        elif code == 21: return "EXTERNAL_INPUT"
+        elif code == 22: return "EXTERNAL_OUTPUT"
         else: return code
 
 @dataclass
