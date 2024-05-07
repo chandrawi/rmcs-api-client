@@ -1,0 +1,25 @@
+{
+  "name": "rmcs-api-client",
+  "version": "0.3.0",
+  "description": "",
+  "main": "src/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "rollup --config --watch",
+    "build": "rollup --config"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "rollup": "^4.17.2"
+  },
+  "dependencies": {
+    "rmcs-auth-api": "file:../../rmcs-auth-api/web/",
+    "rmcs-resource-api": "file:../../rmcs-resource-api/web/"
+  }
+}
