@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from uuid import UUID
 import grpc
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
 
 
 @dataclass
@@ -33,7 +34,8 @@ def user_login(auth, username: str, password: str):
         request = auth_pb2.UserKeyRequest()
         response = stub.UserLoginKey(request)
         public_key = RSA.import_key(response.public_key)
-        chipper_rsa = PKCS1_v1_5.new(public_key)
+        sha = SHA256.new()
+        chipper_rsa = PKCS1_OAEP.new(public_key, sha)
         encrypted = chipper_rsa.encrypt(bytes(password, "utf-8"))
         request = auth_pb2.UserLoginRequest(
             username=username,
