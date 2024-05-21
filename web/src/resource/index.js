@@ -81,6 +81,55 @@ export {
     add_group_gateway_member,
     remove_group_gateway_member,
 } from './group.js'
+export {
+    read_data,
+    list_data_by_time,
+    list_data_by_last_time,
+    list_data_by_range_time,
+    list_data_by_number_before,
+    list_data_by_number_after,
+    get_data_model,
+    read_data_with_model,
+    list_data_with_model_by_time,
+    list_data_with_model_by_last_time,
+    list_data_with_model_by_range_time,
+    list_data_with_model_by_number_before,
+    list_data_with_model_by_number_after,
+    create_data,
+    create_data_with_model,
+    delete_data,
+    delete_data_with_model
+} from './data.js'
+export {
+    read_buffer,
+    read_buffer_by_time,
+    read_buffer_first,
+    read_buffer_last,
+    list_buffer_first,
+    list_buffer_last,
+    create_buffer,
+    update_buffer,
+    delete_buffer
+} from './buffer.js'
+export {
+    read_slice,
+    list_slice_by_name,
+    list_slice_by_device,
+    list_slice_by_model,
+    list_slice_by_device_model,
+    create_slice,
+    update_slice,
+    delete_slice
+} from './slice.js'
+export {
+    read_log,
+    list_log_by_time,
+    list_log_by_last_time,
+    list_log_by_range_time,
+    create_log,
+    update_log,
+    delete_log
+} from './log.js'
 
 
 /**

@@ -103,6 +103,121 @@ function array_buffer_to_base64(buffer) {
 
 /**
  * @param {string} base64 
+ * @param {number[]} types 
+ * @returns {(number|bigint|string|boolean|null)[]}
+ */
+export function get_data_value(base64, types) {
+    const view = new DataView(base64_to_array_buffer(base64))
+    let values = []
+    let offset = 0
+    for (const type of types) {
+        switch (type) {
+            case DataType.I8: 
+                values.push(view.getInt8(offset))
+                offset += 1
+                break
+            case DataType.I16: 
+                values.push(view.getInt16(offset))
+                offset += 2
+                break
+            case DataType.I32: 
+                values.push(view.getInt32(offset))
+                offset += 4
+                break
+            case DataType.I64: 
+                values.push(view.getBigInt64(offset))
+                offset += 8
+                break
+            case DataType.U8: 
+                values.push(view.getUint8(offset))
+                offset += 1
+                break
+            case DataType.U16: 
+                values.push(view.getUint16(offset))
+                offset += 2
+                break
+            case DataType.U32: 
+                values.push(view.getUint32(offset))
+                offset += 4
+                break
+            case DataType.U64: 
+                values.push(view.getBigUint64(offset))
+                offset += 8
+                break
+            case DataType.F32: 
+                values.push(view.getFloat32(offset))
+                offset += 4
+                break
+            case DataType.F64: 
+                values.push(view.getFloat64(offset))
+                offset += 8
+                break
+            case DataType.CHAR: 
+                values.push(String.fromCharCode(view.getUint8(offset)))
+                offset += 1
+                break
+            case DataType.BOOL: 
+                values.push(Boolean(view.getUint8(offset)))
+                offset += 1
+                break
+            default:
+                values.push(null)
+        }
+    }
+    return values
+}
+
+/**
+ * @param {(number|bigint|string|boolean)[]} values
+ */
+export function set_data_value(values) {
+    if (values === undefined) {
+        return {
+            bytes: "",
+            types: []
+        }
+    }
+    let base64 = ""
+    let types = []
+    for (const value of values) {
+        let type = DataType.NULLD
+        if (typeof value == "number") {
+            const buffer = new ArrayBuffer(8)
+            const view = new DataView(buffer)
+            if (Number.isInteger(value)) {
+                view.setInt32(0, value)
+                type = DataType.I32
+            } else {
+                view.setFloat64(0, value)
+                type = DataType.F64
+            }
+            base64 += array_buffer_to_base64(view.buffer)
+        }
+        if (typeof value == "bigint") {
+            const buffer = new ArrayBuffer(8)
+            const view = new DataView(buffer)
+            view.setBigInt64(0, value)
+            type = DataType.I64
+            base64 += array_buffer_to_base64(view.buffer)
+        }
+        else if (typeof value == "string") {
+            type = DataType.CHAR
+            base64 += btoa(value)
+        }
+        else if (typeof value == "boolean") {
+            type = DataType.BOOL
+            base64 += btoa(String.fromCharCode(value))
+        }
+        types.push(type)
+    }
+    return {
+        bytes: base64,
+        types: types
+    }
+}
+
+/**
+ * @param {string} base64 
  * @param {ConfigType} type 
  * @returns {(number|string|null)[]}
  */
