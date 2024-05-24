@@ -1,5 +1,5 @@
-import { get_config_value, set_config_value } from './common.js'
-import { DeviceServiceClient } from 'rmcs-resource-api/rmcs_resource_api/device_grpc_web_pb.js'
+import { get_config_value, set_config_value } from './common.js';
+import { DeviceServiceClient } from 'rmcs-resource-api/rmcs_resource_api/device_grpc_web_pb.js';
 import {
     DeviceId as _DeviceId, 
     SerialNumber as _SerialNumber, 
@@ -17,12 +17,12 @@ import {
     ConfigSchema as _ConfigSchema,
     ConfigUpdate as _ConfigUpdate,
     TypeSchema as _TypeSchema
-} from 'rmcs-resource-api/rmcs_resource_api/device_pb.js'
+} from 'rmcs-resource-api/rmcs_resource_api/device_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
-} from "../utility.js"
-import { get_type_schema } from './types.js'
+} from "../utility.js";
+import { get_type_schema } from './types.js';
 
 
 /**
@@ -41,7 +41,7 @@ import { get_type_schema } from './types.js'
 function get_device_id(r) {
     return {
         id: base64_to_uuid_hex(r.id)
-    }
+    };
 }
 
 /**
@@ -94,7 +94,7 @@ function get_device_schema(r) {
         description: r.description,
         device_type: get_type_schema(r.deviceType),
         configs: get_device_config_schema_vec(r.configsList)
-    }
+    };
 }
 
 /**
@@ -102,7 +102,7 @@ function get_device_schema(r) {
  * @returns {DeviceSchema[]}
  */
 function get_device_schema_vec(r) {
-    return r.map((v) => {return get_device_schema(v)})
+    return r.map((v) => {return get_device_schema(v)});
 }
 
 /**
@@ -137,7 +137,7 @@ function get_device_schema_vec(r) {
 function get_gateway_id(r) {
     return {
         id: base64_to_uuid_hex(r.id)
-    }
+    };
 }
 
 /**
@@ -167,7 +167,7 @@ function get_gateway_schema(r) {
         description: r.description,
         gateway_type: get_type_schema(r.gatewayType),
         configs: get_device_config_schema_vec(r.configsList)
-    }
+    };
 }
 
 /**
@@ -175,7 +175,7 @@ function get_gateway_schema(r) {
  * @returns {GatewaySchema[]}
  */
 function get_gateway_schema_vec(r) {
-    return r.map((v) => {return get_gateway_schema(v)})
+    return r.map((v) => {return get_gateway_schema(v)});
 }
 
 /**
@@ -208,7 +208,7 @@ function get_gateway_schema_vec(r) {
 function get_config_id(r) {
     return {
         id: r.id
-    }
+    };
 }
 
 /**
@@ -240,7 +240,7 @@ function get_device_config_schema(r) {
         name: r.name,
         value: get_config_value(r.configBytes, r.configType),
         category: r.category
-    }
+    };
 }
 
 /**
@@ -248,7 +248,7 @@ function get_device_config_schema(r) {
  * @returns {DeviceConfigSchema[]}
  */
 function get_device_config_schema_vec(r) {
-    return r.map((v) => {return get_device_config_schema(v)})
+    return r.map((v) => {return get_device_config_schema(v)});
 }
 
 /**
@@ -262,7 +262,7 @@ function get_gateway_config_schema(r) {
         name: r.name,
         value: get_config_value(r.configBytes, r.configType),
         category: r.category
-    }
+    };
 }
 
 /**
@@ -270,7 +270,7 @@ function get_gateway_config_schema(r) {
  * @returns {GatewayConfigSchema[]}
  */
 function get_gateway_config_schema_vec(r) {
-    return r.map((v) => {return get_gateway_config_schema(v)})
+    return r.map((v) => {return get_gateway_config_schema(v)});
 }
 
 /**
@@ -289,13 +289,13 @@ function get_gateway_config_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema)} callback The callback function(error, response)
  */
 export async function read_device(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const deviceId = new _DeviceId()
-    deviceId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const deviceId = new _DeviceId();
+    deviceId.setId(uuid_hex_to_base64(request.id));
     await client.readDevice(deviceId, {}, (e, r) => {
-        const response = r ? get_device_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -305,13 +305,13 @@ export async function read_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema)} callback The callback function(error, response)
  */
 export async function read_device_by_sn(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const serialNumber = new _SerialNumber()
-    serialNumber.setSerialNumber(request.serial_number)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const serialNumber = new _SerialNumber();
+    serialNumber.setSerialNumber(request.serial_number);
     await client.readDeviceBySn(serialNumber, {}, (e, r) => {
-        const response = r ? get_device_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -321,13 +321,13 @@ export async function read_device_by_sn(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_device_by_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayId = new _GatewayId()
-    gatewayId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayId = new _GatewayId();
+    gatewayId.setId(uuid_hex_to_base64(request.id));
     await client.listDeviceByGateway(gatewayId, {}, (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -337,13 +337,13 @@ export async function list_device_by_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_device_by_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeId = new _TypeId()
-    typeId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeId = new _TypeId();
+    typeId.setId(uuid_hex_to_base64(request.id));
     await client.listDeviceByType(typeId, {}, (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -353,13 +353,13 @@ export async function list_device_by_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_device_by_name(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const deviceName = new _DeviceName()
-    deviceName.setName(request.name)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const deviceName = new _DeviceName();
+    deviceName.setName(request.name);
     await client.listDeviceByName(deviceName, {}, (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -369,14 +369,14 @@ export async function list_device_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_device_by_gateway_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayType = new _DeviceGatewayType()
-    gatewayType.setId(uuid_hex_to_base64(request.gateway_id))
-    gatewayType.setId(uuid_hex_to_base64(request.type_id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayType = new _DeviceGatewayType();
+    gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
+    gatewayType.setId(uuid_hex_to_base64(request.type_id));
     await client.listDeviceByGatewayType(gatewayType, {}, (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -386,14 +386,14 @@ export async function list_device_by_gateway_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_device_by_gateway_name(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayName = new _DeviceGatewayName()
-    gatewayName.setId(uuid_hex_to_base64(request.gateway_id))
-    gatewayName.setId(request.name)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayName = new _DeviceGatewayName();
+    gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
+    gatewayName.setId(request.name);
     await client.listDeviceByGatewayName(gatewayName, {}, (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -403,20 +403,20 @@ export async function list_device_by_gateway_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceId)} callback The callback function(error, response)
  */
 export async function create_device(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeSchema = new _TypeSchema()
-    typeSchema.setId(uuid_hex_to_base64(request.type_id))
-    const deviceSchema = new _DeviceSchema()
-    deviceSchema.setId(uuid_hex_to_base64(request.id))
-    deviceSchema.setGatewayId(uuid_hex_to_base64(request.gateway_id))
-    deviceSchema.setSerialNumber(request.serial_number)
-    deviceSchema.setName(request.name)
-    deviceSchema.setDescription(request.description)
-    deviceSchema.setDeviceType(typeSchema)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeSchema = new _TypeSchema();
+    typeSchema.setId(uuid_hex_to_base64(request.type_id));
+    const deviceSchema = new _DeviceSchema();
+    deviceSchema.setId(uuid_hex_to_base64(request.id));
+    deviceSchema.setGatewayId(uuid_hex_to_base64(request.gateway_id));
+    deviceSchema.setSerialNumber(request.serial_number);
+    deviceSchema.setName(request.name);
+    deviceSchema.setDescription(request.description);
+    deviceSchema.setDeviceType(typeSchema);
     await client.createDevice(deviceSchema, {}, (e, r) => {
-        const response = r ? get_device_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -426,20 +426,20 @@ export async function create_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_device(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const deviceUpdate = new _DeviceUpdate()
-    deviceUpdate.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const deviceUpdate = new _DeviceUpdate();
+    deviceUpdate.setId(uuid_hex_to_base64(request.id));
     if (request.gateway_id) {
-        deviceUpdate.setGatewayId(uuid_hex_to_base64(request.gateway_id))
+        deviceUpdate.setGatewayId(uuid_hex_to_base64(request.gateway_id));
     }
-    deviceUpdate.setSerialNumber(request.serial_number)
-    deviceUpdate.setName(request.name)
-    deviceUpdate.setDescription(request.description)
-    deviceUpdate.setTypeId(request.type_id)
+    deviceUpdate.setSerialNumber(request.serial_number);
+    deviceUpdate.setName(request.name);
+    deviceUpdate.setDescription(request.description);
+    deviceUpdate.setTypeId(request.type_id);
     await client.updateDevice(deviceUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -449,13 +449,13 @@ export async function update_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_device(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const deviceId = new _DeviceId()
-    deviceId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const deviceId = new _DeviceId();
+    deviceId.setId(uuid_hex_to_base64(request.id));
     await client.deleteDevice(deviceId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -465,13 +465,13 @@ export async function delete_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewaySchema)} callback The callback function(error, response)
  */
 export async function read_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayId = new _GatewayId()
-    gatewayId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayId = new _GatewayId();
+    gatewayId.setId(uuid_hex_to_base64(request.id));
     await client.readGateway(gatewayId, {}, (e, r) => {
-        const response = r ? get_gateway_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -481,13 +481,13 @@ export async function read_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewaySchema)} callback The callback function(error, response)
  */
 export async function read_gateway_by_sn(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const serialNumber = new _SerialNumber()
-    serialNumber.setSerialNumber(request.serial_number)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const serialNumber = new _SerialNumber();
+    serialNumber.setSerialNumber(request.serial_number);
     await client.readGatewayBySn(serialNumber, {}, (e, r) => {
-        const response = r ? get_gateway_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -497,13 +497,13 @@ export async function read_gateway_by_sn(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewaySchema[])} callback The callback function(error, response)
  */
 export async function list_gateway_by_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeId = new _TypeId()
-    typeId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeId = new _TypeId();
+    typeId.setId(uuid_hex_to_base64(request.id));
     await client.listGatewayByType(typeId, {}, (e, r) => {
-        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -513,13 +513,13 @@ export async function list_gateway_by_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewaySchema[])} callback The callback function(error, response)
  */
 export async function list_gateway_by_name(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayName = new _GatewayName()
-    gatewayName.setName(request.name)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayName = new _GatewayName();
+    gatewayName.setName(request.name);
     await client.listGatewayByName(gatewayName, {}, (e, r) => {
-        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -529,19 +529,19 @@ export async function list_gateway_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewayId)} callback The callback function(error, response)
  */
 export async function create_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeSchema = new _TypeSchema()
-    typeSchema.setId(uuid_hex_to_base64(request.type_id))
-    const gatewaySchema = new _GatewaySchema()
-    gatewaySchema.setId(uuid_hex_to_base64(request.id))
-    gatewaySchema.setSerialNumber(request.serial_number)
-    gatewaySchema.setName(request.name)
-    gatewaySchema.setDescription(request.description)
-    gatewaySchema.setGatewayType(typeSchema)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeSchema = new _TypeSchema();
+    typeSchema.setId(uuid_hex_to_base64(request.type_id));
+    const gatewaySchema = new _GatewaySchema();
+    gatewaySchema.setId(uuid_hex_to_base64(request.id));
+    gatewaySchema.setSerialNumber(request.serial_number);
+    gatewaySchema.setName(request.name);
+    gatewaySchema.setDescription(request.description);
+    gatewaySchema.setGatewayType(typeSchema);
     await client.createGateway(gatewaySchema, {}, (e, r) => {
-        const response = r ? get_gateway_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -551,17 +551,17 @@ export async function create_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayUpdate = new _GatewayUpdate()
-    gatewayUpdate.setId(uuid_hex_to_base64(request.id))
-    gatewayUpdate.setSerialNumber(request.serial_number)
-    gatewayUpdate.setName(request.name)
-    gatewayUpdate.setDescription(request.description)
-    gatewayUpdate.setTypeId(request.type_id)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayUpdate = new _GatewayUpdate();
+    gatewayUpdate.setId(uuid_hex_to_base64(request.id));
+    gatewayUpdate.setSerialNumber(request.serial_number);
+    gatewayUpdate.setName(request.name);
+    gatewayUpdate.setDescription(request.description);
+    gatewayUpdate.setTypeId(request.type_id);
     await client.updateGateway(gatewayUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -571,13 +571,13 @@ export async function update_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayId = new _GatewayId()
-    gatewayId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayId = new _GatewayId();
+    gatewayId.setId(uuid_hex_to_base64(request.id));
     await client.deleteGateway(gatewayId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -587,13 +587,13 @@ export async function delete_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceConfigSchema)} callback The callback function(error, response)
  */
 export async function read_device_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configId = new _ConfigId()
-    configId.setId(request.id)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configId = new _ConfigId();
+    configId.setId(request.id);
     await client.readDeviceConfig(configId, {}, (e, r) => {
-        const response = r ? get_device_config_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_config_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -603,13 +603,13 @@ export async function read_device_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DeviceConfigSchema[])} callback The callback function(error, response)
  */
 export async function list_device_config_by_device(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const deviceId = new _DeviceId()
-    deviceId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const deviceId = new _DeviceId();
+    deviceId.setId(uuid_hex_to_base64(request.id));
     await client.listDeviceConfig(deviceId, {}, (e, r) => {
-        const response = r ? get_device_config_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_device_config_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -619,18 +619,18 @@ export async function list_device_config_by_device(resource, request, callback) 
  * @param {function(?grpc.web.RpcError, ?ConfigId)} callback The callback function(error, response)
  */
 export async function create_device_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configSchema = new _ConfigSchema()
-    configSchema.setDeviceId(uuid_hex_to_base64(request.device_id))
-    configSchema.setName(request.name)
-    const value = set_config_value(request.value)
-    configSchema.setConfigBytes(value.bytes)
-    configSchema.setConfigType(value.type)
-    configSchema.setCategory(request.category)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configSchema = new _ConfigSchema();
+    configSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
+    configSchema.setName(request.name);
+    const value = set_config_value(request.value);
+    configSchema.setConfigBytes(value.bytes);
+    configSchema.setConfigType(value.type);
+    configSchema.setCategory(request.category);
     await client.createDeviceConfig(configSchema, {}, (e, r) => {
-        const response = r ? get_config_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_config_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -640,17 +640,17 @@ export async function create_device_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_device_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configUpdate = new _ConfigUpdate()
-    configUpdate.setId(request.id)
-    configUpdate.setName(request.name)
-    const value = set_config_value(request.value)
-    configUpdate.setConfigBytes(value.bytes)
-    configUpdate.setConfigType(value.type)
-    configUpdate.setCategory(request.category)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configUpdate = new _ConfigUpdate();
+    configUpdate.setId(request.id);
+    configUpdate.setName(request.name);
+    const value = set_config_value(request.value);
+    configUpdate.setConfigBytes(value.bytes);
+    configUpdate.setConfigType(value.type);
+    configUpdate.setCategory(request.category);
     await client.updateDeviceConfig(configUpdate, {}, (e, r) => {
-        callback(e, r.toObject())
-    })
+        callback(e, r.toObject());
+    });
 }
 
 /**
@@ -660,12 +660,12 @@ export async function update_device_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_device_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configId = new _ConfigId()
-    configId.setId(request.id)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configId = new _ConfigId();
+    configId.setId(request.id);
     await client.deleteDeviceConfig(configId, {}, (e, r) => {
-        callback(e, r.toObject())
-    })
+        callback(e, r.toObject());
+    });
 }
 
 /**
@@ -675,13 +675,13 @@ export async function delete_device_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewayConfigSchema)} callback The callback function(error, response)
  */
 export async function read_gateway_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configId = new _ConfigId()
-    configId.setId(request.id)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configId = new _ConfigId();
+    configId.setId(request.id);
     await client.readGatewayConfig(configId, {}, (e, r) => {
-        const response = r ? get_gateway_config_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_config_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -691,13 +691,13 @@ export async function read_gateway_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GatewayConfigSchema[])} callback The callback function(error, response)
  */
 export async function list_gateway_config_by_gateway(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const gatewayId = new _GatewayId()
-    gatewayId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const gatewayId = new _GatewayId();
+    gatewayId.setId(uuid_hex_to_base64(request.id));
     await client.listGatewayConfig(gatewayId, {}, (e, r) => {
-        const response = r ? get_gateway_config_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_gateway_config_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -707,18 +707,18 @@ export async function list_gateway_config_by_gateway(resource, request, callback
  * @param {function(?grpc.web.RpcError, ?ConfigId)} callback The callback function(error, response)
  */
 export async function create_gateway_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configSchema = new _ConfigSchema()
-    configSchema.setDeviceId(uuid_hex_to_base64(request.gateway_id))
-    configSchema.setName(request.name)
-    const value = set_config_value(request.value)
-    configSchema.setConfigBytes(value.bytes)
-    configSchema.setConfigType(value.type)
-    configSchema.setCategory(request.category)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configSchema = new _ConfigSchema();
+    configSchema.setDeviceId(uuid_hex_to_base64(request.gateway_id));
+    configSchema.setName(request.name);
+    const value = set_config_value(request.value);
+    configSchema.setConfigBytes(value.bytes);
+    configSchema.setConfigType(value.type);
+    configSchema.setCategory(request.category);
     await client.createGatewayConfig(configSchema, {}, (e, r) => {
-        const response = r ? get_config_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_config_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -728,17 +728,17 @@ export async function create_gateway_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_gateway_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configUpdate = new _ConfigUpdate()
-    configUpdate.setId(request.id)
-    configUpdate.setName(request.name)
-    const value = set_config_value(request.value)
-    configUpdate.setConfigBytes(value.bytes)
-    configUpdate.setConfigType(value.type)
-    configUpdate.setCategory(request.category)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configUpdate = new _ConfigUpdate();
+    configUpdate.setId(request.id);
+    configUpdate.setName(request.name);
+    const value = set_config_value(request.value);
+    configUpdate.setConfigBytes(value.bytes);
+    configUpdate.setConfigType(value.type);
+    configUpdate.setCategory(request.category);
     await client.updateGatewayConfig(configUpdate, {}, (e, r) => {
-        callback(e, r.toObject())
-    })
+        callback(e, r.toObject());
+    });
 }
 
 /**
@@ -748,10 +748,10 @@ export async function update_gateway_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_gateway_config(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const configId = new _ConfigId()
-    configId.setId(request.id)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const configId = new _ConfigId();
+    configId.setId(request.id);
     await client.deleteGatewayConfig(configId, {}, (e, r) => {
-        callback(e, r.toObject())
-    })
+        callback(e, r.toObject());
+    });
 }

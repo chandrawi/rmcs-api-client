@@ -1,4 +1,4 @@
-import { ApiServiceClient } from "rmcs-auth-api/rmcs_auth_api/api_grpc_web_pb.js"
+import { ApiServiceClient } from "rmcs-auth-api/rmcs_auth_api/api_grpc_web_pb.js";
 import {
     ApiId as _ApiId,
     ApiName as _ApiName,
@@ -9,11 +9,11 @@ import {
     ProcedureName as _ProcedureName,
     ProcedureSchema as _ProcedureSchema,
     ProcedureUpdate as _ProcedureUpdate
-} from "rmcs-auth-api/rmcs_auth_api/api_pb.js"
+} from "rmcs-auth-api/rmcs_auth_api/api_pb.js";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
-} from "../utility.js"
+} from "../utility.js";
 
 
 /**
@@ -32,7 +32,7 @@ import {
 function getApiId(r) {
     return {
         id: base64_to_uuid_hex(r.id)
-    }
+    };
 }
 
 /**
@@ -71,7 +71,7 @@ function get_api_schema(r) {
         password: r.password,
         access_key: r.accessKey,
         procedures: get_procedure_schema_vec(r.proceduresList)
-    }
+    };
 }
 
 /**
@@ -79,7 +79,7 @@ function get_api_schema(r) {
  * @returns {ApiSchema[]}
  */
 function get_api_schema_vec(r) {
-    return r.map((v) => {return get_api_schema(v)})
+    return r.map((v) => {return get_api_schema(v)});
 }
 
 /**
@@ -105,7 +105,7 @@ function get_api_schema_vec(r) {
 function get_procedure_id(r) {
     return {
         id: base64_to_uuid_hex(r.id)
-    }
+    };
 }
 
 /**
@@ -134,7 +134,7 @@ function get_procedure_schema(r) {
         name: r.name,
         description: r.description,
         roles: r.rolesList
-    }
+    };
 }
 
 /**
@@ -142,7 +142,7 @@ function get_procedure_schema(r) {
  * @returns {ProcedureSchema[]}
  */
 function get_procedure_schema_vec(r) {
-    return r.map((v) => {return get_procedure_schema(v)})
+    return r.map((v) => {return get_procedure_schema(v)});
 }
 
 /**
@@ -160,13 +160,13 @@ function get_procedure_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
  */
 export async function read_api(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiId = new _ApiId()
-    apiId.setId(uuid_hex_to_base64(request.id))
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiId = new _ApiId();
+    apiId.setId(uuid_hex_to_base64(request.id));
     await client.readApi(apiId, {}, (e, r) => {
-        const response = r ? get_api_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_api_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -176,13 +176,13 @@ export async function read_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
  */
 export async function read_api_by_name(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiName = new _ApiName()
-    apiName.setName(request.name)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiName = new _ApiName();
+    apiName.setName(request.name);
     await client.readApiByName(apiName, {}, (e, r) => {
-        const response = r ? get_api_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_api_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -192,13 +192,13 @@ export async function read_api_by_name(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ApiSchema[])} callback The callback function(error, response)
  */
 export async function list_api_by_category(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiCategory = new _ApiCategory()
-    apiCategory.setCategory(request.category)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiCategory = new _ApiCategory();
+    apiCategory.setCategory(request.category);
     await client.listApiByCategory(apiCategory, {}, (e, r) => {
-        const response = r ? get_api_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_api_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -208,19 +208,19 @@ export async function list_api_by_category(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ApiId)} callback The callback function(error, response)
  */
 export async function create_api(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiSchema = new _ApiSchema()
-    apiSchema.setId(uuid_hex_to_base64(request.id))
-    apiSchema.setName(request.name)
-    apiSchema.setAddress(request.address)
-    apiSchema.setCategory(request.category)
-    apiSchema.setDescription(request.description)
-    apiSchema.setPassword(request.password)
-    apiSchema.setAccessKey(request.access_key)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiSchema = new _ApiSchema();
+    apiSchema.setId(uuid_hex_to_base64(request.id));
+    apiSchema.setName(request.name);
+    apiSchema.setAddress(request.address);
+    apiSchema.setCategory(request.category);
+    apiSchema.setDescription(request.description);
+    apiSchema.setPassword(request.password);
+    apiSchema.setAccessKey(request.access_key);
     await client.createApi(apiSchema, {}, (e, r) => {
-        const response = r ? getApiId(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? getApiId(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -230,19 +230,19 @@ export async function create_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_api(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiUpdate = new _ApiUpdate()
-    apiUpdate.setId(uuid_hex_to_base64(request.id))
-    apiUpdate.setName(request.name)
-    apiUpdate.setAddress(request.address)
-    apiUpdate.setCategory(request.category)
-    apiUpdate.setDescription(request.description)
-    apiUpdate.setPassword(request.password)
-    apiUpdate.setAccessKey(request.access_key)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiUpdate = new _ApiUpdate();
+    apiUpdate.setId(uuid_hex_to_base64(request.id));
+    apiUpdate.setName(request.name);
+    apiUpdate.setAddress(request.address);
+    apiUpdate.setCategory(request.category);
+    apiUpdate.setDescription(request.description);
+    apiUpdate.setPassword(request.password);
+    apiUpdate.setAccessKey(request.access_key);
     await client.updateApi(apiUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -252,13 +252,13 @@ export async function update_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_api(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiId = new _ApiId()
-    apiId.setId(uuid_hex_to_base64(request.id))
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiId = new _ApiId();
+    apiId.setId(uuid_hex_to_base64(request.id));
     await client.deleteApi(apiId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -268,46 +268,46 @@ export async function delete_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
 export async function read_procedure(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const procedureId = new _ProcedureId()
-    procedureId.setId(uuid_hex_to_base64(request.id))
+    const client = new ApiServiceClient(auth.address, null, null);
+    const procedureId = new _ProcedureId();
+    procedureId.setId(uuid_hex_to_base64(request.id));
     await client.readProcedure(procedureId, {}, (e, r) => {
-        const response = r ? get_procedure_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_procedure_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
  * Read an procedure by name
  * @param {Auth} auth Auth instance
- * @param {ProcedureName} request procedure name: name
+ * @param {ProcedureName} request procedure name: api_id, name
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
 export async function read_procedure_by_name(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const procedureName = new _ProcedureName()
-    procedureName.setApiId(uuid_hex_to_base64(request.api_id))
-    procedureName.setName(request.name)
-    await client.readProcedure(procedureName, {}, (e, r) => {
-        const response = r ? get_procedure_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+    const client = new ApiServiceClient(auth.address, null, null);
+    const procedureName = new _ProcedureName();
+    procedureName.setApiId(uuid_hex_to_base64(request.api_id));
+    procedureName.setName(request.name);
+    await client.readProcedureByName(procedureName, {}, (e, r) => {
+        const response = r ? get_procedure_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
  * Read procedures by api uuid
  * @param {Auth} auth Auth instance
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @param {function(?grpc.web.RpcError, ?ProcedureSchema[])} callback The callback function(error, response)
  */
 export async function list_procedure_by_api(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const apiId = new _ApiId()
-    apiId.setId(uuid_hex_to_base64(request.id))
+    const client = new ApiServiceClient(auth.address, null, null);
+    const apiId = new _ApiId();
+    apiId.setId(uuid_hex_to_base64(request.id));
     await client.listProcedureByApi(apiId, {}, (e, r) => {
-        const response = r ? get_procedure_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_procedure_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -317,16 +317,16 @@ export async function list_procedure_by_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
 export async function create_procedure(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const procedureSchema = new _ProcedureSchema()
-    procedureSchema.setId(uuid_hex_to_base64(request.id))
-    procedureSchema.setApiId(uuid_hex_to_base64(request.api_id))
-    procedureSchema.setName(request.name)
-    procedureSchema.setDescription(request.description)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const procedureSchema = new _ProcedureSchema();
+    procedureSchema.setId(uuid_hex_to_base64(request.id));
+    procedureSchema.setApiId(uuid_hex_to_base64(request.api_id));
+    procedureSchema.setName(request.name);
+    procedureSchema.setDescription(request.description);
     await client.createProcedure(procedureSchema, {}, (e, r) => {
-        const response = r ? get_procedure_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_procedure_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -336,15 +336,15 @@ export async function create_procedure(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
 export async function update_procedure(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const procedureUpdate = new _ProcedureUpdate()
-    procedureUpdate.setId(uuid_hex_to_base64(request.id))
-    procedureUpdate.setName(request.name)
-    procedureUpdate.setDescription(request.description)
+    const client = new ApiServiceClient(auth.address, null, null);
+    const procedureUpdate = new _ProcedureUpdate();
+    procedureUpdate.setId(uuid_hex_to_base64(request.id));
+    procedureUpdate.setName(request.name);
+    procedureUpdate.setDescription(request.description);
     await client.updateProcedure(procedureUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -354,11 +354,11 @@ export async function update_procedure(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
 export async function delete_procedure(auth, request, callback) {
-    const client = new ApiServiceClient(auth.address, null, null)
-    const procedureId = new _ProcedureId()
-    procedureId.setId(uuid_hex_to_base64(request.id))
+    const client = new ApiServiceClient(auth.address, null, null);
+    const procedureId = new _ProcedureId();
+    procedureId.setId(uuid_hex_to_base64(request.id));
     await client.deleteProcedure(procedureId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }

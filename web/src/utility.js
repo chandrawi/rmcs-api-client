@@ -95,3 +95,25 @@ export function string_to_array_buffer(str) {
     }
     return buf;
 }
+
+/**
+ * Convert base64 string to bytes (number[])
+ * @param {string} base64 
+ * @returns {number[]}
+ */
+export function base64_to_bytes(base64) {
+    return atob(base64).split("").map((v) => {
+        return v.charCodeAt();
+    });
+}
+
+/**
+ * Convert bytes (Uint8Array, number[]) to base64 string
+ * @param {Uint8Array|number[]} bytes 
+ * @returns {string}
+ */
+export function bytes_to_base64(bytes) {
+    return btoa(Array.from(bytes).map((v) => {
+        return String.fromCharCode(v);
+    }).join(""));
+}

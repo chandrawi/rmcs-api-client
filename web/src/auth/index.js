@@ -11,7 +11,7 @@ export {
     create_procedure,
     update_procedure,
     delete_procedure
-} from './api.js'
+} from './api.js';
 export {
     read_role,
     read_role_by_name,
@@ -22,7 +22,7 @@ export {
     delete_role,
     add_role_access,
     remove_role_access
-} from './role.js'
+} from './role.js';
 export {
     read_user,
     read_user_by_name,
@@ -32,7 +32,7 @@ export {
     delete_user,
     add_user_role,
     remove_user_role
-} from './user.js'
+} from './user.js';
 export {
     read_access_token,
     list_auth_token,
@@ -44,13 +44,13 @@ export {
     delete_access_token,
     delete_auth_token,
     delete_token_by_user
-} from './token.js'
+} from './token.js';
 export {
     user_login_key,
     user_login,
     user_refresh,
     user_logout
-} from './auth.js'
+} from './auth.js';
 
 
 /**
@@ -62,8 +62,8 @@ export {
 export class Auth {
 
     constructor(address, access_token) {
-        this.address = address
-        this.access_token = access_token
+        this.address = address;
+        this.access_token = access_token;
     }
 
 }

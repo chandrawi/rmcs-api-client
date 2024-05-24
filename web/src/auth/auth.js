@@ -1,4 +1,4 @@
-import { AuthServiceClient } from "rmcs-auth-api/rmcs_auth_api/auth_grpc_web_pb.js"
+import { AuthServiceClient } from "rmcs-auth-api/rmcs_auth_api/auth_grpc_web_pb.js";
 import {
     ApiKeyRequest as _ApiKeyRequest,
     ApiKeyResponse as _ApiKeyResponse,
@@ -7,12 +7,12 @@ import {
     UserLoginRequest as _UserLoginRequest,
     UserRefreshRequest as _UserRefreshRequest,
     UserLogoutRequest as _UserLogoutRequest
-} from "rmcs-auth-api/rmcs_auth_api/auth_pb.js"
+} from "rmcs-auth-api/rmcs_auth_api/auth_pb.js";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64,
     string_to_array_buffer
-} from "../utility.js"
+} from "../utility.js";
 
 
 /**
@@ -46,14 +46,14 @@ function get_access_token(r) {
         api_id: base64_to_uuid_hex(r.apiId),
         access_token: r.accessToken,
         refresh_token: r.refreshToken
-    }
+    };
 }
 
 /**
  * @typedef {Object} UserLoginResponse
  * @property {Uuid} user_id
  * @property {string} auth_token
- * @property {AccessTokenMap} access_tokens
+ * @property {AccessTokenMap[]} access_tokens
  */
 
 /**
@@ -65,7 +65,7 @@ function get_login_response(r) {
         user_id: base64_to_uuid_hex(r.userId),
         auth_token: r.authToken,
         access_tokens: r.accessTokensList.map((v) => {return get_access_token(v)})
-    }
+    };
 }
 
 /**
@@ -89,7 +89,7 @@ function get_refresh_response(r) {
     return {
         access_token: r.accessToken,
         refresh_token: r.refreshToken
-    }
+    };
 }
 
 /**
@@ -118,7 +118,7 @@ function importKey(pem) {
             ["encrypt"]
         );
     } catch {
-        return null
+        return null;
     }
 }
 
@@ -155,12 +155,12 @@ async function encryptMessage(message, encryptionKey)
  * @param {function(?grpc.web.RpcError, ?UserKeyResponse)} callback The callback function(error, response)
  */
 export async function user_login_key(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null)
-    const userKeyRequest = new _UserKeyRequest()
+    const client = new AuthServiceClient(auth.address, null, null);
+    const userKeyRequest = new _UserKeyRequest();
     await client.userLoginKey(userKeyRequest, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -170,22 +170,22 @@ export async function user_login_key(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserLoginResponse)} callback The callback function(error, response)
  */
 export async function user_login(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null)
-    const userKeyRequest = new _UserKeyRequest()
-    const userLoginRequest = new _UserLoginRequest()
-    userLoginRequest.setUsername(request.username)
+    const client = new AuthServiceClient(auth.address, null, null);
+    const userKeyRequest = new _UserKeyRequest();
+    const userLoginRequest = new _UserLoginRequest();
+    userLoginRequest.setUsername(request.username);
     await client.userLoginKey(userKeyRequest, {}, async (e, r) => {
         if (r) {
-            const key = r.toObject().publicKey
-            const pubkey = await importKey(key)
-            const ciphertext = await encryptMessage(request.password, pubkey)
-            userLoginRequest.setPassword(ciphertext)
+            const key = r.toObject().publicKey;
+            const pubkey = await importKey(key);
+            const ciphertext = await encryptMessage(request.password, pubkey);
+            userLoginRequest.setPassword(ciphertext);
             await client.userLogin(userLoginRequest, {}, (e, r) => {
-                const response = r ? get_login_response(r.toObject()) : null
-                callback(e, response)
-            })
+                const response = r ? get_login_response(r.toObject()) : null;
+                callback(e, response);
+            });
         }
-    })
+    });
 }
 
 /**
@@ -195,15 +195,15 @@ export async function user_login(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserRefreshResponse)} callback The callback function(error, response)
  */
 export async function user_refresh(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null)
-    const userRefreshRequest = new _UserRefreshRequest()
-    userRefreshRequest.setApiId(request.api_id)
-    userRefreshRequest.setAccessToken(request.access_token)
-    userRefreshRequest.setRefreshToken(request.refresh_token)
+    const client = new AuthServiceClient(auth.address, null, null);
+    const userRefreshRequest = new _UserRefreshRequest();
+    userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
+    userRefreshRequest.setAccessToken(request.access_token);
+    userRefreshRequest.setRefreshToken(request.refresh_token);
     await client.userRefresh(userRefreshRequest, {}, (e, r) => {
-        const response = r ? get_refresh_response(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_refresh_response(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -213,12 +213,12 @@ export async function user_refresh(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function user_logout(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null)
-    const userLogoutRequest = new _UserLogoutRequest()
-    userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id))
-    userLogoutRequest.setAuthToken(request.auth_token)
+    const client = new AuthServiceClient(auth.address, null, null);
+    const userLogoutRequest = new _UserLogoutRequest();
+    userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
+    userLogoutRequest.setAuthToken(request.auth_token);
     await client.userLogout(userLogoutRequest, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }

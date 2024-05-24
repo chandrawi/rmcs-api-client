@@ -13,7 +13,7 @@ export {
     create_model_config,
     update_model_config,
     delete_model_config
-} from './model.js'
+} from './model.js';
 export {
     read_device,
     read_device_by_sn,
@@ -42,7 +42,7 @@ export {
     create_gateway_config,
     update_gateway_config,
     delete_gateway_config
-} from './device.js'
+} from './device.js';
 export {
     read_type,
     list_type_by_name,
@@ -51,7 +51,7 @@ export {
     delete_type,
     add_type_model,
     remove_type_model
-} from './types.js'
+} from './types.js';
 export {
     read_group_model,
     list_group_model_by_name,
@@ -80,7 +80,7 @@ export {
     delete_group_gateway,
     add_group_gateway_member,
     remove_group_gateway_member,
-} from './group.js'
+} from './group.js';
 export {
     read_data,
     list_data_by_time,
@@ -99,7 +99,7 @@ export {
     create_data_with_model,
     delete_data,
     delete_data_with_model
-} from './data.js'
+} from './data.js';
 export {
     read_buffer,
     read_buffer_by_time,
@@ -110,7 +110,7 @@ export {
     create_buffer,
     update_buffer,
     delete_buffer
-} from './buffer.js'
+} from './buffer.js';
 export {
     read_slice,
     list_slice_by_name,
@@ -120,7 +120,7 @@ export {
     create_slice,
     update_slice,
     delete_slice
-} from './slice.js'
+} from './slice.js';
 export {
     read_log,
     list_log_by_time,
@@ -129,7 +129,7 @@ export {
     create_log,
     update_log,
     delete_log
-} from './log.js'
+} from './log.js';
 
 
 /**
@@ -141,8 +141,8 @@ export {
 export class Resource {
 
     constructor(address, access_token) {
-        this.address = address
-        this.access_token = access_token
+        this.address = address;
+        this.access_token = access_token;
     }
 
 }

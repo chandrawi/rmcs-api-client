@@ -1,15 +1,15 @@
-import { DeviceServiceClient } from 'rmcs-resource-api/rmcs_resource_api/device_grpc_web_pb.js'
+import { DeviceServiceClient } from 'rmcs-resource-api/rmcs_resource_api/device_grpc_web_pb.js';
 import {
     TypeId as _TypeId, 
     TypeName as _TypeName,
     TypeSchema as _TypeSchema,
     TypeUpdate as _TypeUpdate,
     TypeModel as _TypeModel
-} from 'rmcs-resource-api/rmcs_resource_api/device_pb.js'
+} from 'rmcs-resource-api/rmcs_resource_api/device_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
-} from "../utility.js"
+} from "../utility.js";
 
 
 /**
@@ -33,7 +33,7 @@ import {
 function get_type_id(r) {
     return {
         id: base64_to_uuid_hex(r.id)
-    }
+    };
 }
 
 /**
@@ -54,7 +54,7 @@ export function get_type_schema(r) {
         name: r.name,
         description: r.description,
         models: r.modelsList.map((v) => {return base64_to_uuid_hex(v)})
-    }
+    };
 }
 
 /**
@@ -62,7 +62,7 @@ export function get_type_schema(r) {
  * @returns {TypeSchema[]}
  */
 function get_type_schema_vec(r) {
-    return r.map((v) => {return get_type_schema(v)})
+    return r.map((v) => {return get_type_schema(v)});
 }
 
 /**
@@ -86,13 +86,13 @@ function get_type_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?TypeSchema)} callback The callback function(error, response)
  */
 export async function read_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeId = new _TypeId()
-    typeId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeId = new _TypeId();
+    typeId.setId(uuid_hex_to_base64(request.id));
     await client.readType(typeId, {}, (e, r) => {
-        const response = r ? get_type_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_type_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -102,13 +102,13 @@ export async function read_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?TypeSchema[])} callback The callback function(error, response)
  */
 export async function list_type_by_name(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeName = new _TypeName()
-    typeName.setName(request.name)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeName = new _TypeName();
+    typeName.setName(request.name);
     await client.listTypeByName(typeName, {}, (e, r) => {
-        const response = r ? get_type_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_type_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -118,15 +118,15 @@ export async function list_type_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?TypeId)} callback The callback function(error, response)
  */
 export async function create_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeSchema = new _TypeSchema()
-    typeSchema.setId(uuid_hex_to_base64(request.id))
-    typeSchema.setName(request.name)
-    typeSchema.setDescription(request.description)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeSchema = new _TypeSchema();
+    typeSchema.setId(uuid_hex_to_base64(request.id));
+    typeSchema.setName(request.name);
+    typeSchema.setDescription(request.description);
     await client.createType(typeSchema, {}, (e, r) => {
-        const response = r ? get_type_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_type_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -136,15 +136,15 @@ export async function create_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeUpdate = new _TypeUpdate()
-    typeUpdate.setId(uuid_hex_to_base64(request.id))
-    typeUpdate.setName(request.name)
-    typeUpdate.setDescription(request.description)
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeUpdate = new _TypeUpdate();
+    typeUpdate.setId(uuid_hex_to_base64(request.id));
+    typeUpdate.setName(request.name);
+    typeUpdate.setDescription(request.description);
     await client.updateType(typeUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -154,13 +154,13 @@ export async function update_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_type(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeId = new _TypeId()
-    typeId.setId(uuid_hex_to_base64(request.id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeId = new _TypeId();
+    typeId.setId(uuid_hex_to_base64(request.id));
     await client.deleteType(typeId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -170,14 +170,14 @@ export async function delete_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_type_model(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeModel = new _TypeModel()
-    typeModel.setId(uuid_hex_to_base64(request.id))
-    typeModel.setModelId(uuid_hex_to_base64(request.model_id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeModel = new _TypeModel();
+    typeModel.setId(uuid_hex_to_base64(request.id));
+    typeModel.setModelId(uuid_hex_to_base64(request.model_id));
     await client.addTypeModel(typeModel, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -187,12 +187,12 @@ export async function add_type_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_type_model(resource, request, callback) {
-    const client = new DeviceServiceClient(resource.address, null, null)
-    const typeModel = new _TypeModel()
-    typeModel.setId(uuid_hex_to_base64(request.id))
-    typeModel.setModelId(uuid_hex_to_base64(request.model_id))
+    const client = new DeviceServiceClient(resource.address, null, null);
+    const typeModel = new _TypeModel();
+    typeModel.setId(uuid_hex_to_base64(request.id));
+    typeModel.setModelId(uuid_hex_to_base64(request.model_id));
     await client.removeTypeModel(typeModel, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }

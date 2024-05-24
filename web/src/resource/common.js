@@ -88,7 +88,7 @@ function base64_to_array_buffer(base64) {
     for (let i=0; i<binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
-    return bytes.buffer
+    return bytes.buffer;
 }
 
 /**

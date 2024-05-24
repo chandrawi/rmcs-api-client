@@ -1,5 +1,5 @@
-import { get_data_value, set_data_value } from './common.js'
-import { BufferServiceClient } from 'rmcs-resource-api/rmcs_resource_api/buffer_grpc_web_pb.js'
+import { get_data_value, set_data_value } from './common.js';
+import { BufferServiceClient } from 'rmcs-resource-api/rmcs_resource_api/buffer_grpc_web_pb.js';
 import {
     BufferId as _BufferId, 
     BufferTime as _BufferTime, 
@@ -7,11 +7,11 @@ import {
     BuffersSelector as _BuffersSelector,
     BufferSchema as _BufferSchema,
     BufferUpdate as _BufferUpdate
-} from 'rmcs-resource-api/rmcs_resource_api/buffer_pb.js'
+} from 'rmcs-resource-api/rmcs_resource_api/buffer_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
-} from "../utility.js"
+} from "../utility.js";
 
 
 /**
@@ -30,7 +30,7 @@ import {
 function get_buffer_id(r) {
     return {
         id: r.id
-    }
+    };
 }
 
 /**
@@ -62,7 +62,7 @@ function get_buffer_id(r) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
- * @property {number|bigint|string|boolean} data
+ * @property {(number|bigint|string|boolean)[]} data
  * @property {number|string} status
  */
 
@@ -78,7 +78,7 @@ function get_buffer_schema(r) {
         timestamp: new Date(r.timestamp / 1000),
         data: get_data_value(r.dataBytes, r.dataTypeList),
         status: get_buffer_status(r.status)
-    }
+    };
 }
 
 /**
@@ -86,7 +86,7 @@ function get_buffer_schema(r) {
  * @returns {BufferSchema[]}
  */
 function get_buffer_schema_vec(r) {
-    return r.map((v) => {return get_buffer_schema(v)})
+    return r.map((v) => {return get_buffer_schema(v)});
 }
 
 /**
@@ -102,31 +102,31 @@ function get_buffer_schema_vec(r) {
  */
 function get_buffer_status(status) {
     switch (status) {
-        case 0: return "DEFAULT"
-        case 1: return "ERROR"
-        case 2: return "DELETE"
-        case 3: return "HOLD"
-        case 4: return "SEND_UPLINK"
-        case 5: return "SEND_DOWNLINK"
-        case 6: return "TRANSFER_LOCAL"
-        case 7: return "TRANSFER_GATEWAY"
-        case 8: return "TRANSFER_SERVER"
-        case 9: return "BACKUP"
-        case 10: return "RESTORE"
-        case 11: return "ANALYSIS_1"
-        case 12: return "ANALYSIS_2"
-        case 13: return "ANALYSIS_3"
-        case 14: return "ANALYSIS_4"
-        case 15: return "ANALYSIS_5"
-        case 16: return "ANALYSIS_6"
-        case 17: return "ANALYSIS_7"
-        case 18: return "ANALYSIS_8"
-        case 19: return "ANALYSIS_9"
-        case 20: return "ANALYSIS_10"
-        case 21: return "EXTERNAL_OUTPUT"
-        case 22: return "EXTERNAL_INPUT"
+        case 0: return "DEFAULT";
+        case 1: return "ERROR";
+        case 2: return "DELETE";
+        case 3: return "HOLD";
+        case 4: return "SEND_UPLINK";
+        case 5: return "SEND_DOWNLINK";
+        case 6: return "TRANSFER_LOCAL";
+        case 7: return "TRANSFER_GATEWAY";
+        case 8: return "TRANSFER_SERVER";
+        case 9: return "BACKUP";
+        case 10: return "RESTORE";
+        case 11: return "ANALYSIS_1";
+        case 12: return "ANALYSIS_2";
+        case 13: return "ANALYSIS_3";
+        case 14: return "ANALYSIS_4";
+        case 15: return "ANALYSIS_5";
+        case 16: return "ANALYSIS_6";
+        case 17: return "ANALYSIS_7";
+        case 18: return "ANALYSIS_8";
+        case 19: return "ANALYSIS_9";
+        case 20: return "ANALYSIS_10";
+        case 21: return "EXTERNAL_OUTPUT";
+        case 22: return "EXTERNAL_INPUT";
     }
-    return status
+    return status;
 }
 
 /**
@@ -135,37 +135,37 @@ function get_buffer_status(status) {
  */
 function set_buffer_status(status) {
     if (typeof status == "number") {
-        return status
+        return status;
     }
     if (typeof status == "string") {
-        status = status.replace(/[a-z][A-Z]/, s => `${s.charAt(0)}_${s.charAt(1)}`)
+        status = status.replace(/[a-z][A-Z]/, s => `${s.charAt(0)}_${s.charAt(1)}`);
         switch (status.toUpperCase()) {
-            case "DEFAULT": return 0
-            case "ERROR": return 1
-            case "DELETE": return 2
-            case "HOLD": return 3
-            case "SEND_UPLINK": return 4
-            case "SEND_DOWNLINK": return 5
-            case "TRANSFER_LOCAL": return 6
-            case "TRANSFER_GATEWAY": return 7
-            case "TRANSFER_SERVER": return 8
-            case "BACKUP": return 9
-            case "RESTORE": return 10
-            case "ANALYSIS_1": return 11
-            case "ANALYSIS_2": return 12
-            case "ANALYSIS_3": return 13
-            case "ANALYSIS_4": return 14
-            case "ANALYSIS_5": return 15
-            case "ANALYSIS_6": return 16
-            case "ANALYSIS_7": return 17
-            case "ANALYSIS_8": return 18
-            case "ANALYSIS_9": return 19
-            case "ANALYSIS_10": return 20
-            case "EXTERNAL_INPUT": return 21
-            case "EXTERNAL_OUTPUT": return 22
+            case "DEFAULT": return 0;
+            case "ERROR": return 1;
+            case "DELETE": return 2;
+            case "HOLD": return 3;
+            case "SEND_UPLINK": return 4;
+            case "SEND_DOWNLINK": return 5;
+            case "TRANSFER_LOCAL": return 6;
+            case "TRANSFER_GATEWAY": return 7;
+            case "TRANSFER_SERVER": return 8;
+            case "BACKUP": return 9;
+            case "RESTORE": return 10;
+            case "ANALYSIS_1": return 11;
+            case "ANALYSIS_2": return 12;
+            case "ANALYSIS_3": return 13;
+            case "ANALYSIS_4": return 14;
+            case "ANALYSIS_5": return 15;
+            case "ANALYSIS_6": return 16;
+            case "ANALYSIS_7": return 17;
+            case "ANALYSIS_8": return 18;
+            case "ANALYSIS_9": return 19;
+            case "ANALYSIS_10": return 20;
+            case "EXTERNAL_INPUT": return 21;
+            case "EXTERNAL_OUTPUT": return 22;
         }
     }
-    return 0
+    return 0;
 }
 
 
@@ -176,13 +176,13 @@ function set_buffer_status(status) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferId = new _BufferId()
-    bufferId.setId(request.id)
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferId = new _BufferId();
+    bufferId.setId(request.id);
     await client.readBuffer(bufferId, {}, (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -192,16 +192,16 @@ export async function read_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_by_time(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferTime = new _BufferTime()
-    bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id))
-    bufferTime.setModelId(uuid_hex_to_base64(request.model_id))
-    bufferTime.setTimestamp(request.timestamp.valueOf() * 1000)
-    bufferTime.setStatus(set_buffer_status(request.status))
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferTime = new _BufferTime();
+    bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferTime.setStatus(set_buffer_status(request.status));
     await client.readBufferByTime(bufferTime, {}, (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -211,21 +211,21 @@ export async function read_buffer_by_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_first(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferSelector = new _BufferSelector()
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferSelector = new _BufferSelector();
     if (request.device_id) {
-        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id))
+        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id))
+        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
     if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status))
+        bufferSelector.setStatus(set_buffer_status(request.status));
     }
     await client.readBufferFirst(bufferSelector, {}, (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -235,21 +235,21 @@ export async function read_buffer_first(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_last(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferSelector = new _BufferSelector()
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferSelector = new _BufferSelector();
     if (request.device_id) {
-        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id))
+        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id))
+        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
     if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status))
+        bufferSelector.setStatus(set_buffer_status(request.status));
     }
     await client.readBufferLast(bufferSelector, {}, (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema(r.toObject().result) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -259,22 +259,22 @@ export async function read_buffer_last(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
 export async function list_buffer_first(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const buffersSelector = new _BuffersSelector()
+    const client = new BufferServiceClient(resource.address, null, null);
+    const buffersSelector = new _BuffersSelector();
     if (request.device_id) {
-        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id))
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id))
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
     if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status))
+        buffersSelector.setStatus(set_buffer_status(request.status));
     }
-    buffersSelector.setNumber(request.number)
+    buffersSelector.setNumber(request.number);
     await client.listBufferFirst(buffersSelector, {}, (e, r) => {
-        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -284,22 +284,22 @@ export async function list_buffer_first(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
 export async function list_buffer_last(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const buffersSelector = new _BuffersSelector()
+    const client = new BufferServiceClient(resource.address, null, null);
+    const buffersSelector = new _BuffersSelector();
     if (request.device_id) {
-        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id))
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id))
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
     if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status))
+        buffersSelector.setStatus(set_buffer_status(request.status));
     }
-    buffersSelector.setNumber(request.number)
+    buffersSelector.setNumber(request.number);
     await client.listBufferLast(buffersSelector, {}, (e, r) => {
-        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -309,21 +309,21 @@ export async function list_buffer_last(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferId)} callback The callback function(error, response)
  */
 export async function create_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferSchema = new _BufferSchema()
-    bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id))
-    bufferSchema.setModelId(uuid_hex_to_base64(request.model_id))
-    bufferSchema.setTimestamp(request.timestamp.valueOf() * 1000)
-    const value = set_data_value(request.data)
-    bufferSchema.setDataBytes(value.bytes)
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferSchema = new _BufferSchema();
+    bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferSchema.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferSchema.setTimestamp(request.timestamp.valueOf() * 1000);
+    const value = set_data_value(request.data);
+    bufferSchema.setDataBytes(value.bytes);
     for (const type of value.types) {
-        bufferSchema.addDataType(type)
+        bufferSchema.addDataType(type);
     }
-    bufferSchema.setStatus(set_buffer_status(request.status))
+    bufferSchema.setStatus(set_buffer_status(request.status));
     await client.createBuffer(bufferSchema, {}, (e, r) => {
-        const response = r ? get_buffer_id(r.toObject()) : null
-        callback(e, response)
-    })
+        const response = r ? get_buffer_id(r.toObject()) : null;
+        callback(e, response);
+    });
 }
 
 /**
@@ -333,21 +333,21 @@ export async function create_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferUpdate = new _BufferUpdate()
-    bufferUpdate.setId(request.id)
-    const ty = typeof request.data
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferUpdate = new _BufferUpdate();
+    bufferUpdate.setId(request.id);
+    const ty = typeof request.data;
     if (ty == "number" || ty == "string" || ty == "bigint" || ty == "boolean") {
-        const value = set_data_value(request.data)
-        bufferUpdate.setDataBytes(value.bytes)
+        const value = set_data_value(request.data);
+        bufferUpdate.setDataBytes(value.bytes);
         for (const type of value.types) {
-            bufferUpdate.addDataType(type)
+            bufferUpdate.addDataType(type);
         }
     }
-    bufferUpdate.setStatus(set_buffer_status(request.status))
+    bufferUpdate.setStatus(set_buffer_status(request.status));
     await client.updateBuffer(bufferUpdate, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
+        const response = r ? r.toObject() : null;
+        callback(e, response);
     })
 }
 
@@ -358,11 +358,11 @@ export async function update_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null)
-    const bufferId = new _BufferId()
-    bufferId.setId(request.id)
+    const client = new BufferServiceClient(resource.address, null, null);
+    const bufferId = new _BufferId();
+    bufferId.setId(request.id);
     await client.deleteBuffer(bufferId, {}, (e, r) => {
-        const response = r ? r.toObject() : null
-        callback(e, response)
-    })
+        const response = r ? r.toObject() : null;
+        callback(e, response);
+    });
 }
