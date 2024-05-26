@@ -4,7 +4,7 @@ use rmcs_resource_db::schema::value::{DataType, ConfigValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
-    ModelSchema, ModelId, ModelName, ModelCategory, ModelNameCategory, ModelUpdate, ModelTypes,
+    ModelSchema, ModelId, ModelName, ModelCategory, ModelNameCategory, TypeId, ModelUpdate, 
     ConfigSchema, ConfigId, ConfigUpdate
 };
 use crate::resource::Resource;
@@ -74,7 +74,22 @@ pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str,
     Ok(response.results)
 }
 
-pub(crate) async fn create_model(resource: &Resource, id: Uuid, category: &str, name: &str, description: Option<&str>)
+pub(crate) async fn list_model_by_type(resource: &Resource, type_id: Uuid)
+    -> Result<Vec<ModelSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TypeId {
+        id: type_id.as_bytes().to_vec()
+    });
+    let response = client.list_model_by_type(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn create_model(resource: &Resource, id: Uuid, data_type: &[DataType], category: &str, name: &str, description: Option<&str>)
     -> Result<Uuid, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -85,7 +100,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, category: &str, 
         category: category.to_owned(),
         name: name.to_owned(),
         description: description.unwrap_or("").to_owned(),
-        types: Vec::new(),
+        data_type: data_type.into_iter().map(|ty| i16::from(ty.to_owned()) as i32).collect::<Vec<i32>>().to_owned(),
         configs: Vec::new()
     });
     let response = client.create_model(request)
@@ -94,7 +109,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, category: &str, 
     Ok(Uuid::from_slice(&response.id).unwrap_or_default())
 }
 
-pub(crate) async fn update_model(resource: &Resource, id: Uuid, category: Option<&str>, name: Option<&str>, description: Option<&str>)
+pub(crate) async fn update_model(resource: &Resource, id: Uuid, data_type: Option<&[DataType]>, category: Option<&str>, name: Option<&str>, description: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -104,7 +119,12 @@ pub(crate) async fn update_model(resource: &Resource, id: Uuid, category: Option
         id: id.as_bytes().to_vec(),
         category: category.map(|s| s.to_owned()),
         name: name.map(|s| s.to_owned()),
-        description: description.map(|s| s.to_owned())
+        description: description.map(|s| s.to_owned()),
+        data_type: data_type.map(|ty| {
+            ty.into_iter()
+                .map(|t| i16::from(t.to_owned()) as i32)
+                .collect::<Vec<i32>>()
+        }).unwrap_or_default()
     });
     client.update_model(request)
         .await?;
@@ -121,37 +141,6 @@ pub(crate) async fn delete_model(resource: &Resource, id: Uuid)
         id: id.as_bytes().to_vec()
     });
     client.delete_model(request)
-        .await?;
-    Ok(())
-}
-
-pub(crate) async fn add_model_type(resource: &Resource, id: Uuid, types: &[DataType])
-    -> Result<(), Status>
-{
-    let interceptor = TokenInterceptor(resource.access_token.clone());
-    let mut client = 
-        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(ModelTypes {
-        id: id.as_bytes().to_vec(),
-        types: types.into_iter()
-            .map(|s| Into::<common::DataType>::into(s.clone()).into())
-            .collect()
-    });
-    client.add_model_type(request)
-        .await?;
-    Ok(())
-}
-
-pub(crate) async fn remove_model_type(resource: &Resource, id: Uuid)
-    -> Result<(), Status>
-{
-    let interceptor = TokenInterceptor(resource.access_token.clone());
-    let mut client = 
-        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(ModelId {
-        id: id.as_bytes().to_vec()
-    });
-    client.remove_model_type(request)
         .await?;
     Ok(())
 }
