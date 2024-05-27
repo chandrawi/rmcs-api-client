@@ -25,10 +25,8 @@ def test_resource():
     utility.start_resource_server()
 
     # create new data model and add data types
-    model_id = resource.create_model(uuid.uuid4(), "UPLINK", "speed and direction", None)
-    model_buf_id = resource.create_model(uuid.uuid4(), "UPLINK", "buffer 4", None)
-    resource.add_model_type(model_id, [DataType.F64, DataType.F64])
-    resource.add_model_type(model_buf_id, [DataType.U8, DataType.U8, DataType.U8, DataType.U8])
+    model_id = resource.create_model(uuid.uuid4(), [DataType.F64, DataType.F64], "UPLINK", "speed and direction", None)
+    model_buf_id = resource.create_model(uuid.uuid4(), [DataType.U8, DataType.U8, DataType.U8, DataType.U8], "UPLINK", "buffer 4", None)
     # create scale, symbol, and threshold configurations for new created model
     resource.create_model_config(model_id, 0, "scale_0", "speed", "SCALE")
     resource.create_model_config(model_id, 1, "scale_1", "direction", "SCALE")
@@ -71,7 +69,7 @@ def test_resource():
     assert model_id in model_ids
     assert model.name == "speed and direction"
     assert model.category == "UPLINK"
-    assert model.types == [DataType.F64, DataType.F64]
+    assert model.data_type == [DataType.F64, DataType.F64]
     # read model configurations
     model_configs = resource.list_model_config_by_model(model_id)
     config_vec =[]
@@ -114,12 +112,10 @@ def test_resource():
     assert group_device.category == "APPLICATION"
 
     # update model
-    resource.update_model(model_buf_id, None, "buffer 2 integer", "Model for store 2 i32 temporary data")
-    resource.remove_model_type(model_buf_id)
-    resource.add_model_type(model_buf_id, [DataType.I32, DataType.I32])
+    resource.update_model(model_buf_id, [DataType.I32, DataType.I32], None, "buffer 2 integer", "Model for store 2 i32 temporary data")
     model = resource.read_model(model_buf_id)
     assert model.name == "buffer 2 integer"
-    assert model.types == [DataType.I32, DataType.I32]
+    assert model.data_type == [DataType.I32, DataType.I32]
     # update model configurations
     resource.update_model_config(model_cfg_id, None, 238, None)
     config = resource.read_model_config(model_cfg_id)

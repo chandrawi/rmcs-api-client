@@ -144,15 +144,10 @@ def test_secured():
         res_user.create_model(uuid.uuid4(), "UPLINK", "name", "")
     model_id = res_admin.create_model(
         id=uuid.uuid4(),
+        data_type=[DataType.F64],
         category="UPLINK",
         name="name",
         description=""
-    )
-
-    # add model type using admin service
-    res_admin.add_model_type(
-        id=model_id,
-        types=[DataType.F64]
     )
 
     # read created model using user service
@@ -167,7 +162,6 @@ def test_secured():
     res_user.read_model(model_id)
 
     # remove model type and delete model
-    res_admin.remove_model_type(model_id)
     res_admin.delete_model(model_id)
     with pytest.raises(Exception):
         res_admin.read_model(model_id)

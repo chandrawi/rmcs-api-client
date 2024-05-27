@@ -26,12 +26,12 @@ class ModelSchema:
     category: str
     name: str
     description: str
-    types: List[DataType]
+    data_type: List[DataType]
     configs: List[List[ModelConfigSchema]]
 
     def from_response(r):
         types = []
-        for ty in r.types:
+        for ty in r.data_type:
             types.append(DataType(ty))
         configs = []
         for conf_vec in r.configs:
@@ -75,26 +75,41 @@ def list_model_by_name_category(resource, name: str, category: str):
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls
 
-def create_model(resource, id: UUID, category: str, name: str, description: str):
+def list_model_by_type(resource, type_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.TypeId(id=type_id)
+        response = stub.ListModelByType(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(ModelSchema.from_response(result))
+        return ls
+
+def create_model(resource, id: UUID, data_type: List[DataType], category: str, name: str, description: str):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        types = []
+        for ty in data_type: types.append(ty.value)
         request = model_pb2.ModelSchema(
             id=id.bytes,
             category=category,
             name=name,
             description=description,
+            data_type=types
         )
         response = stub.CreateModel(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_model(resource, id: UUID, category: Optional[str], name: Optional[str], description: Optional[str]):
+def update_model(resource, id: UUID, data_type: Optional[List[DataType]], category: Optional[str], name: Optional[str], description: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
+        types = []
+        for ty in data_type: types.append(ty.value)
         request = model_pb2.ModelUpdate(
             id=id.bytes,
             category=category,
             name=name,
-            description=description
+            description=description,
+            data_type=types
         )
         stub.UpdateModel(request=request, metadata=resource.metadata)
 
@@ -103,20 +118,6 @@ def delete_model(resource, id: UUID):
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ModelId(id=id.bytes)
         stub.DeleteModel(request=request, metadata=resource.metadata)
-
-def add_model_type(resource, id: UUID, types: List[DataType]):
-    with grpc.insecure_channel(resource.address) as channel:
-        stub = model_pb2_grpc.ModelServiceStub(channel)
-        data_types = []
-        for ty in types: data_types.append(ty.value)
-        request = model_pb2.ModelTypes(id=id.bytes, types=data_types)
-        stub.AddModelType(request=request, metadata=resource.metadata)
-
-def remove_model_type(resource, id: UUID):
-    with grpc.insecure_channel(resource.address) as channel:
-        stub = model_pb2_grpc.ModelServiceStub(channel)
-        request = model_pb2.ModelTypes(id=id.bytes)
-        stub.RemoveModelType(request=request, metadata=resource.metadata)
 
 def read_model_config(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:

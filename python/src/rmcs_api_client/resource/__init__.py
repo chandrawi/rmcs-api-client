@@ -32,20 +32,17 @@ class Resource:
     def list_model_by_name_category(self, name: str, category: str) -> List[ModelSchema]:
         return _model.list_model_by_name_category(self, name, category)
 
-    def create_model(self, id: UUID, category: str, name: str, description: str) -> UUID:
-        return _model.create_model(self, id, category, name, description)
+    def list_model_by_type(self, type_id: UUID) -> List[ModelSchema]:
+        return _model.list_model_by_type(self, type_id)
 
-    def update_model(self, id: UUID, category: Optional[str], name: Optional[str], description: Optional[str]):
-        return _model.update_model(self, id, category, name, description)
+    def create_model(self, id: UUID, data_type: List[DataType], category: str, name: str, description: str) -> UUID:
+        return _model.create_model(self, id, data_type, category, name, description)
+
+    def update_model(self, id: UUID, data_type: Optional[List[DataType]], category: Optional[str], name: Optional[str], description: Optional[str]):
+        return _model.update_model(self, id, data_type, category, name, description)
 
     def delete_model(self, id: UUID):
         return _model.delete_model(self, id)
-
-    def add_model_type(self, id: UUID, types: List[DataType]):
-        return _model.add_model_type(self, id, types)
-
-    def remove_model_type(self, id: UUID):
-        return _model.remove_model_type(self, id)
 
     def read_model_config(self, id: int) -> ModelConfigSchema:
         return _model.read_model_config(self, id)
@@ -263,38 +260,11 @@ class Resource:
     def list_data_by_number_after(self, device_id: UUID, model_id: UUID, after: datetime, number: int) -> List[DataSchema]:
         return _data.list_data_by_number_after(self, device_id, model_id, after, number)
 
-    def get_data_model(self, model_id: UUID):
-        return _data.get_data_model(self, model_id)
-
-    def read_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime) -> DataSchema:
-        return _data.read_data_with_model(self, model, device_id, timestamp)
-
-    def list_data_with_model_by_time(self, model: DataModel, device_id: UUID, timestamp: datetime) -> List[DataSchema]:
-        return _data.list_data_with_model_by_time(self, model, device_id, timestamp)
-
-    def list_data_with_model_by_last_time(self, model: DataModel, device_id: UUID, last: datetime) -> List[DataSchema]:
-        return _data.list_data_with_model_by_last_time(self, model, device_id, last)
-
-    def list_data_with_model_by_range_time(self, model: DataModel, device_id: UUID, begin: datetime, end: datetime) -> List[DataSchema]:
-        return _data.list_data_with_model_by_range_time(self, model, device_id, begin, end)
-
-    def list_data_with_model_by_number_before(self, model: DataModel, device_id: UUID, before: datetime, number: int) -> List[DataSchema]:
-        return _data.list_data_with_model_by_number_before(self, model, device_id, before, number)
-
-    def list_data_with_model_by_number_after(self, model: DataModel, device_id: UUID, after: datetime, number: int) -> List[DataSchema]:
-        return _data.list_data_with_model_by_number_after(self, model, device_id, after, number)
-
     def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
         return _data.create_data(self, device_id, model_id, timestamp, data)
 
-    def create_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
-        return _data.create_data_with_model(self, model, device_id, timestamp, data)
-
     def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
         return _data.delete_data(self, device_id, model_id, timestamp)
-
-    def delete_data_with_model(self, model: DataModel, device_id: UUID, timestamp: datetime):
-        return _data.delete_data_with_model(self, model, device_id, timestamp)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
