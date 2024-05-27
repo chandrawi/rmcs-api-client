@@ -57,6 +57,16 @@ export function set_data_type(type) {
 }
 
 /**
+ * @param {number[]|string[]} types
+ * @returns {string}
+ */
+export function set_data_type_bytes(types) {
+    const type_code = types.map((value) => { return set_data_type(value); });
+    const type_str = type_code.map((value) => { return String.fromCharCode(value); }).join("");
+    return btoa(type_str)
+}
+
+/**
  * @param {number} type 
  * @returns {string}
  */
@@ -76,6 +86,16 @@ export function get_data_type(type) {
         case DataType.BOOL: return "BOOL";
     }
     return "NULL";
+}
+
+/**
+ * @param {string} types
+ * @returns {string[]}
+ */
+export function get_data_type_bytes(types) {
+    const type_str = atob(types);
+    const type_code = type_str.split("").map((value) => { return value.charCodeAt(); });
+    return type_code.map((value) => { return get_data_type(value) });
 }
 
 /**

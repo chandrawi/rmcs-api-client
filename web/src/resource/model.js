@@ -5,9 +5,9 @@ import {
     ModelName as _ModelName, 
     ModelCategory as _ModelCategory, 
     ModelNameCategory as _ModelNameCategory, 
+    TypeId as _TypeId,
     ModelSchema as _ModelSchema,
     ModelUpdate as _ModelUpdate,
-    ModelTypes as _ModelTypes,
     ConfigId as _ConfigId,
     ConfigSchema as _ConfigSchema,
     ConfigUpdate as _ConfigUpdate
@@ -54,12 +54,17 @@ function get_model_id(r) {
  */
 
 /**
+ * @typedef {Object} TypeId
+ * @property {Uuid} id
+ */
+
+/**
  * @typedef {Object} ModelSchema
  * @property {Uuid} id
  * @property {string} category
  * @property {string} name
  * @property {string} description
- * @property {string[]} types
+ * @property {number[]|string[]} data_type
  * @property {ModelConfigSchema[][]} configs
  */
 
@@ -73,7 +78,7 @@ function get_model_schema(r) {
         category: r.category,
         name: r.name,
         description: r.description,
-        types: r.typesList.map((v) => { return get_data_type(v) }),
+        data_type: r.dataTypeList.map((v) => { return get_data_type(v) }),
         configs: r.configsList.map((v) => { return get_model_config_schema_vec(v.configsList) })
     };
 }
@@ -92,12 +97,7 @@ function get_model_schema_vec(r) {
  * @property {?string} category
  * @property {?string} name
  * @property {?string} description
- */
-
-/**
- * @typedef {Object} ModelTypes
- * @property {Uuid} id
- * @property {number[]|string[]} types
+ * @property {?number[]|string[]} data_type
  */
 
 /**
@@ -223,15 +223,32 @@ export async function list_model_by_name_category(resource, request, callback) {
 }
 
 /**
+ * Read models by type
+ * @param {Resource} resource Resource instance
+ * @param {TypeId} request type uuid: id
+ * @param {function(?grpc.web.RpcError, ?ModelSchema[])} callback The callback function(error, response)
+ */
+export async function list_model_by_type(resource, request, callback) {
+    const client = new ModelServiceClient(resource.address, null, null);
+    const typeId = new _TypeId();
+    typeId.setId(uuid_hex_to_base64(request.id));
+    await client.listModelByType(modelNameCategory, {}, (e, r) => {
+        const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
+        callback(e, response);
+    });
+}
+
+/**
  * Create a model
  * @param {Resource} resource Resource instance
- * @param {ModelSchema} request model schema: id, category, name, description
+ * @param {ModelSchema} request model schema: id, data_type, category, name, description
  * @param {function(?grpc.web.RpcError, ?ModelId)} callback The callback function(error, response)
  */
 export async function create_model(resource, request, callback) {
     const client = new ModelServiceClient(resource.address, null, null);
     const modelSchema = new _ModelSchema();
     modelSchema.setId(uuid_hex_to_base64(request.id));
+    modelSchema.setDataTypeList(request.data_type.map((v) => {return set_data_type(v)}));
     modelSchema.setCategory(request.category);
     modelSchema.setName(request.name);
     modelSchema.setDescription(request.description);
@@ -244,13 +261,16 @@ export async function create_model(resource, request, callback) {
 /**
  * Update a model
  * @param {Resource} resource Resource instance
- * @param {ModelUpdate} request model update: id, category, name, description
+ * @param {ModelUpdate} request model update: id, data_type, category, name, description
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_model(resource, request, callback) {
     const client = new ModelServiceClient(resource.address, null, null);
     const modelUpdate = new _ModelUpdate();
     modelUpdate.setId(uuid_hex_to_base64(request.id));
+    if (request.data_type) {
+        modelUpdate.setDataTypeList(request.data_type.map((v) => {return set_data_type(v)}));
+    }
     modelUpdate.setCategory(request.category);
     modelUpdate.setName(request.name);
     modelUpdate.setDescription(request.description);
@@ -271,39 +291,6 @@ export async function delete_model(resource, request, callback) {
     const modelId = new _ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
     await client.deleteModel(modelId, {}, (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
-}
-
-/**
- * Add types to a model
- * @param {Resource} resource Resource instance
- * @param {ModelTypes} request model types: id, types
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
- */
-export async function add_model_type(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelTypes = new _ModelTypes();
-    modelTypes.setId(uuid_hex_to_base64(request.id));
-    modelTypes.setTypesList(request.types.map((v) => {return set_data_type(v)}));
-    await client.addModelType(modelTypes, {}, (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
-}
-
-/**
- * Remove types to a model
- * @param {Resource} resource Resource instance
- * @param {ModelTypes} request model types: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
- */
-export async function remove_model_type(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelTypes = new _ModelTypes();
-    modelTypes.setId(uuid_hex_to_base64(request.id));
-    await client.removeModelType(modelTypes, {}, (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

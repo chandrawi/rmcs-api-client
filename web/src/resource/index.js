@@ -3,11 +3,10 @@ export {
     list_model_by_name,
     list_model_by_category,
     list_model_by_name_category,
+    list_model_by_type,
     create_model,
     update_model,
     delete_model,
-    add_model_type,
-    remove_model_type,
     read_model_config,
     list_model_config_by_model,
     create_model_config,
@@ -88,17 +87,8 @@ export {
     list_data_by_range_time,
     list_data_by_number_before,
     list_data_by_number_after,
-    get_data_model,
-    read_data_with_model,
-    list_data_with_model_by_time,
-    list_data_with_model_by_last_time,
-    list_data_with_model_by_range_time,
-    list_data_with_model_by_number_before,
-    list_data_with_model_by_number_after,
     create_data,
-    create_data_with_model,
-    delete_data,
-    delete_data_with_model
+    delete_data
 } from './data.js';
 export {
     read_buffer,

@@ -24,7 +24,8 @@ describe("RMCS Resource test", function() {
             id: model_id,
             name: "speed and direction",
             category: "UPLINK",
-            description: ""
+            description: "",
+            data_type: ["F32", "F32"]
         }, (e, r) => {
             expect(e).toBeNull(e);
             done();
@@ -36,22 +37,9 @@ describe("RMCS Resource test", function() {
             id: model_buf_id,
             name: "buffer 4",
             category: "UPLINK",
-            description: ""
+            description: "",
+            data_type: ["U8", "U8", "U8", "U8"]
         }, (e, r) => {
-            expect(e).toBeNull(e);
-            done();
-        });
-    });
-
-    it("should add type to data model", function(done) {
-        resource.add_model_type(R, { id: model_id, types: ["F32", "F32"] }, (e, r) => {
-            expect(e).toBeNull(e);
-            done();
-        });
-    });
-
-    it("should add type to buffer model", function(done) {
-        resource.add_model_type(R, { id: model_buf_id, types: ["U8", "U8", "U8", "U8"] }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
@@ -192,7 +180,7 @@ describe("RMCS Resource test", function() {
             expect(r.id).toEqual(model_id);
             expect(r.name).toEqual("speed and direction");
             expect(r.category).toEqual("UPLINK");
-            expect(r.types).toEqual(["F32", "F32"]);
+            expect(r.data_type).toEqual(["F32", "F32"]);
             done();
         });
     });
@@ -307,21 +295,12 @@ describe("RMCS Resource test", function() {
         resource.update_model(R, {
             id: model_buf_id,
             name: "buffer 2 integer",
-            description: "Model for store 2 i32 temporary data"
+            description: "Model for store 2 i32 temporary data",
+            data_type: ["I32", "I32"]
         }, (e, r) => {
             expect(e).toBeNull(e);
             resource.read_model(R, { id: model_buf_id }, (e, r) => {
                 expect(r.name).toEqual("buffer 2 integer");
-                done();
-            });
-        });
-    });
-
-    it("should remove and add buffer model type", function(done) {
-        resource.remove_model_type(R, { id: model_buf_id }, (e, r) => {
-            expect(e).toBeNull(e);
-            resource.add_model_type(R, { id: model_buf_id, types: ["I32", "I32"] }, (e, r) => {
-                expect(e).toBeNull(e);
                 done();
             });
         });
