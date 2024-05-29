@@ -92,7 +92,7 @@ def create_group_model(resource, id: UUID, name: str, category: str, description
         response = stub.CreateGroupModel(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_group_model(resource, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
+def update_group_model(resource, id: UUID, name: Optional[str]=None, category: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupUpdate(
@@ -167,7 +167,7 @@ def create_group_device(resource, id: UUID, name: str, category: str, descriptio
         response = stub.CreateGroupDevice(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_group_device(resource, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
+def update_group_device(resource, id: UUID, name: Optional[str]=None, category: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupUpdate(
@@ -242,7 +242,7 @@ def create_group_gateway(resource, id: UUID, name: str, category: str, descripti
         response = stub.CreateGroupGateway(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_group_gateway(resource, id: UUID, name: Optional[str], category: Optional[str], description: Optional[str]):
+def update_group_gateway(resource, id: UUID, name: Optional[str]=None, category: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
         request = group_pb2.GroupUpdate(

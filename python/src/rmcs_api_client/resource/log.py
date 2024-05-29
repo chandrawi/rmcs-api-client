@@ -133,7 +133,7 @@ def create_log(resource, timestamp: datetime, device_id: UUID, status: Union[str
         )
         stub.CreateLog(request=request, metadata=resource.metadata)
 
-def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[Union[str, int]], value: Union[int, float, str, None]):
+def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[Union[str, int]]=None, value: Union[int, float, str, None]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         stat = None

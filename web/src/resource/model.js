@@ -270,6 +270,9 @@ export async function update_model(resource, request, callback) {
     modelUpdate.setId(uuid_hex_to_base64(request.id));
     if (request.data_type) {
         modelUpdate.setDataTypeList(request.data_type.map((v) => {return set_data_type(v)}));
+        modelUpdate.setDataTypeFlag(true);
+    } else {
+        modelUpdate.setDataTypeFlag(false);
     }
     modelUpdate.setCategory(request.category);
     modelUpdate.setName(request.name);

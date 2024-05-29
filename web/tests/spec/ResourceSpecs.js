@@ -466,6 +466,7 @@ describe("RMCS Resource test", function() {
             expect(e).toBeNull(e);
             resource.read_buffer(R, { id: buffers[0].id }, (e, r) => {
                 expect(e).toBeNull(e);
+                expect(r.data).toEqual(buffers[0].data);
                 expect(r.status).toEqual("DELETE");
                 done();
             });

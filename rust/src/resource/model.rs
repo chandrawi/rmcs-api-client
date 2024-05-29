@@ -100,7 +100,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, data_type: &[Dat
         category: category.to_owned(),
         name: name.to_owned(),
         description: description.unwrap_or("").to_owned(),
-        data_type: data_type.into_iter().map(|ty| i16::from(ty.to_owned()) as i32).collect::<Vec<i32>>().to_owned(),
+        data_type: data_type.into_iter().map(|ty| i32::from(ty.to_owned())).collect::<Vec<i32>>().to_owned(),
         configs: Vec::new()
     });
     let response = client.create_model(request)
@@ -122,9 +122,10 @@ pub(crate) async fn update_model(resource: &Resource, id: Uuid, data_type: Optio
         description: description.map(|s| s.to_owned()),
         data_type: data_type.map(|ty| {
             ty.into_iter()
-                .map(|t| i16::from(t.to_owned()) as i32)
+                .map(|t| i32::from(t.to_owned()))
                 .collect::<Vec<i32>>()
-        }).unwrap_or_default()
+        }).unwrap_or_default(),
+        data_type_flag: data_type.is_some()
     });
     client.update_model(request)
         .await?;

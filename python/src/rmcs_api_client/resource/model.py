@@ -99,17 +99,21 @@ def create_model(resource, id: UUID, data_type: List[DataType], category: str, n
         response = stub.CreateModel(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_model(resource, id: UUID, data_type: Optional[List[DataType]], category: Optional[str], name: Optional[str], description: Optional[str]):
+def update_model(resource, id: UUID, data_type: Optional[List[DataType]]=None, category: Optional[str]=None, name: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
+        type_flag = False
         types = []
-        for ty in data_type: types.append(ty.value)
+        if (data_type is not None):
+            type_flag = True
+            for ty in data_type: types.append(ty.value)
         request = model_pb2.ModelUpdate(
             id=id.bytes,
             category=category,
             name=name,
             description=description,
-            data_type=types
+            data_type=types,
+            data_type_flag=type_flag
         )
         stub.UpdateModel(request=request, metadata=resource.metadata)
 
@@ -149,7 +153,7 @@ def create_model_config(resource, model_id: UUID, index: int, name: str, value: 
         response = stub.CreateModelConfig(request=request, metadata=resource.metadata)
         return response.id
 
-def update_model_config(resource, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
+def update_model_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, None]=None, category: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ConfigUpdate(

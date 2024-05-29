@@ -45,7 +45,7 @@ def create_type(resource, id: UUID, name: str, description: str):
         response = stub.CreateType(request=request, metadata=resource.metadata)
         return UUID(bytes=response.id)
 
-def update_type(resource, id: UUID, name: Optional[str], description: Optional[str]):
+def update_type(resource, id: UUID, name: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.TypeUpdate(

@@ -93,8 +93,6 @@ def test_resource():
     assert device1.type == device_type
     # read device configurations
     device_configs = resource.list_device_config_by_device(device_id1)
-    print(device1.configs)
-    print(device_configs)
     assert device1.configs == device_configs
 
     # read group model

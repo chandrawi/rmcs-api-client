@@ -79,7 +79,7 @@ def create_slice(resource, device_id: UUID, model_id: UUID, timestamp_begin: dat
         response = stub.CreateSlice(request=request, metadata=resource.metadata)
         return response.id
 
-def update_slice(resource, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
+def update_slice(resource, id: int, timestamp_begin: Optional[datetime]=None, timestamp_end: Optional[datetime]=None, name: Optional[str]=None, description: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         begin = None

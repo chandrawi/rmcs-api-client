@@ -382,6 +382,7 @@ mod tests {
         // update buffer status
         resource.update_buffer(buffers[0].id, None, Some(Delete)).await.unwrap();
         let buffer = resource.read_buffer(buffers[0].id).await.unwrap();
+        assert_eq!(buffers[0].data, buffer.data);
         assert_eq!(buffer.status, Delete);
 
         // delete buffer data

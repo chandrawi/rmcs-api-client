@@ -182,11 +182,11 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
         response = stub.CreateBuffer(request=request, metadata=resource.metadata)
         return response.id
 
-def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[Union[str, int]]):
+def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, bool, None]]]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         data_bytes = None
-        data_list = list()
+        data_list = []
         if data != None: 
             data_bytes = pack_data_array(data)
             data_list = data
