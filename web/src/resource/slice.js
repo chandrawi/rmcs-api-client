@@ -1,4 +1,4 @@
-import pb_slice from 'rmcs-resource-api/rmcs_resource_api/slice_grpc_web_pb.js';
+import { pb_slice } from 'rmcs-resource-api';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64

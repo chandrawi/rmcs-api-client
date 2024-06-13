@@ -1,4 +1,4 @@
-import pb_auth from "rmcs-auth-api/rmcs_auth_api/auth_grpc_web_pb.js";
+import { pb_auth } from "rmcs-auth-api";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64,

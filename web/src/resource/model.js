@@ -1,5 +1,5 @@
 import { get_config_value, set_config_value, get_data_type, set_data_type } from './common.js';
-import pb_model from 'rmcs-resource-api/rmcs_resource_api/model_grpc_web_pb.js';
+import { pb_model } from 'rmcs-resource-api';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64

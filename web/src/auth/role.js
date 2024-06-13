@@ -1,4 +1,4 @@
-import pb_role from "rmcs-auth-api/rmcs_auth_api/role_grpc_web_pb.js";
+import { pb_role } from "rmcs-auth-api";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
