@@ -10,6 +10,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} SliceId
  * @property {number} id
  */
@@ -92,12 +98,12 @@ function get_slice_schema_vec(r) {
 
 /**
  * Read a data slice by id
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceId} request data slice id: id
  * @param {function(?grpc.web.RpcError, ?SliceSchema)} callback The callback function(error, response)
  */
-export async function read_slice(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function read_slice(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
     await client.readSlice(sliceId, {}, (e, r) => {
@@ -108,12 +114,12 @@ export async function read_slice(resource, request, callback) {
 
 /**
  * Read data slices by name
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceName} request data slice name: name
  * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
  */
-export async function list_slice_by_name(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function list_slice_by_name(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceName = new pb_slice.SliceName();
     sliceName.setName(request.name);
     await client.listSliceByName(sliceName, {}, (e, r) => {
@@ -124,12 +130,12 @@ export async function list_slice_by_name(resource, request, callback) {
 
 /**
  * Read data slices by device
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceDevice} request data slice device: device_id
  * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
  */
-export async function list_slice_by_device(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function list_slice_by_device(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceDevice = new pb_slice.SliceDevice();
     sliceDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
     await client.listSliceByDevice(sliceDevice, {}, (e, r) => {
@@ -140,12 +146,12 @@ export async function list_slice_by_device(resource, request, callback) {
 
 /**
  * Read data slices by model
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceModel} request data slice model: model_id
  * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
  */
-export async function list_slice_by_model(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function list_slice_by_model(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceModel = new pb_slice.SliceModel();
     sliceModel.setModelId(uuid_hex_to_base64(request.model_id));
     await client.listSliceByModel(sliceModel, {}, (e, r) => {
@@ -156,12 +162,12 @@ export async function list_slice_by_model(resource, request, callback) {
 
 /**
  * Read data slices by device and model
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceDeviceModel} request data slice device and model: device_id, model_id
  * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
  */
-export async function list_slice_by_device_model(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function list_slice_by_device_model(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceDeviceModel = new pb_slice.SliceDeviceModel();
     sliceDeviceModel.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceDeviceModel.setModelId(uuid_hex_to_base64(request.model_id));
@@ -173,12 +179,12 @@ export async function list_slice_by_device_model(resource, request, callback) {
 
 /**
  * Create a data slice
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceSchema} request data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  * @param {function(?grpc.web.RpcError, ?SliceId)} callback The callback function(error, response)
  */
-export async function create_slice(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function create_slice(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceSchema = new pb_slice.SliceSchema();
     sliceSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -194,12 +200,12 @@ export async function create_slice(resource, request, callback) {
 
 /**
  * Update a data slice
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceUpdate} request data slice update: id, timestamp_begin, timestamp_end, name, description
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_slice(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function update_slice(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceUpdate = new pb_slice.SliceUpdate();
     sliceUpdate.setId(request.id);
     if (request.timestamp_begin instanceof Date) {
@@ -218,12 +224,12 @@ export async function update_slice(resource, request, callback) {
 
 /**
  * Delete a data slice
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {SliceId} request data slice id: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_slice(resource, request, callback) {
-    const client = new pb_slice.SliceServiceClient(resource.address, null, null);
+export async function delete_slice(server, request, callback) {
+    const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
     await client.deleteSlice(sliceId, {}, (e, r) => {

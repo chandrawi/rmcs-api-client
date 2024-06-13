@@ -10,6 +10,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} TypeId
  * @property {Uuid} id
  */
@@ -74,12 +80,12 @@ function get_type_schema_vec(r) {
 
 /**
  * Read a device type by uuid
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeId} request type uuid: id
  * @param {function(?grpc.web.RpcError, ?TypeSchema)} callback The callback function(error, response)
  */
-export async function read_type(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function read_type(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_type.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
     await client.readType(typeId, {}, (e, r) => {
@@ -90,12 +96,12 @@ export async function read_type(resource, request, callback) {
 
 /**
  * Read device types by name
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeName} request type name: name
  * @param {function(?grpc.web.RpcError, ?TypeSchema[])} callback The callback function(error, response)
  */
-export async function list_type_by_name(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function list_type_by_name(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeName = new pb_type.TypeName();
     typeName.setName(request.name);
     await client.listTypeByName(typeName, {}, (e, r) => {
@@ -106,12 +112,12 @@ export async function list_type_by_name(resource, request, callback) {
 
 /**
  * Create a device type
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeSchema} request type schema: id, name, description
  * @param {function(?grpc.web.RpcError, ?TypeId)} callback The callback function(error, response)
  */
-export async function create_type(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function create_type(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeSchema = new pb_type.TypeSchema();
     typeSchema.setId(uuid_hex_to_base64(request.id));
     typeSchema.setName(request.name);
@@ -124,12 +130,12 @@ export async function create_type(resource, request, callback) {
 
 /**
  * Update a device type
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeUpdate} request type update: id, name, description
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_type(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function update_type(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeUpdate = new pb_type.TypeUpdate();
     typeUpdate.setId(uuid_hex_to_base64(request.id));
     typeUpdate.setName(request.name);
@@ -142,12 +148,12 @@ export async function update_type(resource, request, callback) {
 
 /**
  * Delete a device type
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeId} request type id: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_type(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function delete_type(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_type.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
     await client.deleteType(typeId, {}, (e, r) => {
@@ -158,12 +164,12 @@ export async function delete_type(resource, request, callback) {
 
 /**
  * Add model to a device type
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeModel} request type id: id, model_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function add_type_model(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function add_type_model(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeModel = new pb_type.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
@@ -175,12 +181,12 @@ export async function add_type_model(resource, request, callback) {
 
 /**
  * Remove model from a device type
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {TypeModel} request type id: id, model_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function remove_type_model(resource, request, callback) {
-    const client = new pb_type.DeviceServiceClient(resource.address, null, null);
+export async function remove_type_model(server, request, callback) {
+    const client = new pb_type.DeviceServiceClient(server.address, null, null);
     const typeModel = new pb_type.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));

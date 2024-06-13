@@ -10,6 +10,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} UserId
  * @property {Uuid} id
  */
@@ -111,12 +117,12 @@ function get_user_schema_vec(r) {
 
 /**
  * Read a user by uuid
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserId} request user uuid: id
  * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
  */
-export async function read_user(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function read_user(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
     await client.readUser(userId, {}, (e, r) => {
@@ -127,12 +133,12 @@ export async function read_user(auth, request, callback) {
 
 /**
  * Read a user by name
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserName} request user name: name
  * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
  */
-export async function read_user_by_name(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function read_user_by_name(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userName = new pb_user.UserName();
     userName.setName(request.name);
     await client.readUserByName(userName, {}, (e, r) => {
@@ -143,12 +149,12 @@ export async function read_user_by_name(auth, request, callback) {
 
 /**
  * Read users by role uuid
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {RoleId} request role uuid: id
  * @param {function(?grpc.web.RpcError, ?UserSchema[])} callback The callback function(error, response)
  */
-export async function list_user_by_role(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function list_user_by_role(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
     await client.listUserByRole(roleId, {}, (e, r) => {
@@ -159,12 +165,12 @@ export async function list_user_by_role(auth, request, callback) {
 
 /**
  * Create an user
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserSchema} request user schema: id, name, email, phone, password
  * @param {function(?grpc.web.RpcError, ?UserId)} callback The callback function(error, response)
  */
-export async function create_user(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function create_user(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userSchema = new pb_user.UserSchema();
     userSchema.setId(uuid_hex_to_base64(request.id));
     userSchema.setName(request.name);
@@ -179,12 +185,12 @@ export async function create_user(auth, request, callback) {
 
 /**
  * Update an user
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserUpdate} request user update: id, name, email, phone, password
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_user(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function update_user(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userUpdate = new pb_user.UserUpdate();
     userUpdate.setId(uuid_hex_to_base64(request.id));
     userUpdate.setName(request.name);
@@ -199,12 +205,12 @@ export async function update_user(auth, request, callback) {
 
 /**
  * Delete an user
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserId} request user uuid: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_user(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function delete_user(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
     await client.deleteUser(userId, {}, (e, r) => {
@@ -215,12 +221,12 @@ export async function delete_user(auth, request, callback) {
 
 /**
  * Add a role to user
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserRole} request user role: user_id, role_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function add_user_role(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function add_user_role(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
@@ -232,12 +238,12 @@ export async function add_user_role(auth, request, callback) {
 
 /**
  * Remove a role from user
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserRole} request user role: user_id, role_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function remove_user_role(auth, request, callback) {
-    const client = new pb_user.UserServiceClient(auth.address, null, null);
+export async function remove_user_role(server, request, callback) {
+    const client = new pb_user.UserServiceClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));

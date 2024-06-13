@@ -1,6 +1,6 @@
-import { Resource, resource, utility } from '../../build/bundle.js';
+import { resource, utility } from '../../build/bundle.js';
 
-let R = new Resource("http://localhost:9002", null);
+let server = { address: "http://localhost:9002" };
 
 describe("RMCS Resource test", function() {
 
@@ -20,7 +20,7 @@ describe("RMCS Resource test", function() {
     let device_configs = [];
 
     it("should create data model", function(done) {
-        resource.create_model(R, {
+        resource.create_model(server, {
             id: model_id,
             name: "speed and direction",
             category: "UPLINK",
@@ -33,7 +33,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create buffer model", function(done) {
-        resource.create_model(R, {
+        resource.create_model(server, {
             id: model_buf_id,
             name: "buffer 4",
             category: "UPLINK",
@@ -46,15 +46,15 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create model configurations", function(done) {
-        resource.create_model_config(R, { model_id: model_id, index: 0, name: "scale_0", value: "speed", category: "SCALE" }, (e, r) => {
+        resource.create_model_config(server, { model_id: model_id, index: 0, name: "scale_0", value: "speed", category: "SCALE" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.create_model_config(R, { model_id: model_id, index: 0, name: "scale_1", value: "direction", category: "SCALE" }, (e, r) => {
+            resource.create_model_config(server, { model_id: model_id, index: 0, name: "scale_1", value: "direction", category: "SCALE" }, (e, r) => {
                 expect(e).toBeNull(e);
-                resource.create_model_config(R, { model_id: model_id, index: 1, name: "unit_0", value: "meter/second", category: "UNIT" }, (e, r) => {
+                resource.create_model_config(server, { model_id: model_id, index: 1, name: "unit_0", value: "meter/second", category: "UNIT" }, (e, r) => {
                     expect(e).toBeNull(e);
-                    resource.create_model_config(R, { model_id: model_id, index: 1, name: "unit_1", value: "degree", category: "UNIT" }, (e, r) => {
+                    resource.create_model_config(server, { model_id: model_id, index: 1, name: "unit_1", value: "degree", category: "UNIT" }, (e, r) => {
                         expect(e).toBeNull(e);
-                        resource.create_model_config(R, { model_id: model_id, index: 0, name: "upper_threshold", value: 250, category: "THRESHOLD" }, (e, r) => {
+                        resource.create_model_config(server, { model_id: model_id, index: 0, name: "upper_threshold", value: 250, category: "THRESHOLD" }, (e, r) => {
                             expect(e).toBeNull(e);
                             model_cfg_id = r.id;
                             done();
@@ -66,7 +66,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create a type", function(done) {
-        resource.create_type(R, {
+        resource.create_type(server, {
             id: type_id,
             name: "Speedometer Compass",
             description: ""
@@ -77,21 +77,21 @@ describe("RMCS Resource test", function() {
     });
 
     it("should add data model to type", function(done) {
-        resource.add_type_model(R, { id: type_id, model_id: model_id }, (e, r) => {
+        resource.add_type_model(server, { id: type_id, model_id: model_id }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
     });
 
     it("should add buffer model to type", function(done) {
-        resource.add_type_model(R, { id: type_id, model_id: model_buf_id }, (e, r) => {
+        resource.add_type_model(server, { id: type_id, model_id: model_buf_id }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
     });
 
     it("should create device 1", function(done) {
-        resource.create_device(R, {
+        resource.create_device(server, {
             id: device_id_1,
             gateway_id: gateway_id,
             type_id: type_id,
@@ -105,7 +105,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create device 2", function(done) {
-        resource.create_device(R, {
+        resource.create_device(server, {
             id: device_id_2,
             gateway_id: gateway_id,
             type_id: type_id,
@@ -119,9 +119,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create device 1 configurations", function(done) {
-        resource.create_device_config(R, { device_id: device_id_1, name: "coef_0", value: -21, category: "CONVERSION" }, (e, r) => {
+        resource.create_device_config(server, { device_id: device_id_1, name: "coef_0", value: -21, category: "CONVERSION" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.create_device_config(R, { device_id: device_id_1, name: "coef_1", value: 0.1934, category: "CONVERSION" }, (e, r) => {
+            resource.create_device_config(server, { device_id: device_id_1, name: "coef_1", value: 0.1934, category: "CONVERSION" }, (e, r) => {
                 expect(e).toBeNull(e);
                 done();
             });
@@ -129,11 +129,11 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create device 2 configurations", function(done) {
-        resource.create_device_config(R, { device_id: device_id_2, name: "coef_0", value: 44, category: "CONVERSION" }, (e, r) => {
+        resource.create_device_config(server, { device_id: device_id_2, name: "coef_0", value: 44, category: "CONVERSION" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.create_device_config(R, { device_id: device_id_2, name: "coef_1", value: 0.2192, category: "CONVERSION" }, (e, r) => {
+            resource.create_device_config(server, { device_id: device_id_2, name: "coef_1", value: 0.2192, category: "CONVERSION" }, (e, r) => {
                 expect(e).toBeNull(e);
-                resource.create_device_config(R, { device_id: device_id_2, name: "period", value: 120, category: "NETWORK" }, (e, r) => {
+                resource.create_device_config(server, { device_id: device_id_2, name: "period", value: 120, category: "NETWORK" }, (e, r) => {
                     expect(e).toBeNull(e);
                     device_cfg_id = r.id;
                     done();
@@ -143,30 +143,30 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create a model group", function(done) {
-        resource.create_group_model(R, { id: group_model_id, name: "data", category: "APPLICATION", description: "" }, (e, r) => {
+        resource.create_group_model(server, { id: group_model_id, name: "data", category: "APPLICATION", description: "" }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
     });
 
     it("should add data model to model group", function(done) {
-        resource.add_group_model_member(R, { id: group_model_id, model_id: model_id }, (e, r) => {
+        resource.add_group_model_member(server, { id: group_model_id, model_id: model_id }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
     });
 
     it("should create a device group", function(done) {
-        resource.create_group_device(R, { id: group_device_id, name: "sensor", category: "APPLICATION", description: "" }, (e, r) => {
+        resource.create_group_device(server, { id: group_device_id, name: "sensor", category: "APPLICATION", description: "" }, (e, r) => {
             expect(e).toBeNull(e);
             done();
         });
     });
 
     it("should add device 1 and 2 to device group", function(done) {
-        resource.add_group_device_member(R, { id: group_device_id, device_id: device_id_1 }, (e, r) => {
+        resource.add_group_device_member(server, { id: group_device_id, device_id: device_id_1 }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.add_group_device_member(R, { id: group_device_id, device_id: device_id_2 }, (e, r) => {
+            resource.add_group_device_member(server, { id: group_device_id, device_id: device_id_2 }, (e, r) => {
                 expect(e).toBeNull(e);
                 done();
             });
@@ -174,7 +174,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read data model", function(done) {
-        resource.read_model(R, { id: model_id }, (e, r) => {
+        resource.read_model(server, { id: model_id }, (e, r) => {
             expect(e).toBeNull(e);
             model = r;
             expect(r.id).toEqual(model_id);
@@ -186,7 +186,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read multiple models", function(done) {
-        resource.list_model_by_name(R, { name: "speed" }, (e, r) => {
+        resource.list_model_by_name(server, { name: "speed" }, (e, r) => {
             expect(e).toBeNull(e);
             const model_ids = [];
             for (const model of r) {
@@ -198,7 +198,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read multiple model configurations", function(done) {
-        resource.list_model_config_by_model(R, { id: model_id }, (e, r) => {
+        resource.list_model_config_by_model(server, { id: model_id }, (e, r) => {
             expect(e).toBeNull(e);
             model_configs = r;
             for (const configs of model.configs) {
@@ -211,7 +211,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read device 1", function(done) {
-        resource.read_device(R, { id: device_id_1 }, (e, r) => {
+        resource.read_device(server, { id: device_id_1 }, (e, r) => {
             expect(e).toBeNull(e);
             device_1 = r;
             expect(r.id).toEqual(device_id_1);
@@ -222,7 +222,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read multiple devices", function(done) {
-        resource.list_device_by_gateway(R, { id: gateway_id }, (e, r) => {
+        resource.list_device_by_gateway(server, { id: gateway_id }, (e, r) => {
             expect(e).toBeNull(e);
             const device_ids = [];
             for (const device of r) {
@@ -234,7 +234,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read device configurations", function(done) {
-        resource.list_device_config_by_device(R, { id: device_id_1 }, (e, r) => {
+        resource.list_device_config_by_device(server, { id: device_id_1 }, (e, r) => {
             expect(e).toBeNull(e);
             device_configs = r;
             for (const config of device_1.configs) {
@@ -245,7 +245,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read types", function(done) {
-        resource.list_type_by_name(R, { name: "Speedometer" }, (e, r) => {
+        resource.list_type_by_name(server, { name: "Speedometer" }, (e, r) => {
             expect(e).toBeNull(e);
             let type;
             for (const ty of r) {
@@ -259,7 +259,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read model groups", function(done) {
-        resource.list_group_model_by_category(R, { category: "APPLICATION" }, (e, r) => {
+        resource.list_group_model_by_category(server, { category: "APPLICATION" }, (e, r) => {
             expect(e).toBeNull(e);
             let group_model;
             for (const group of r) {
@@ -275,7 +275,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read device groups", function(done) {
-        resource.list_group_device_by_name(R, { category: "sensor" }, (e, r) => {
+        resource.list_group_device_by_name(server, { category: "sensor" }, (e, r) => {
             expect(e).toBeNull(e);
             let group_device;
             for (const group of r) {
@@ -292,14 +292,14 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update buffer model", function(done) {
-        resource.update_model(R, {
+        resource.update_model(server, {
             id: model_buf_id,
             name: "buffer 2 integer",
             description: "Model for store 2 i32 temporary data",
             data_type: ["I32", "I32"]
         }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_model(R, { id: model_buf_id }, (e, r) => {
+            resource.read_model(server, { id: model_buf_id }, (e, r) => {
                 expect(r.name).toEqual("buffer 2 integer");
                 done();
             });
@@ -307,9 +307,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update data model configuration", function(done) {
-        resource.update_model_config(R, { id: model_cfg_id, value: 238 }, (e, r) => {
+        resource.update_model_config(server, { id: model_cfg_id, value: 238 }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_model_config(R, { id: model_cfg_id }, (e, r) => {
+            resource.read_model_config(server, { id: model_cfg_id }, (e, r) => {
                 expect(r.value).toEqual(238);
                 done();
             });
@@ -317,9 +317,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a type", function(done) {
-        resource.update_type(R, { id: type_id, description: "Speedometer and compass sensor" }, (e, r) => {
+        resource.update_type(server, { id: type_id, description: "Speedometer and compass sensor" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_type(R, { id: type_id }, (e, r) => {
+            resource.read_type(server, { id: type_id }, (e, r) => {
                 expect(r.description).toEqual("Speedometer and compass sensor");
                 done();
             });
@@ -327,9 +327,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update device 2", function(done) {
-        resource.update_device(R, { id: device_id_2, description: "E-bike speedometer and compass sensor 2" }, (e, r) => {
+        resource.update_device(server, { id: device_id_2, description: "E-bike speedometer and compass sensor 2" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_device(R, { id: device_id_2 }, (e, r) => {
+            resource.read_device(server, { id: device_id_2 }, (e, r) => {
                 expect(r.description).toEqual("E-bike speedometer and compass sensor 2");
                 done();
             });
@@ -337,9 +337,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update device 2 configuration", function(done) {
-        resource.update_device_config(R, { id: device_cfg_id, value: 60 }, (e, r) => {
+        resource.update_device_config(server, { id: device_cfg_id, value: 60 }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_device_config(R, { id: device_cfg_id }, (e, r) => {
+            resource.read_device_config(server, { id: device_cfg_id }, (e, r) => {
                 expect(r.value).toEqual(60);
                 done();
             });
@@ -347,9 +347,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a model group", function(done) {
-        resource.update_group_model(R, { id: group_model_id, description: "Data models" }, (e, r) => {
+        resource.update_group_model(server, { id: group_model_id, description: "Data models" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_group_model(R, { id: group_model_id }, (e, r) => {
+            resource.read_group_model(server, { id: group_model_id }, (e, r) => {
                 expect(r.description).toEqual("Data models");
                 done();
             });
@@ -357,9 +357,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a device group", function(done) {
-        resource.update_group_device(R, { id: group_device_id, description: "Sensor devices" }, (e, r) => {
+        resource.update_group_device(server, { id: group_device_id, description: "Sensor devices" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_group_device(R, { id: group_device_id }, (e, r) => {
+            resource.read_group_device(server, { id: group_device_id }, (e, r) => {
                 expect(r.description).toEqual("Sensor devices");
                 done();
             });
@@ -372,7 +372,7 @@ describe("RMCS Resource test", function() {
     let buffers = [];
 
     it("should create buffers", function(done) {
-        resource.create_buffer(R, {
+        resource.create_buffer(server, {
             device_id: device_id_1,
             model_id: model_buf_id,
             timestamp: timestamp,
@@ -380,7 +380,7 @@ describe("RMCS Resource test", function() {
             status: "ANALYSIS_1"
         }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.create_buffer(R, {
+            resource.create_buffer(server, {
                 device_id: device_id_2,
                 model_id: model_buf_id,
                 timestamp: timestamp,
@@ -394,7 +394,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read buffers", function(done) {
-        resource.list_buffer_first(R, { number: 100 }, (e, r) => {
+        resource.list_buffer_first(server, { number: 100 }, (e, r) => {
             expect(e).toBeNull(e);
             buffers = r;
             for (const buffer of r) {
@@ -420,7 +420,7 @@ describe("RMCS Resource test", function() {
         const coef_1 = get_conf(device_configs, "coef_1");
         speed = (raw_1[0] - coef_0) * coef_1;
         direction = (raw_1[1] - coef_0) * coef_1;
-        resource.create_data(R, {
+        resource.create_data(server, {
             device_id: device_id_1,
             model_id: model_id,
             timestamp: timestamp,
@@ -432,7 +432,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read data", function(done) {
-        resource.list_data_by_number_before(R, {
+        resource.list_data_by_number_before(server, {
             device_id: device_id_1,
             model_id: model_id,
             timestamp: timestamp,
@@ -452,9 +452,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a data", function(done) {
-        resource.delete_data(R, { device_id: device_id_1, model_id: model_id, timestamp: timestamp }, (e, r) => {
+        resource.delete_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_data(R, { device_id: device_id_1, model_id: model_id, timestamp: timestamp }, (e, r) => {
+            resource.read_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -462,9 +462,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a buffer", function(done) {
-        resource.update_buffer(R, { id: buffers[0].id, status: "DELETE" }, (e, r) => {
+        resource.update_buffer(server, { id: buffers[0].id, status: "DELETE" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_buffer(R, { id: buffers[0].id }, (e, r) => {
+            resource.read_buffer(server, { id: buffers[0].id }, (e, r) => {
                 expect(e).toBeNull(e);
                 expect(r.data).toEqual(buffers[0].data);
                 expect(r.status).toEqual("DELETE");
@@ -474,13 +474,13 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete buffers", function(done) {
-        resource.delete_buffer(R, { id: buffers[0].id }, (e, r) => {
+        resource.delete_buffer(server, { id: buffers[0].id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.delete_buffer(R, { id: buffers[1].id }, (e, r) => {
+            resource.delete_buffer(server, { id: buffers[1].id }, (e, r) => {
                 expect(e).toBeNull(e);
-                resource.read_buffer(R, { id: buffers[0].id }, (e, r) => {
+                resource.read_buffer(server, { id: buffers[0].id }, (e, r) => {
                     expect(e).not.toBeNull(e);
-                    resource.read_buffer(R, { id: buffers[1].id }, (e, r) => {
+                    resource.read_buffer(server, { id: buffers[1].id }, (e, r) => {
                         expect(e).not.toBeNull(e);
                         done();
                     });
@@ -492,7 +492,7 @@ describe("RMCS Resource test", function() {
     let slice_id;
 
     it("should create a data slice", function(done) {
-        resource.create_slice(R, {
+        resource.create_slice(server, {
             device_id: device_id_1,
             model_id: model_id,
             timestamp_begin: timestamp,
@@ -507,7 +507,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read data slices", function(done) {
-        resource.list_slice_by_name(R, { name: "slice" }, (e, r) => {
+        resource.list_slice_by_name(server, { name: "slice" }, (e, r) => {
             expect(e).toBeNull(e);
             for (const slice of r) {
                 expect(slice.timestamp_begin).toEqual(timestamp);
@@ -518,9 +518,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a data slice", function(done) {
-        resource.update_slice(R, { id: slice_id, description: "Speed and compass sensor 1 at '2023-05-07 07:08:48'" }, (e, r) => {
+        resource.update_slice(server, { id: slice_id, description: "Speed and compass sensor 1 at '2023-05-07 07:08:48'" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_slice(R, { id: slice_id }, (e, r) => {
+            resource.read_slice(server, { id: slice_id }, (e, r) => {
                 expect(e).toBeNull(e);
                 expect(r.description).toEqual("Speed and compass sensor 1 at '2023-05-07 07:08:48'");
                 done();
@@ -529,9 +529,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a data slice", function(done) {
-        resource.delete_slice(R, { id: slice_id }, (e, r) => {
+        resource.delete_slice(server, { id: slice_id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_slice(R, { id: slice_id }, (e, r) => {
+            resource.read_slice(server, { id: slice_id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -539,7 +539,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should create a system log", function(done) {
-        resource.create_log(R, {
+        resource.create_log(server, {
             device_id: device_id_1,
             timestamp: timestamp,
             status: "UNKNOWN_ERROR",
@@ -551,7 +551,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read system logs", function(done) {
-        resource.list_log_by_range_time(R, { begin: timestamp, end: new Date() }, (e, r) => {
+        resource.list_log_by_range_time(server, { begin: timestamp, end: new Date() }, (e, r) => {
             expect(e).toBeNull(e);
             let log;
             for (const logSchema of r) {
@@ -565,9 +565,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a system log", function(done) {
-        resource.update_log(R, { device_id: device_id_1, timestamp: timestamp, status: "SUCCESS" }, (e, r) => {
+        resource.update_log(server, { device_id: device_id_1, timestamp: timestamp, status: "SUCCESS" }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_log(R, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
+            resource.read_log(server, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
                 expect(e).toBeNull(e);
                 expect(r.status).toEqual("SUCCESS");
                 done();
@@ -576,9 +576,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a system log", function(done) {
-        resource.delete_log(R, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
+        resource.delete_log(server, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_log(R, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
+            resource.read_log(server, { device_id: device_id_1, timestamp: timestamp }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -586,9 +586,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete model configs", function(done) {
-        resource.delete_model_config(R, { id: model_configs[0].id }, (e, r) => {
+        resource.delete_model_config(server, { id: model_configs[0].id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_model_config(R, { id: model_configs[0].id }, (e, r) => {
+            resource.read_model_config(server, { id: model_configs[0].id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -596,11 +596,11 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a model", function(done) {
-        resource.delete_model(R, { id: model_id }, (e, r) => {
+        resource.delete_model(server, { id: model_id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_model(R, { id: model_id }, (e, r) => {
+            resource.read_model(server, { id: model_id }, (e, r) => {
                 expect(e).not.toBeNull(e);
-                resource.list_model_config_by_model(R, { id: model_id }, (e, r) => {
+                resource.list_model_config_by_model(server, { id: model_id }, (e, r) => {
                     expect(r).toEqual([]);
                     done();
                 });
@@ -609,9 +609,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete device configs", function(done) {
-        resource.delete_device_config(R, { id: device_configs[0].id }, (e, r) => {
+        resource.delete_device_config(server, { id: device_configs[0].id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_model_config(R, { id: device_configs[0].id }, (e, r) => {
+            resource.read_model_config(server, { id: device_configs[0].id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -619,11 +619,11 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a device", function(done) {
-        resource.delete_device(R, { id: device_id_1 }, (e, r) => {
+        resource.delete_device(server, { id: device_id_1 }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_device(R, { id: device_id_1 }, (e, r) => {
+            resource.read_device(server, { id: device_id_1 }, (e, r) => {
                 expect(e).not.toBeNull(e);
-                resource.list_device_config_by_device(R, { id: device_id_1 }, (e, r) => {
+                resource.list_device_config_by_device(server, { id: device_id_1 }, (e, r) => {
                     expect(r).toEqual([]);
                     done();
                 });
@@ -632,18 +632,18 @@ describe("RMCS Resource test", function() {
     });
 
     it("should failed to delete a type", function(done) {
-        resource.delete_type(R, { id: type_id }, (e, r) => {
+        resource.delete_type(server, { id: type_id }, (e, r) => {
             expect(e).not.toBeNull(e);
             done();
         });
     });
 
     it("should delete devices associated with type", function(done) {
-        resource.list_device_by_type(R, { id: type_id }, (e, r) => {
+        resource.list_device_by_type(server, { id: type_id }, (e, r) => {
             expect(e).toBeNull(e);
             const length = r.length;
             for (let i=1; i<=length; i++) {
-                resource.delete_device(R, { id: r[0].id }, (e, r) => {
+                resource.delete_device(server, { id: r[0].id }, (e, r) => {
                     expect(e).toBeNull(e);
                     if (i == length) {
                         done();
@@ -654,9 +654,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a type", function(done) {
-        resource.delete_type(R, { id: type_id }, (e, r) => {
+        resource.delete_type(server, { id: type_id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_type(R, { id: type_id }, (e, r) => {
+            resource.read_type(server, { id: type_id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -664,9 +664,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a model group", function(done) {
-        resource.delete_group_model(R, { id: group_model_id }, (e, r) => {
+        resource.delete_group_model(server, { id: group_model_id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_group_model(R, { id: group_model_id }, (e, r) => {
+            resource.read_group_model(server, { id: group_model_id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });
@@ -674,9 +674,9 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a device group", function(done) {
-        resource.delete_group_device(R, { id: group_device_id }, (e, r) => {
+        resource.delete_group_device(server, { id: group_device_id }, (e, r) => {
             expect(e).toBeNull(e);
-            resource.read_group_device(R, { id: group_device_id }, (e, r) => {
+            resource.read_group_device(server, { id: group_device_id }, (e, r) => {
                 expect(e).not.toBeNull(e);
                 done();
             });

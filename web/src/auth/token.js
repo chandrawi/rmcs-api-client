@@ -12,6 +12,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} AccessId
  * @property {number} access_id
  */
@@ -122,12 +128,12 @@ function get_token_update_response(r) {
 
 /**
  * Read an access token by access id
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {AccessId} request access id: access_id
  * @param {function(?grpc.web.RpcError, ?TokenSchema)} callback The callback function(error, response)
  */
-export async function read_access_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function read_access_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
     await client.readAccessToken(accessId, {}, (e, r) => {
@@ -138,12 +144,12 @@ export async function read_access_token(auth, request, callback) {
 
 /**
  * Read tokens by auth token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {AuthToken} request auth token: auth_token
  * @param {function(?grpc.web.RpcError, ?TokenSchema[])} callback The callback function(error, response)
  */
-export async function list_auth_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function list_auth_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
     await client.listAuthToken(authToken, {}, (e, r) => {
@@ -154,12 +160,12 @@ export async function list_auth_token(auth, request, callback) {
 
 /**
  * Read tokens by user id
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserId} request user id: id
  * @param {function(?grpc.web.RpcError, ?TokenSchema[])} callback The callback function(error, response)
  */
-export async function list_token_by_user(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function list_token_by_user(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
     await client.listTokenByUser(userId, {}, (e, r) => {
@@ -170,12 +176,12 @@ export async function list_token_by_user(auth, request, callback) {
 
 /**
  * Create an access token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {TokenSchema} request token schema: user_id, auth_token, expire, ip
  * @param {function(?grpc.web.RpcError, ?TokenCreateResponse)} callback The callback function(error, response)
  */
-export async function create_access_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function create_access_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const tokenSchema = new pb_token.TokenSchema();
     tokenSchema.setUserId(uuid_hex_to_base64(request.user_id));
     tokenSchema.setAuthToken(request.auth_token);
@@ -189,12 +195,12 @@ export async function create_access_token(auth, request, callback) {
 
 /**
  * Create tokens with shared auth token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {AuthTokenCreate} request token schema: user_id, expire, ip, number
  * @param {function(?grpc.web.RpcError, ?TokenCreateResponse[])} callback The callback function(error, response)
  */
-export async function create_auth_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function create_auth_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authTokenCreate = new pb_token.AuthTokenCreate();
     authTokenCreate.setUserId(uuid_hex_to_base64(request.user_id));
     authTokenCreate.setExpire(request.expire.valueOf() * 1000);
@@ -208,12 +214,12 @@ export async function create_auth_token(auth, request, callback) {
 
 /**
  * Update an access token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {TokenUpdate} request token update: access_id, expire, ip
  * @param {function(?grpc.web.RpcError, ?TokenUpdateResponse)} callback The callback function(error, response)
  */
-export async function update_access_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function update_access_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const tokenUpdate = new pb_token.TokenUpdate();
     tokenUpdate.setAccessId(request.access_id);
     if (request.expire instanceof Date) {
@@ -230,12 +236,12 @@ export async function update_access_token(auth, request, callback) {
 
 /**
  * Update all tokens with shared auth token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {TokenUpdate} request token update: auth_token, expire, ip
  * @param {function(?grpc.web.RpcError, ?TokenUpdateResponse)} callback The callback function(error, response)
  */
-export async function update_auth_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function update_auth_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const tokenUpdate = new pb_token.TokenUpdate();
     tokenUpdate.setAuthToken(request.auth_token);
     if (request.expire instanceof Date) {
@@ -252,12 +258,12 @@ export async function update_auth_token(auth, request, callback) {
 
 /**
  * Delete an access token by access id
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {AccessId} request access id: access_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_access_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function delete_access_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
     await client.deleteAccessToken(accessId, {}, (e, r) => {
@@ -268,12 +274,12 @@ export async function delete_access_token(auth, request, callback) {
 
 /**
  * Delete tokens by auth token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {AuthToken} request auth token: auth_token
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_auth_token(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function delete_auth_token(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
     await client.deleteAuthToken(authToken, {}, (e, r) => {
@@ -284,12 +290,12 @@ export async function delete_auth_token(auth, request, callback) {
 
 /**
  * Delete tokens by user id
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserId} request user id: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_token_by_user(auth, request, callback) {
-    const client = new pb_token.TokenServiceClient(auth.address, null, null);
+export async function delete_token_by_user(server, request, callback) {
+    const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
     await client.deleteTokenByUser(userId, {}, (e, r) => {

@@ -51,19 +51,3 @@ export {
     user_refresh,
     user_logout
 } from './auth.js';
-
-
-/**
- * Auth class object
- * @class
- * @param {string} address
- * @param {string} access_token
- */
-export class Auth {
-
-    constructor(address, access_token) {
-        this.address = address;
-        this.access_token = access_token;
-    }
-
-}

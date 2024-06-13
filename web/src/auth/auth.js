@@ -11,6 +11,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} UserKeyResponse
  * @property {string} public_key
  */
@@ -141,12 +147,12 @@ async function encryptMessage(message, encryptionKey)
 
 /**
  * Get user login key
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {} request empty object
  * @param {function(?grpc.web.RpcError, ?UserKeyResponse)} callback The callback function(error, response)
  */
-export async function user_login_key(auth, request, callback) {
-    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+export async function user_login_key(server, request, callback) {
+    const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
     await client.userLoginKey(userKeyRequest, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -156,12 +162,12 @@ export async function user_login_key(auth, request, callback) {
 
 /**
  * User login
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserLoginRequest} request user login request: username, password
  * @param {function(?grpc.web.RpcError, ?UserLoginResponse)} callback The callback function(error, response)
  */
-export async function user_login(auth, request, callback) {
-    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+export async function user_login(server, request, callback) {
+    const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
     const userLoginRequest = new pb_auth.UserLoginRequest();
     userLoginRequest.setUsername(request.username);
@@ -181,12 +187,12 @@ export async function user_login(auth, request, callback) {
 
 /**
  * Refresh user token
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserRefreshRequest} request user refresh request: api_id, access_token, refresh_token
  * @param {function(?grpc.web.RpcError, ?UserRefreshResponse)} callback The callback function(error, response)
  */
-export async function user_refresh(auth, request, callback) {
-    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+export async function user_refresh(server, request, callback) {
+    const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userRefreshRequest = new pb_auth.UserRefreshRequest();
     userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
     userRefreshRequest.setAccessToken(request.access_token);
@@ -199,12 +205,12 @@ export async function user_refresh(auth, request, callback) {
 
 /**
  * User logout
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {UserLogoutRequest} request user logout request: user_id, auth_token
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function user_logout(auth, request, callback) {
-    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+export async function user_logout(server, request, callback) {
+    const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userLogoutRequest = new pb_auth.UserLogoutRequest();
     userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
     userLogoutRequest.setAuthToken(request.auth_token);

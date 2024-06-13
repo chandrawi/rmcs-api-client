@@ -11,6 +11,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} BufferId
  * @property {number} id
  */
@@ -163,12 +169,12 @@ function set_buffer_status(status) {
 
 /**
  * Read a data buffer by id
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferId} request data buffer id: id
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
-export async function read_buffer(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function read_buffer(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     await client.readBuffer(bufferId, {}, (e, r) => {
@@ -179,12 +185,12 @@ export async function read_buffer(resource, request, callback) {
 
 /**
  * Read a data buffer by time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, status
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
-export async function read_buffer_by_time(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function read_buffer_by_time(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferTime = new pb_buffer.BufferTime();
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
@@ -198,12 +204,12 @@ export async function read_buffer_by_time(resource, request, callback) {
 
 /**
  * Read first of a data buffer
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferSelector} request data buffer selector: device_id, model_id, status
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
-export async function read_buffer_first(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function read_buffer_first(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -222,12 +228,12 @@ export async function read_buffer_first(resource, request, callback) {
 
 /**
  * Read last of a data buffer
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferSelector} request data buffer selector: device_id, model_id, status
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
-export async function read_buffer_last(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function read_buffer_last(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -246,12 +252,12 @@ export async function read_buffer_last(resource, request, callback) {
 
 /**
  * Read first of data buffers
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
-export async function list_buffer_first(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function list_buffer_first(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -271,12 +277,12 @@ export async function list_buffer_first(resource, request, callback) {
 
 /**
  * Read last of data buffers
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
-export async function list_buffer_last(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function list_buffer_last(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -296,12 +302,12 @@ export async function list_buffer_last(resource, request, callback) {
 
 /**
  * Create a data buffer
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferSchema} request data buffer schema: device_id, model_id, timestamp, data, status
  * @param {function(?grpc.web.RpcError, ?BufferId)} callback The callback function(error, response)
  */
-export async function create_buffer(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function create_buffer(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferSchema = new pb_buffer.BufferSchema();
     bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -320,12 +326,12 @@ export async function create_buffer(resource, request, callback) {
 
 /**
  * Update a data buffer
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferUpdate} request data buffer update: id, data, status
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_buffer(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function update_buffer(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferUpdate = new pb_buffer.BufferUpdate();
     bufferUpdate.setId(request.id);
     const ty = typeof request.data;
@@ -345,12 +351,12 @@ export async function update_buffer(resource, request, callback) {
 
 /**
  * Delete a data buffer
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {BufferId} request data buffer id: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_buffer(resource, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+export async function delete_buffer(server, request, callback) {
+    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     await client.deleteBuffer(bufferId, {}, (e, r) => {

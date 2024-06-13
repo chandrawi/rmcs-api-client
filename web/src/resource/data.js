@@ -11,6 +11,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} DataId
  * @property {Uuid} device_id
  * @property {Uuid} model_id
@@ -72,12 +78,12 @@ function get_data_schema_vec(r) {
 
 /**
  * Read a data by id
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataId} request data id: device_id, model_id, timestamp
  * @param {function(?grpc.web.RpcError, ?DataSchema)} callback The callback function(error, response)
  */
-export async function read_data(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function read_data(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
@@ -90,12 +96,12 @@ export async function read_data(resource, request, callback) {
 
 /**
  * Read multiple data by specific time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataTime} request data time: device_id, model_id, timestamp
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
-export async function list_data_by_time(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function list_data_by_time(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
@@ -108,12 +114,12 @@ export async function list_data_by_time(resource, request, callback) {
 
 /**
  * Read multiple data by last time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataTime} request data time: device_id, model_id, timestamp
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
-export async function list_data_by_last_time(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function list_data_by_last_time(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
@@ -126,12 +132,12 @@ export async function list_data_by_last_time(resource, request, callback) {
 
 /**
  * Read multiple data by range time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataRange} request data range: device_id, model_id, begin, end
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
-export async function list_data_by_range_time(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function list_data_by_range_time(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataRange = new pb_data.DataRange();
     dataRange.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
@@ -145,12 +151,12 @@ export async function list_data_by_range_time(resource, request, callback) {
 
 /**
  * Read multiple data by specific time and number before
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
-export async function list_data_by_number_before(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function list_data_by_number_before(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
@@ -164,12 +170,12 @@ export async function list_data_by_number_before(resource, request, callback) {
 
 /**
  * Read multiple data by specific time and number after
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
-export async function list_data_by_number_after(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function list_data_by_number_after(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
@@ -183,12 +189,12 @@ export async function list_data_by_number_after(resource, request, callback) {
 
 /**
  * Create a data
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataSchema} request data schema: device_id, model_id, timestamp, data
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function create_data(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function create_data(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataSchema = new pb_data.DataSchema();
     dataSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -206,12 +212,12 @@ export async function create_data(resource, request, callback) {
 
 /**
  * Delete a data
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {DataId} request data id: device_id, model_id, timestamp
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_data(resource, request, callback) {
-    const client = new pb_data.DataServiceClient(resource.address, null, null);
+export async function delete_data(server, request, callback) {
+    const client = new pb_data.DataServiceClient(server.address, null, null);
     const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));

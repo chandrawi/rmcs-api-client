@@ -10,6 +10,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} ApiId
  * @property {Uuid} id
  */
@@ -144,12 +150,12 @@ function get_procedure_schema_vec(r) {
 
 /**
  * Read an api by uuid
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
  * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
  */
-export async function read_api(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function read_api(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
     await client.readApi(apiId, {}, (e, r) => {
@@ -160,12 +166,12 @@ export async function read_api(auth, request, callback) {
 
 /**
  * Read an api by name
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiName} request api name: id, name
  * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
  */
-export async function read_api_by_name(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function read_api_by_name(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiName = new pb_api.ApiName();
     apiName.setName(request.name);
     await client.readApiByName(apiName, {}, (e, r) => {
@@ -176,12 +182,12 @@ export async function read_api_by_name(auth, request, callback) {
 
 /**
  * Read apis by category
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiCategory} request api category: category
  * @param {function(?grpc.web.RpcError, ?ApiSchema[])} callback The callback function(error, response)
  */
-export async function list_api_by_category(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function list_api_by_category(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiCategory = new pb_api.ApiCategory();
     apiCategory.setCategory(request.category);
     await client.listApiByCategory(apiCategory, {}, (e, r) => {
@@ -192,12 +198,12 @@ export async function list_api_by_category(auth, request, callback) {
 
 /**
  * Create an api
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiSchema} request api schema: id, name, address, category, description, password, access_key
  * @param {function(?grpc.web.RpcError, ?ApiId)} callback The callback function(error, response)
  */
-export async function create_api(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function create_api(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiSchema = new pb_api.ApiSchema();
     apiSchema.setId(uuid_hex_to_base64(request.id));
     apiSchema.setName(request.name);
@@ -214,12 +220,12 @@ export async function create_api(auth, request, callback) {
 
 /**
  * Update an api
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiUpdate} request api update: id, name, address, category, description, password, access_key
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_api(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function update_api(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiUpdate = new pb_api.ApiUpdate();
     apiUpdate.setId(uuid_hex_to_base64(request.id));
     apiUpdate.setName(request.name);
@@ -236,12 +242,12 @@ export async function update_api(auth, request, callback) {
 
 /**
  * Delete an api
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_api(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function delete_api(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
     await client.deleteApi(apiId, {}, (e, r) => {
@@ -252,12 +258,12 @@ export async function delete_api(auth, request, callback) {
 
 /**
  * Read an procedure by uuid
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ProcedureId} request procedure uuid: id
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
-export async function read_procedure(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function read_procedure(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
     await client.readProcedure(procedureId, {}, (e, r) => {
@@ -268,12 +274,12 @@ export async function read_procedure(auth, request, callback) {
 
 /**
  * Read an procedure by name
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ProcedureName} request procedure name: api_id, name
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
-export async function read_procedure_by_name(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function read_procedure_by_name(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureName = new pb_api.ProcedureName();
     procedureName.setApiId(uuid_hex_to_base64(request.api_id));
     procedureName.setName(request.name);
@@ -285,12 +291,12 @@ export async function read_procedure_by_name(auth, request, callback) {
 
 /**
  * Read procedures by api uuid
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema[])} callback The callback function(error, response)
  */
-export async function list_procedure_by_api(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function list_procedure_by_api(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
     await client.listProcedureByApi(apiId, {}, (e, r) => {
@@ -301,12 +307,12 @@ export async function list_procedure_by_api(auth, request, callback) {
 
 /**
  * Create a procedure
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ProcedureSchema} request procedure schema: id, api_id, name, description
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
-export async function create_procedure(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function create_procedure(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureSchema = new pb_api.ProcedureSchema();
     procedureSchema.setId(uuid_hex_to_base64(request.id));
     procedureSchema.setApiId(uuid_hex_to_base64(request.api_id));
@@ -320,12 +326,12 @@ export async function create_procedure(auth, request, callback) {
 
 /**
  * Update a procedure
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ProcedureUpdate} request procedure update: id, name, description
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
-export async function update_procedure(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function update_procedure(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureUpdate = new pb_api.ProcedureUpdate();
     procedureUpdate.setId(uuid_hex_to_base64(request.id));
     procedureUpdate.setName(request.name);
@@ -338,12 +344,12 @@ export async function update_procedure(auth, request, callback) {
 
 /**
  * Delete a procedure
- * @param {Auth} auth Auth instance
+ * @param {ServerConfig} server Server configuration
  * @param {ProcedureId} request procedure uuid: id
  * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
  */
-export async function delete_procedure(auth, request, callback) {
-    const client = new pb_api.ApiServiceClient(auth.address, null, null);
+export async function delete_procedure(server, request, callback) {
+    const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
     await client.deleteProcedure(procedureId, {}, (e, r) => {

@@ -11,6 +11,12 @@ import {
  */
 
 /**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} LogId
  * @property {Date} timestamp
  * @property {Uuid} device_id
@@ -125,12 +131,12 @@ function set_log_status(status) {
 
 /**
  * Read a system log by id
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogId} request system log id: timestamp, device_id
  * @param {function(?grpc.web.RpcError, ?LogSchema)} callback The callback function(error, response)
  */
-export async function read_log(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function read_log(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -142,12 +148,12 @@ export async function read_log(resource, request, callback) {
 
 /**
  * Read system logs by time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogTime} request system log time: timestamp, device_id, status
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
-export async function list_log_by_time(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function list_log_by_time(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
@@ -164,12 +170,12 @@ export async function list_log_by_time(resource, request, callback) {
 
 /**
  * Read system logs by last time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogTime} request system log last time: timestamp, device_id, status
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
-export async function list_log_by_last_time(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function list_log_by_last_time(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
@@ -186,12 +192,12 @@ export async function list_log_by_last_time(resource, request, callback) {
 
 /**
  * Read system logs by range time
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogRange} request system log time: begin, end, device_id, status
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
-export async function list_log_by_range_time(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function list_log_by_range_time(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logRange = new pb_log.LogRange();
     logRange.setBegin(request.begin.valueOf() * 1000);
     logRange.setEnd(request.end.valueOf() * 1000);
@@ -209,12 +215,12 @@ export async function list_log_by_range_time(resource, request, callback) {
 
 /**
  * Create a system log
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogSchema} request system log schema: timestamp, device_id, status, value
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function create_log(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function create_log(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logSchema = new pb_log.LogSchema();
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -230,12 +236,12 @@ export async function create_log(resource, request, callback) {
 
 /**
  * Update a system log
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogUpdate} request system log id: timestamp, device_id, status, value
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function update_log(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function update_log(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logUpdate = new pb_log.LogUpdate();
     logUpdate.setTimestamp(request.timestamp.valueOf() * 1000);
     logUpdate.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -253,12 +259,12 @@ export async function update_log(resource, request, callback) {
 
 /**
  * Delete a system log
- * @param {Resource} resource Resource instance
+ * @param {ServerConfig} server Server configuration
  * @param {LogId} request system log id: timestamp, device_id
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
-export async function delete_log(resource, request, callback) {
-    const client = new pb_log.LogServiceClient(resource.address, null, null);
+export async function delete_log(server, request, callback) {
+    const client = new pb_log.LogServiceClient(server.address, null, null);
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
