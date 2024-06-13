@@ -1,13 +1,4 @@
-import { AuthServiceClient } from "rmcs-auth-api/rmcs_auth_api/auth_grpc_web_pb.js";
-import {
-    ApiKeyRequest as _ApiKeyRequest,
-    ApiKeyResponse as _ApiKeyResponse,
-    ApiLoginRequest as _ApiLoginRequest,
-    UserKeyRequest as _UserKeyRequest,
-    UserLoginRequest as _UserLoginRequest,
-    UserRefreshRequest as _UserRefreshRequest,
-    UserLogoutRequest as _UserLogoutRequest
-} from "rmcs-auth-api/rmcs_auth_api/auth_pb.js";
+import pb_auth from "rmcs-auth-api/rmcs_auth_api/auth_grpc_web_pb.js";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64,
@@ -155,8 +146,8 @@ async function encryptMessage(message, encryptionKey)
  * @param {function(?grpc.web.RpcError, ?UserKeyResponse)} callback The callback function(error, response)
  */
 export async function user_login_key(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null);
-    const userKeyRequest = new _UserKeyRequest();
+    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+    const userKeyRequest = new pb_auth.UserKeyRequest();
     await client.userLoginKey(userKeyRequest, {}, (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
@@ -170,9 +161,9 @@ export async function user_login_key(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserLoginResponse)} callback The callback function(error, response)
  */
 export async function user_login(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null);
-    const userKeyRequest = new _UserKeyRequest();
-    const userLoginRequest = new _UserLoginRequest();
+    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+    const userKeyRequest = new pb_auth.UserKeyRequest();
+    const userLoginRequest = new pb_auth.UserLoginRequest();
     userLoginRequest.setUsername(request.username);
     await client.userLoginKey(userKeyRequest, {}, async (e, r) => {
         if (r) {
@@ -195,8 +186,8 @@ export async function user_login(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserRefreshResponse)} callback The callback function(error, response)
  */
 export async function user_refresh(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null);
-    const userRefreshRequest = new _UserRefreshRequest();
+    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+    const userRefreshRequest = new pb_auth.UserRefreshRequest();
     userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
     userRefreshRequest.setAccessToken(request.access_token);
     userRefreshRequest.setRefreshToken(request.refresh_token);
@@ -213,8 +204,8 @@ export async function user_refresh(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function user_logout(auth, request, callback) {
-    const client = new AuthServiceClient(auth.address, null, null);
-    const userLogoutRequest = new _UserLogoutRequest();
+    const client = new pb_auth.AuthServiceClient(auth.address, null, null);
+    const userLogoutRequest = new pb_auth.UserLogoutRequest();
     userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
     userLogoutRequest.setAuthToken(request.auth_token);
     await client.userLogout(userLogoutRequest, {}, (e, r) => {

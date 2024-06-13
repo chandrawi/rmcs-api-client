@@ -1,13 +1,4 @@
-import { RoleServiceClient } from "rmcs-auth-api/rmcs_auth_api/role_grpc_web_pb.js";
-import {
-    RoleId as _RoleId,
-    RoleName as _RoleName,
-    ApiId as _ApiId,
-    UserId as _UserId,
-    RoleSchema as _RoleSchema,
-    RoleUpdate as _RoleUpdate,
-    RoleAccess as _RoleAccess
-} from "rmcs-auth-api/rmcs_auth_api/role_pb.js";
+import pb_role from "rmcs-auth-api/rmcs_auth_api/role_grpc_web_pb.js";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -110,8 +101,8 @@ function get_role_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
  */
 export async function read_role(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleId = new _RoleId();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
     await client.readRole(roleId, {}, (e, r) => {
         const response = r ? get_role_schema(r.toObject().result) : null;
@@ -126,8 +117,8 @@ export async function read_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
  */
 export async function read_role_by_name(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleName = new _RoleName();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleName = new pb_role.RoleName();
     roleName.setApiId(uuid_hex_to_base64(request.api_id));
     roleName.setName(request.name);
     await client.readRoleByName(roleName, {}, (e, r) => {
@@ -143,8 +134,8 @@ export async function read_role_by_name(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
  */
 export async function list_role_by_api(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const apiId = new _ApiId();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const apiId = new pb_role.ApiId();
     apiId.setApiId(uuid_hex_to_base64(request.id));
     await client.listRoleByApi(apiId, {}, (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
@@ -159,8 +150,8 @@ export async function list_role_by_api(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
  */
 export async function list_role_by_user(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const userId = new _UserId();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
     await client.listRoleByUser(userId, {}, (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
@@ -175,8 +166,8 @@ export async function list_role_by_user(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?RoleId)} callback The callback function(error, response)
  */
 export async function create_role(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleSchema = new _RoleSchema();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleSchema = new pb_role.RoleSchema();
     roleSchema.setId(uuid_hex_to_base64(request.id));
     roleSchema.setApiId(uuid_hex_to_base64(request.api_id));
     roleSchema.setName(request.name);
@@ -198,8 +189,8 @@ export async function create_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_role(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleUpdate = new _RoleUpdate();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleUpdate = new pb_role.RoleUpdate();
     roleUpdate.setId(uuid_hex_to_base64(request.id));
     roleUpdate.setName(request.name);
     roleUpdate.setMulti(request.multi);
@@ -219,8 +210,8 @@ export async function update_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_role(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleId = new _RoleId();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
     await client.deleteRole(roleId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -235,8 +226,8 @@ export async function delete_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_role_access(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleAccess = new _RoleAccess();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
     await client.addRoleAccess(roleAccess, {}, (e, r) => {
@@ -252,8 +243,8 @@ export async function add_role_access(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_role_access(auth, request, callback) {
-    const client = new RoleServiceClient(auth.address, null, null);
-    const roleAccess = new _RoleAccess();
+    const client = new pb_role.RoleServiceClient(auth.address, null, null);
+    const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
     await client.removeRoleAccess(roleAccess, {}, (e, r) => {

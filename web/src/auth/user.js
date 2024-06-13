@@ -1,12 +1,4 @@
-import { UserServiceClient } from "rmcs-auth-api/rmcs_auth_api/user_grpc_web_pb.js";
-import {
-    UserId as _UserId,
-    UserName as _UserName,
-    RoleId as _RoleId,
-    UserSchema as _UserSchema,
-    UserUpdate as _UserUpdate,
-    UserRole as _UserRole
-} from "rmcs-auth-api/rmcs_auth_api/user_pb.js";
+import pb_user from "rmcs-auth-api/rmcs_auth_api/user_grpc_web_pb.js";
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -124,8 +116,8 @@ function get_user_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
  */
 export async function read_user(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userId = new _UserId();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
     await client.readUser(userId, {}, (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
@@ -140,8 +132,8 @@ export async function read_user(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
  */
 export async function read_user_by_name(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userName = new _UserName();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userName = new pb_user.UserName();
     userName.setName(request.name);
     await client.readUserByName(userName, {}, (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
@@ -156,8 +148,8 @@ export async function read_user_by_name(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserSchema[])} callback The callback function(error, response)
  */
 export async function list_user_by_role(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const roleId = new _RoleId();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
     await client.listUserByRole(roleId, {}, (e, r) => {
         const response = r ? get_user_schema_vec(r.toObject().resultsList) : null;
@@ -172,8 +164,8 @@ export async function list_user_by_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?UserId)} callback The callback function(error, response)
  */
 export async function create_user(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userSchema = new _UserSchema();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userSchema = new pb_user.UserSchema();
     userSchema.setId(uuid_hex_to_base64(request.id));
     userSchema.setName(request.name);
     userSchema.setEmail(request.email);
@@ -192,8 +184,8 @@ export async function create_user(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_user(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userUpdate = new _UserUpdate();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userUpdate = new pb_user.UserUpdate();
     userUpdate.setId(uuid_hex_to_base64(request.id));
     userUpdate.setName(request.name);
     userUpdate.setEmail(request.email);
@@ -212,8 +204,8 @@ export async function update_user(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_user(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userId = new _UserId();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
     await client.deleteUser(userId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -228,8 +220,8 @@ export async function delete_user(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_user_role(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userRole = new _UserRole();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
     await client.addUserRole(userRole, {}, (e, r) => {
@@ -245,8 +237,8 @@ export async function add_user_role(auth, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_user_role(auth, request, callback) {
-    const client = new UserServiceClient(auth.address, null, null);
-    const userRole = new _UserRole();
+    const client = new pb_user.UserServiceClient(auth.address, null, null);
+    const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
     await client.removeUserRole(userRole, {}, (e, r) => {

@@ -1,17 +1,5 @@
 import { get_config_value, set_config_value, get_data_type, set_data_type } from './common.js';
-import { ModelServiceClient } from 'rmcs-resource-api/rmcs_resource_api/model_grpc_web_pb.js';
-import {
-    ModelId as _ModelId, 
-    ModelName as _ModelName, 
-    ModelCategory as _ModelCategory, 
-    ModelNameCategory as _ModelNameCategory, 
-    TypeId as _TypeId,
-    ModelSchema as _ModelSchema,
-    ModelUpdate as _ModelUpdate,
-    ConfigId as _ConfigId,
-    ConfigSchema as _ConfigSchema,
-    ConfigUpdate as _ConfigUpdate
-} from 'rmcs-resource-api/rmcs_resource_api/model_pb.js';
+import pb_model from 'rmcs-resource-api/rmcs_resource_api/model_grpc_web_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -164,8 +152,8 @@ function get_model_config_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?ModelSchema)} callback The callback function(error, response)
  */
 export async function read_model(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelId = new _ModelId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
     await client.readModel(modelId, {}, (e, r) => {
         const response = r ? get_model_schema(r.toObject().result) : null;
@@ -180,8 +168,8 @@ export async function read_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelSchema[])} callback The callback function(error, response)
  */
 export async function list_model_by_name(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelName = new _ModelName();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelName = new pb_model.ModelName();
     modelName.setName(request.name);
     await client.listModelByName(modelName, {}, (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
@@ -196,8 +184,8 @@ export async function list_model_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelSchema[])} callback The callback function(error, response)
  */
 export async function list_model_by_category(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelCategory = new _ModelCategory();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelCategory = new pb_model.ModelCategory();
     modelCategory.setCategory(request.category);
     await client.listModelByCategory(modelCategory, {}, (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
@@ -212,8 +200,8 @@ export async function list_model_by_category(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelSchema[])} callback The callback function(error, response)
  */
 export async function list_model_by_name_category(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelNameCategory = new _ModelNameCategory();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelNameCategory = new pb_model.ModelNameCategory();
     modelNameCategory.setName(request.name);
     modelNameCategory.setCategory(request.category);
     await client.listModelByNameCategory(modelNameCategory, {}, (e, r) => {
@@ -229,8 +217,8 @@ export async function list_model_by_name_category(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelSchema[])} callback The callback function(error, response)
  */
 export async function list_model_by_type(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const typeId = new _TypeId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const typeId = new pb_model.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
     await client.listModelByType(modelNameCategory, {}, (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
@@ -245,8 +233,8 @@ export async function list_model_by_type(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelId)} callback The callback function(error, response)
  */
 export async function create_model(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelSchema = new _ModelSchema();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelSchema = new pb_model.ModelSchema();
     modelSchema.setId(uuid_hex_to_base64(request.id));
     modelSchema.setDataTypeList(request.data_type.map((v) => {return set_data_type(v)}));
     modelSchema.setCategory(request.category);
@@ -265,8 +253,8 @@ export async function create_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_model(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelUpdate = new _ModelUpdate();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelUpdate = new pb_model.ModelUpdate();
     modelUpdate.setId(uuid_hex_to_base64(request.id));
     if (request.data_type) {
         modelUpdate.setDataTypeList(request.data_type.map((v) => {return set_data_type(v)}));
@@ -290,8 +278,8 @@ export async function update_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_model(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelId = new _ModelId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
     await client.deleteModel(modelId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -306,8 +294,8 @@ export async function delete_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelConfigSchema)} callback The callback function(error, response)
  */
 export async function read_model_config(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const configId = new _ConfigId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const configId = new pb_model.ConfigId();
     configId.setId(request.id);
     await client.readModelConfig(configId, {}, (e, r) => {
         const response = r ? get_model_config_schema(r.toObject().result) : null;
@@ -322,8 +310,8 @@ export async function read_model_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelConfigSchema[])} callback The callback function(error, response)
  */
 export async function list_model_config_by_model(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const modelId = new _ModelId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
     await client.listModelConfig(modelId, {}, (e, r) => {
         const response = r ? get_model_config_schema_vec(r.toObject().resultsList) : null;
@@ -338,8 +326,8 @@ export async function list_model_config_by_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?ModelConfigId)} callback The callback function(error, response)
  */
 export async function create_model_config(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const configSchema = new _ConfigSchema();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const configSchema = new pb_model.ConfigSchema();
     configSchema.setModelId(uuid_hex_to_base64(request.model_id));
     configSchema.setIndex(request.index);
     configSchema.setName(request.name);
@@ -360,8 +348,8 @@ export async function create_model_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_model_config(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const configUpdate = new _ConfigUpdate();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const configUpdate = new pb_model.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
     const value = set_config_value(request.value);
@@ -380,8 +368,8 @@ export async function update_model_config(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_model_config(resource, request, callback) {
-    const client = new ModelServiceClient(resource.address, null, null);
-    const configId = new _ConfigId();
+    const client = new pb_model.ModelServiceClient(resource.address, null, null);
+    const configId = new pb_model.ConfigId();
     configId.setId(request.id);
     await client.deleteModelConfig(configId, {}, (e, r) => {
         callback(e, r.toObject());

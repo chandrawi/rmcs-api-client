@@ -1,12 +1,5 @@
 import { get_config_value, set_config_value } from './common.js';
-import { LogServiceClient } from 'rmcs-resource-api/rmcs_resource_api/log_grpc_web_pb.js';
-import {
-    LogId as _LogId, 
-    LogTime as _LogTime, 
-    LogRange as _LogRange, 
-    LogSchema as _LogSchema,
-    LogUpdate as _LogUpdate
-} from 'rmcs-resource-api/rmcs_resource_api/log_pb.js';
+import pb_log from 'rmcs-resource-api/rmcs_resource_api/log_grpc_web_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -137,8 +130,8 @@ function set_log_status(status) {
  * @param {function(?grpc.web.RpcError, ?LogSchema)} callback The callback function(error, response)
  */
 export async function read_log(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logId = new _LogId();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
     await client.readLog(logId, {}, (e, r) => {
@@ -154,8 +147,8 @@ export async function read_log(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
 export async function list_log_by_time(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logTime = new _LogTime();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
         logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -176,8 +169,8 @@ export async function list_log_by_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
 export async function list_log_by_last_time(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logTime = new _LogTime();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
         logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -198,8 +191,8 @@ export async function list_log_by_last_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
  */
 export async function list_log_by_range_time(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logRange = new _LogRange();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logRange = new pb_log.LogRange();
     logRange.setBegin(request.begin.valueOf() * 1000);
     logRange.setEnd(request.end.valueOf() * 1000);
     if (request.device_id) {
@@ -221,8 +214,8 @@ export async function list_log_by_range_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function create_log(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logSchema = new _LogSchema();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logSchema = new pb_log.LogSchema();
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     logSchema.setStatus(set_log_status(request.status));
@@ -242,8 +235,8 @@ export async function create_log(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_log(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logUpdate = new _LogUpdate();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logUpdate = new pb_log.LogUpdate();
     logUpdate.setTimestamp(request.timestamp.valueOf() * 1000);
     logUpdate.setDeviceId(uuid_hex_to_base64(request.device_id));
     if (typeof request.status == "number" || typeof request.status == "string") {
@@ -265,8 +258,8 @@ export async function update_log(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_log(resource, request, callback) {
-    const client = new LogServiceClient(resource.address, null, null);
-    const logId = new _LogId();
+    const client = new pb_log.LogServiceClient(resource.address, null, null);
+    const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
     await client.deleteLog(logId, {}, (e, r) => {

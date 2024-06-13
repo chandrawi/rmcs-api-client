@@ -1,15 +1,4 @@
-import { GroupServiceClient } from 'rmcs-resource-api/rmcs_resource_api/group_grpc_web_pb.js';
-import {
-    GroupId as _GroupId, 
-    GroupName as _GroupName, 
-    GroupCategory as _GroupCategory, 
-    GroupNameCategory as _GroupNameCategory,
-    GroupModelSchema as _GroupModelSchema,
-    GroupDeviceSchema as _GroupDeviceSchema,
-    GroupUpdate as _GroupUpdate, 
-    GroupModel as _GroupModel,
-    GroupDevice as _GroupDevice
-} from 'rmcs-resource-api/rmcs_resource_api/group_pb.js';
+import pb_group from 'rmcs-resource-api/rmcs_resource_api/group_grpc_web_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -178,8 +167,8 @@ function get_group_gateway_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?GroupModelSchema)} callback The callback function(error, response)
  */
 export async function read_group_model(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.readGroupModel(groupId, {}, (e, r) => {
         const response = r ? get_group_model_schema(r.toObject().result) : null;
@@ -194,8 +183,8 @@ export async function read_group_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupModelSchema[])} callback The callback function(error, response)
  */
 export async function list_group_model_by_name(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupName = new _GroupName();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
     await client.listGroupModelByName(groupName, {}, (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
@@ -210,8 +199,8 @@ export async function list_group_model_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupModelSchema[])} callback The callback function(error, response)
  */
 export async function list_group_model_by_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupCategory = new _GroupCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
     await client.listGroupModelByCategory(groupCategory, {}, (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
@@ -226,8 +215,8 @@ export async function list_group_model_by_category(resource, request, callback) 
  * @param {function(?grpc.web.RpcError, ?GroupModelSchema[])} callback The callback function(error, response)
  */
 export async function list_group_model_by_name_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupNameCategory = new _GroupNameCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
     await client.listGroupModelByNameCategory(groupNameCategory, {}, (e, r) => {
@@ -243,8 +232,8 @@ export async function list_group_model_by_name_category(resource, request, callb
  * @param {function(?grpc.web.RpcError, ?GroupId)} callback The callback function(error, response)
  */
 export async function create_group_model(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupSchema = new _GroupModelSchema();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupSchema = new pb_group.GroupModelSchema();
     groupSchema.setId(uuid_hex_to_base64(request.id));
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
@@ -262,8 +251,8 @@ export async function create_group_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_group_model(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupUpdate = new _GroupUpdate();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupUpdate = new pb_group.GroupUpdate();
     groupUpdate.setId(uuid_hex_to_base64(request.id));
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
@@ -281,8 +270,8 @@ export async function update_group_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_group_model(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.deleteGroupModel(groupId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -297,8 +286,8 @@ export async function delete_group_model(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_group_model_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupModel = new _GroupModel();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
     await client.addGroupModelMember(groupModel, {}, (e, r) => {
@@ -314,8 +303,8 @@ export async function add_group_model_member(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_group_model_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupModel = new _GroupModel();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
     await client.removeGroupModelMember(groupModel, {}, (e, r) => {
@@ -331,8 +320,8 @@ export async function remove_group_model_member(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupDeviceSchema)} callback The callback function(error, response)
  */
 export async function read_group_device(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.readGroupDevice(groupId, {}, (e, r) => {
         const response = r ? get_group_device_schema(r.toObject().result) : null;
@@ -347,8 +336,8 @@ export async function read_group_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupDeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_group_device_by_name(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupName = new _GroupName();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
     await client.listGroupDeviceByName(groupName, {}, (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
@@ -363,8 +352,8 @@ export async function list_group_device_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupDeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_group_device_by_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupCategory = new _GroupCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
     await client.listGroupDeviceByCategory(groupCategory, {}, (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
@@ -379,8 +368,8 @@ export async function list_group_device_by_category(resource, request, callback)
  * @param {function(?grpc.web.RpcError, ?GroupDeviceSchema[])} callback The callback function(error, response)
  */
 export async function list_group_device_by_name_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupNameCategory = new _GroupNameCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
     await client.listGroupDeviceByNameCategory(groupNameCategory, {}, (e, r) => {
@@ -396,8 +385,8 @@ export async function list_group_device_by_name_category(resource, request, call
  * @param {function(?grpc.web.RpcError, ?GroupId)} callback The callback function(error, response)
  */
 export async function create_group_device(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupSchema = new _GroupDeviceSchema();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupSchema = new pb_group.GroupDeviceSchema();
     groupSchema.setId(uuid_hex_to_base64(request.id));
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
@@ -415,8 +404,8 @@ export async function create_group_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_group_device(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupUpdate = new _GroupUpdate();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupUpdate = new pb_group.GroupUpdate();
     groupUpdate.setId(uuid_hex_to_base64(request.id));
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
@@ -434,8 +423,8 @@ export async function update_group_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_group_device(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.deleteGroupDevice(groupId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -450,8 +439,8 @@ export async function delete_group_device(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_group_device_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupDevice = new _GroupDevice();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
     await client.addGroupDeviceMember(groupDevice, {}, (e, r) => {
@@ -467,8 +456,8 @@ export async function add_group_device_member(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_group_device_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupDevice = new _GroupDevice();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
     await client.removeGroupDeviceMember(groupDevice, {}, (e, r) => {
@@ -484,8 +473,8 @@ export async function remove_group_device_member(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupGatewaySchema)} callback The callback function(error, response)
  */
 export async function read_group_gateway(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.readGroupGateway(groupId, {}, (e, r) => {
         const response = r ? get_group_gateway_schema(r.toObject().result) : null;
@@ -500,8 +489,8 @@ export async function read_group_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupGatewaySchema[])} callback The callback function(error, response)
  */
 export async function list_group_gateway_by_name(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupName = new _GroupName();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
     await client.listGroupGatewayByName(groupName, {}, (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
@@ -516,8 +505,8 @@ export async function list_group_gateway_by_name(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?GroupGatewaySchema[])} callback The callback function(error, response)
  */
 export async function list_group_gateway_by_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupCategory = new _GroupCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
     await client.listGroupGatewayByCategory(groupCategory, {}, (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
@@ -532,8 +521,8 @@ export async function list_group_gateway_by_category(resource, request, callback
  * @param {function(?grpc.web.RpcError, ?GroupGatewaySchema[])} callback The callback function(error, response)
  */
 export async function list_group_gateway_by_name_category(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupNameCategory = new _GroupNameCategory();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
     await client.listGroupGatewayByNameCategory(groupNameCategory, {}, (e, r) => {
@@ -549,8 +538,8 @@ export async function list_group_gateway_by_name_category(resource, request, cal
  * @param {function(?grpc.web.RpcError, ?GroupId)} callback The callback function(error, response)
  */
 export async function create_group_gateway(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupSchema = new _GroupDeviceSchema();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupSchema = new pb_group.GroupDeviceSchema();
     groupSchema.setId(uuid_hex_to_base64(request.id));
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
@@ -568,8 +557,8 @@ export async function create_group_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_group_gateway(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupUpdate = new _GroupUpdate();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupUpdate = new pb_group.GroupUpdate();
     groupUpdate.setId(uuid_hex_to_base64(request.id));
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
@@ -587,8 +576,8 @@ export async function update_group_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_group_gateway(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupId = new _GroupId();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
     await client.deleteGroupGateway(groupId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
@@ -603,8 +592,8 @@ export async function delete_group_gateway(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function add_group_gateway_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupDevice = new _GroupDevice();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
     await client.addGroupGatewayMember(groupDevice, {}, (e, r) => {
@@ -620,8 +609,8 @@ export async function add_group_gateway_member(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function remove_group_gateway_member(resource, request, callback) {
-    const client = new GroupServiceClient(resource.address, null, null);
-    const groupDevice = new _GroupDevice();
+    const client = new pb_group.GroupServiceClient(resource.address, null, null);
+    const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
     await client.removeGroupGatewayMember(groupDevice, {}, (e, r) => {

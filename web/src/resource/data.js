@@ -1,19 +1,5 @@
 import { get_data_value, set_data_value } from './common.js';
-import { DataServiceClient } from 'rmcs-resource-api/rmcs_resource_api/data_grpc_web_pb.js';
-import {
-    DataId as _DataId, 
-    DataTime as _DataTime, 
-    DataRange as _DataRange, 
-    DataNumber as _DataNumber,
-    ModelId as _ModelId,
-    DataModel as _DataModel,
-    DataIdModel as _DataIdModel,
-    DataTimeModel as _DataTimeModel, 
-    DataRangeModel as _DataRangeModel,
-    DataNumberModel as _DataNumberModel,
-    DataSchema as _DataSchema,
-    DataSchemaModel as _DataSchemaModel
-} from 'rmcs-resource-api/rmcs_resource_api/data_pb.js';
+import pb_data from 'rmcs-resource-api/rmcs_resource_api/data_grpc_web_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -91,8 +77,8 @@ function get_data_schema_vec(r) {
  * @param {function(?grpc.web.RpcError, ?DataSchema)} callback The callback function(error, response)
  */
 export async function read_data(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataId = new _DataId();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -109,8 +95,8 @@ export async function read_data(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
 export async function list_data_by_time(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataTime = new _DataTime();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -127,8 +113,8 @@ export async function list_data_by_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
 export async function list_data_by_last_time(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataTime = new _DataTime();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -145,8 +131,8 @@ export async function list_data_by_last_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
 export async function list_data_by_range_time(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataRange = new _DataRange();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataRange = new pb_data.DataRange();
     dataRange.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
@@ -164,8 +150,8 @@ export async function list_data_by_range_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
 export async function list_data_by_number_before(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataNumber = new _DataNumber();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -183,8 +169,8 @@ export async function list_data_by_number_before(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
  */
 export async function list_data_by_number_after(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataNumber = new _DataNumber();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -202,8 +188,8 @@ export async function list_data_by_number_after(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function create_data(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataSchema = new _DataSchema();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataSchema = new pb_data.DataSchema();
     dataSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataSchema.setModelId(uuid_hex_to_base64(request.model_id));
     dataSchema.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -225,8 +211,8 @@ export async function create_data(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_data(resource, request, callback) {
-    const client = new DataServiceClient(resource.address, null, null);
-    const dataId = new _DataId();
+    const client = new pb_data.DataServiceClient(resource.address, null, null);
+    const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);

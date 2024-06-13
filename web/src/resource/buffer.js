@@ -1,13 +1,5 @@
 import { get_data_value, set_data_value } from './common.js';
-import { BufferServiceClient } from 'rmcs-resource-api/rmcs_resource_api/buffer_grpc_web_pb.js';
-import {
-    BufferId as _BufferId, 
-    BufferTime as _BufferTime, 
-    BufferSelector as _BufferSelector, 
-    BuffersSelector as _BuffersSelector,
-    BufferSchema as _BufferSchema,
-    BufferUpdate as _BufferUpdate
-} from 'rmcs-resource-api/rmcs_resource_api/buffer_pb.js';
+import pb_buffer from 'rmcs-resource-api/rmcs_resource_api/buffer_grpc_web_pb.js';
 import {
     base64_to_uuid_hex,
     uuid_hex_to_base64
@@ -176,8 +168,8 @@ function set_buffer_status(status) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferId = new _BufferId();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     await client.readBuffer(bufferId, {}, (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
@@ -192,8 +184,8 @@ export async function read_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_by_time(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferTime = new _BufferTime();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferTime = new pb_buffer.BufferTime();
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -211,8 +203,8 @@ export async function read_buffer_by_time(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_first(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferSelector = new _BufferSelector();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
@@ -235,8 +227,8 @@ export async function read_buffer_first(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
  */
 export async function read_buffer_last(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferSelector = new _BufferSelector();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
@@ -259,8 +251,8 @@ export async function read_buffer_last(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
 export async function list_buffer_first(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const buffersSelector = new _BuffersSelector();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
@@ -284,8 +276,8 @@ export async function list_buffer_first(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
  */
 export async function list_buffer_last(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const buffersSelector = new _BuffersSelector();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
@@ -309,8 +301,8 @@ export async function list_buffer_last(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?BufferId)} callback The callback function(error, response)
  */
 export async function create_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferSchema = new _BufferSchema();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferSchema = new pb_buffer.BufferSchema();
     bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferSchema.setModelId(uuid_hex_to_base64(request.model_id));
     bufferSchema.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -333,8 +325,8 @@ export async function create_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function update_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferUpdate = new _BufferUpdate();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferUpdate = new pb_buffer.BufferUpdate();
     bufferUpdate.setId(request.id);
     const ty = typeof request.data;
     if (ty == "number" || ty == "string" || ty == "bigint" || ty == "boolean") {
@@ -358,8 +350,8 @@ export async function update_buffer(resource, request, callback) {
  * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
  */
 export async function delete_buffer(resource, request, callback) {
-    const client = new BufferServiceClient(resource.address, null, null);
-    const bufferId = new _BufferId();
+    const client = new pb_buffer.BufferServiceClient(resource.address, null, null);
+    const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     await client.deleteBuffer(bufferId, {}, (e, r) => {
         const response = r ? r.toObject() : null;
