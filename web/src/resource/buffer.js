@@ -1,6 +1,7 @@
 import { get_data_value, set_data_value } from './common.js';
 import { pb_buffer } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -177,7 +178,7 @@ export async function read_buffer(server, request, callback) {
     const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.readBuffer(bufferId, {}, (e, r) => {
+    await client.readBuffer(bufferId, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -196,7 +197,7 @@ export async function read_buffer_by_time(server, request, callback) {
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferTime.setStatus(set_buffer_status(request.status));
-    await client.readBufferByTime(bufferTime, {}, (e, r) => {
+    await client.readBufferByTime(bufferTime, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -220,7 +221,7 @@ export async function read_buffer_first(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferFirst(bufferSelector, {}, (e, r) => {
+    await client.readBufferFirst(bufferSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -244,7 +245,7 @@ export async function read_buffer_last(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferLast(bufferSelector, {}, (e, r) => {
+    await client.readBufferLast(bufferSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -269,7 +270,7 @@ export async function list_buffer_first(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferFirst(buffersSelector, {}, (e, r) => {
+    await client.listBufferFirst(buffersSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -294,7 +295,7 @@ export async function list_buffer_last(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferLast(buffersSelector, {}, (e, r) => {
+    await client.listBufferLast(buffersSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -318,7 +319,7 @@ export async function create_buffer(server, request, callback) {
         bufferSchema.addDataType(type);
     }
     bufferSchema.setStatus(set_buffer_status(request.status));
-    await client.createBuffer(bufferSchema, {}, (e, r) => {
+    await client.createBuffer(bufferSchema, metadata(server), (e, r) => {
         const response = r ? get_buffer_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -343,7 +344,7 @@ export async function update_buffer(server, request, callback) {
         }
     }
     bufferUpdate.setStatus(set_buffer_status(request.status));
-    await client.updateBuffer(bufferUpdate, {}, (e, r) => {
+    await client.updateBuffer(bufferUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     })
@@ -359,7 +360,7 @@ export async function delete_buffer(server, request, callback) {
     const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.deleteBuffer(bufferId, {}, (e, r) => {
+    await client.deleteBuffer(bufferId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

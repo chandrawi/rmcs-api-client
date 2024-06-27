@@ -1,5 +1,6 @@
 import { pb_token } from "rmcs-auth-api";
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64,
     base64_to_bytes,
@@ -136,7 +137,7 @@ export async function read_access_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.readAccessToken(accessId, {}, (e, r) => {
+    await client.readAccessToken(accessId, metadata(server), (e, r) => {
         const response = r ? get_token_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -152,7 +153,7 @@ export async function list_auth_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.listAuthToken(authToken, {}, (e, r) => {
+    await client.listAuthToken(authToken, metadata(server), (e, r) => {
         const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -168,7 +169,7 @@ export async function list_token_by_user(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listTokenByUser(userId, {}, (e, r) => {
+    await client.listTokenByUser(userId, metadata(server), (e, r) => {
         const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -187,7 +188,7 @@ export async function create_access_token(server, request, callback) {
     tokenSchema.setAuthToken(request.auth_token);
     tokenSchema.setExpire(request.expire.valueOf() * 1000);
     tokenSchema.setIp(bytes_to_base64(request.ip));
-    await client.createAccessToken(tokenSchema, {}, (e, r) => {
+    await client.createAccessToken(tokenSchema, metadata(server), (e, r) => {
         const response = r ? get_token_create_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -206,7 +207,7 @@ export async function create_auth_token(server, request, callback) {
     authTokenCreate.setExpire(request.expire.valueOf() * 1000);
     authTokenCreate.setIp(bytes_to_base64(request.ip));
     authTokenCreate.setNumber(request.number);
-    await client.createAuthToken(authTokenCreate, {}, (e, r) => {
+    await client.createAuthToken(authTokenCreate, metadata(server), (e, r) => {
         const response = r ? get_token_create_response_vec(r.toObject().tokensList) : null;
         callback(e, response);
     });
@@ -228,7 +229,7 @@ export async function update_access_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAccessToken(tokenUpdate, {}, (e, r) => {
+    await client.updateAccessToken(tokenUpdate, metadata(server), (e, r) => {
         const response = r ? get_token_update_response(r.toObject()) : null;
         callback(e, response);
     })
@@ -250,7 +251,7 @@ export async function update_auth_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAuthToken(tokenUpdate, {}, (e, r) => {
+    await client.updateAuthToken(tokenUpdate, metadata(server), (e, r) => {
         const response = r ? get_token_update_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -266,7 +267,7 @@ export async function delete_access_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.deleteAccessToken(accessId, {}, (e, r) => {
+    await client.deleteAccessToken(accessId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -282,7 +283,7 @@ export async function delete_auth_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.deleteAuthToken(authToken, {}, (e, r) => {
+    await client.deleteAuthToken(authToken, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -298,7 +299,7 @@ export async function delete_token_by_user(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.deleteTokenByUser(userId, {}, (e, r) => {
+    await client.deleteTokenByUser(userId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

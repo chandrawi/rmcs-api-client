@@ -1,5 +1,6 @@
 import { pb_auth } from "rmcs-auth-api";
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64,
     string_to_array_buffer
@@ -154,7 +155,7 @@ async function encryptMessage(message, encryptionKey)
 export async function user_login_key(server, request, callback) {
     const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
-    await client.userLoginKey(userKeyRequest, {}, (e, r) => {
+    await client.userLoginKey(userKeyRequest, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -177,7 +178,7 @@ export async function user_login(server, request, callback) {
             const pubkey = await importKey(key);
             const ciphertext = await encryptMessage(request.password, pubkey);
             userLoginRequest.setPassword(ciphertext);
-            await client.userLogin(userLoginRequest, {}, (e, r) => {
+            await client.userLogin(userLoginRequest, metadata(server), (e, r) => {
                 const response = r ? get_login_response(r.toObject()) : null;
                 callback(e, response);
             });
@@ -197,7 +198,7 @@ export async function user_refresh(server, request, callback) {
     userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
     userRefreshRequest.setAccessToken(request.access_token);
     userRefreshRequest.setRefreshToken(request.refresh_token);
-    await client.userRefresh(userRefreshRequest, {}, (e, r) => {
+    await client.userRefresh(userRefreshRequest, metadata(server), (e, r) => {
         const response = r ? get_refresh_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -214,7 +215,7 @@ export async function user_logout(server, request, callback) {
     const userLogoutRequest = new pb_auth.UserLogoutRequest();
     userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
     userLogoutRequest.setAuthToken(request.auth_token);
-    await client.userLogout(userLogoutRequest, {}, (e, r) => {
+    await client.userLogout(userLogoutRequest, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

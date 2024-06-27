@@ -1,5 +1,6 @@
 import { pb_role } from "rmcs-auth-api";
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -110,7 +111,7 @@ export async function read_role(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.readRole(roleId, {}, (e, r) => {
+    await client.readRole(roleId, metadata(server), (e, r) => {
         const response = r ? get_role_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -127,7 +128,7 @@ export async function read_role_by_name(server, request, callback) {
     const roleName = new pb_role.RoleName();
     roleName.setApiId(uuid_hex_to_base64(request.api_id));
     roleName.setName(request.name);
-    await client.readRoleByName(roleName, {}, (e, r) => {
+    await client.readRoleByName(roleName, metadata(server), (e, r) => {
         const response = r ? get_role_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -143,7 +144,7 @@ export async function list_role_by_api(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const apiId = new pb_role.ApiId();
     apiId.setApiId(uuid_hex_to_base64(request.id));
-    await client.listRoleByApi(apiId, {}, (e, r) => {
+    await client.listRoleByApi(apiId, metadata(server), (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -159,7 +160,7 @@ export async function list_role_by_user(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listRoleByUser(userId, {}, (e, r) => {
+    await client.listRoleByUser(userId, metadata(server), (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -182,7 +183,7 @@ export async function create_role(server, request, callback) {
     roleSchema.setAccessDuration(request.access_duration);
     roleSchema.setRefreshDuration(request.refresh_duration);
     roleSchema.setAccessKey(request.access_key);
-    await client.createRole(roleSchema, {}, (e, r) => {
+    await client.createRole(roleSchema, metadata(server), (e, r) => {
         const response = r ? get_role_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -203,7 +204,7 @@ export async function update_role(server, request, callback) {
     roleUpdate.setIpLock(request.ip_lock);
     roleUpdate.setAccessDuration(request.access_duration);
     roleUpdate.setRefreshDuration(request.refresh_duration);
-    await client.updateRole(roleUpdate, {}, (e, r) => {
+    await client.updateRole(roleUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -219,7 +220,7 @@ export async function delete_role(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteRole(roleId, {}, (e, r) => {
+    await client.deleteRole(roleId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -236,7 +237,7 @@ export async function add_role_access(server, request, callback) {
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.addRoleAccess(roleAccess, {}, (e, r) => {
+    await client.addRoleAccess(roleAccess, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -253,7 +254,7 @@ export async function remove_role_access(server, request, callback) {
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.removeRoleAccess(roleAccess, {}, (e, r) => {
+    await client.removeRoleAccess(roleAccess, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

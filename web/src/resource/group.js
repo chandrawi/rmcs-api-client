@@ -1,5 +1,6 @@
 import { pb_group } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -176,7 +177,7 @@ export async function read_group_model(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupModel(groupId, {}, (e, r) => {
+    await client.readGroupModel(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -192,7 +193,7 @@ export async function list_group_model_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupModelByName(groupName, {}, (e, r) => {
+    await client.listGroupModelByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -208,7 +209,7 @@ export async function list_group_model_by_category(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupModelByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupModelByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -225,7 +226,7 @@ export async function list_group_model_by_name_category(server, request, callbac
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupModelByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupModelByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -244,7 +245,7 @@ export async function create_group_model(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupModel(groupSchema, {}, (e, r) => {
+    await client.createGroupModel(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -263,7 +264,7 @@ export async function update_group_model(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupModel(groupUpdate, {}, (e, r) => {
+    await client.updateGroupModel(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -279,7 +280,7 @@ export async function delete_group_model(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupModel(groupId, {}, (e, r) => {
+    await client.deleteGroupModel(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -296,7 +297,7 @@ export async function add_group_model_member(server, request, callback) {
     const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.addGroupModelMember(groupModel, {}, (e, r) => {
+    await client.addGroupModelMember(groupModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -313,7 +314,7 @@ export async function remove_group_model_member(server, request, callback) {
     const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.removeGroupModelMember(groupModel, {}, (e, r) => {
+    await client.removeGroupModelMember(groupModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -329,7 +330,7 @@ export async function read_group_device(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupDevice(groupId, {}, (e, r) => {
+    await client.readGroupDevice(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -345,7 +346,7 @@ export async function list_group_device_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupDeviceByName(groupName, {}, (e, r) => {
+    await client.listGroupDeviceByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -361,7 +362,7 @@ export async function list_group_device_by_category(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupDeviceByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupDeviceByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -378,7 +379,7 @@ export async function list_group_device_by_name_category(server, request, callba
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupDeviceByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupDeviceByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -397,7 +398,7 @@ export async function create_group_device(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupDevice(groupSchema, {}, (e, r) => {
+    await client.createGroupDevice(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -416,7 +417,7 @@ export async function update_group_device(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupDevice(groupUpdate, {}, (e, r) => {
+    await client.updateGroupDevice(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -432,7 +433,7 @@ export async function delete_group_device(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupDevice(groupId, {}, (e, r) => {
+    await client.deleteGroupDevice(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -449,7 +450,7 @@ export async function add_group_device_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.addGroupDeviceMember(groupDevice, {}, (e, r) => {
+    await client.addGroupDeviceMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -466,7 +467,7 @@ export async function remove_group_device_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.removeGroupDeviceMember(groupDevice, {}, (e, r) => {
+    await client.removeGroupDeviceMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -482,7 +483,7 @@ export async function read_group_gateway(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupGateway(groupId, {}, (e, r) => {
+    await client.readGroupGateway(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -498,7 +499,7 @@ export async function list_group_gateway_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupGatewayByName(groupName, {}, (e, r) => {
+    await client.listGroupGatewayByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -514,7 +515,7 @@ export async function list_group_gateway_by_category(server, request, callback) 
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupGatewayByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupGatewayByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -531,7 +532,7 @@ export async function list_group_gateway_by_name_category(server, request, callb
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupGatewayByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupGatewayByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -550,7 +551,7 @@ export async function create_group_gateway(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupGateway(groupSchema, {}, (e, r) => {
+    await client.createGroupGateway(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -569,7 +570,7 @@ export async function update_group_gateway(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupGateway(groupUpdate, {}, (e, r) => {
+    await client.updateGroupGateway(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -585,7 +586,7 @@ export async function delete_group_gateway(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupGateway(groupId, {}, (e, r) => {
+    await client.deleteGroupGateway(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -602,7 +603,7 @@ export async function add_group_gateway_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
-    await client.addGroupGatewayMember(groupDevice, {}, (e, r) => {
+    await client.addGroupGatewayMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -619,7 +620,7 @@ export async function remove_group_gateway_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
-    await client.removeGroupGatewayMember(groupDevice, {}, (e, r) => {
+    await client.removeGroupGatewayMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

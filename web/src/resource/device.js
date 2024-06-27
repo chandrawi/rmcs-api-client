@@ -1,6 +1,7 @@
 import { get_config_value, set_config_value } from './common.js';
 import { pb_device } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -280,7 +281,7 @@ export async function read_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.readDevice(deviceId, {}, (e, r) => {
+    await client.readDevice(deviceId, metadata(server), (e, r) => {
         const response = r ? get_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -296,7 +297,7 @@ export async function read_device_by_sn(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readDeviceBySn(serialNumber, {}, (e, r) => {
+    await client.readDeviceBySn(serialNumber, metadata(server), (e, r) => {
         const response = r ? get_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -312,7 +313,7 @@ export async function list_device_by_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByGateway(gatewayId, {}, (e, r) => {
+    await client.listDeviceByGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -328,7 +329,7 @@ export async function list_device_by_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByType(typeId, {}, (e, r) => {
+    await client.listDeviceByType(typeId, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -344,7 +345,7 @@ export async function list_device_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceName = new pb_device.DeviceName();
     deviceName.setName(request.name);
-    await client.listDeviceByName(deviceName, {}, (e, r) => {
+    await client.listDeviceByName(deviceName, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -361,7 +362,7 @@ export async function list_device_by_gateway_type(server, request, callback) {
     const gatewayType = new pb_device.DeviceGatewayType();
     gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayType.setId(uuid_hex_to_base64(request.type_id));
-    await client.listDeviceByGatewayType(gatewayType, {}, (e, r) => {
+    await client.listDeviceByGatewayType(gatewayType, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -378,7 +379,7 @@ export async function list_device_by_gateway_name(server, request, callback) {
     const gatewayName = new pb_device.DeviceGatewayName();
     gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayName.setId(request.name);
-    await client.listDeviceByGatewayName(gatewayName, {}, (e, r) => {
+    await client.listDeviceByGatewayName(gatewayName, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -401,7 +402,7 @@ export async function create_device(server, request, callback) {
     deviceSchema.setName(request.name);
     deviceSchema.setDescription(request.description);
     deviceSchema.setDeviceType(typeSchema);
-    await client.createDevice(deviceSchema, {}, (e, r) => {
+    await client.createDevice(deviceSchema, metadata(server), (e, r) => {
         const response = r ? get_device_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -424,7 +425,7 @@ export async function update_device(server, request, callback) {
     deviceUpdate.setName(request.name);
     deviceUpdate.setDescription(request.description);
     deviceUpdate.setTypeId(request.type_id);
-    await client.updateDevice(deviceUpdate, {}, (e, r) => {
+    await client.updateDevice(deviceUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -440,7 +441,7 @@ export async function delete_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteDevice(deviceId, {}, (e, r) => {
+    await client.deleteDevice(deviceId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -456,7 +457,7 @@ export async function read_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.readGateway(gatewayId, {}, (e, r) => {
+    await client.readGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -472,7 +473,7 @@ export async function read_gateway_by_sn(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readGatewayBySn(serialNumber, {}, (e, r) => {
+    await client.readGatewayBySn(serialNumber, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -488,7 +489,7 @@ export async function list_gateway_by_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayByType(typeId, {}, (e, r) => {
+    await client.listGatewayByType(typeId, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -504,7 +505,7 @@ export async function list_gateway_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayName = new pb_device.GatewayName();
     gatewayName.setName(request.name);
-    await client.listGatewayByName(gatewayName, {}, (e, r) => {
+    await client.listGatewayByName(gatewayName, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -526,7 +527,7 @@ export async function create_gateway(server, request, callback) {
     gatewaySchema.setName(request.name);
     gatewaySchema.setDescription(request.description);
     gatewaySchema.setGatewayType(typeSchema);
-    await client.createGateway(gatewaySchema, {}, (e, r) => {
+    await client.createGateway(gatewaySchema, metadata(server), (e, r) => {
         const response = r ? get_gateway_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -546,7 +547,7 @@ export async function update_gateway(server, request, callback) {
     gatewayUpdate.setName(request.name);
     gatewayUpdate.setDescription(request.description);
     gatewayUpdate.setTypeId(request.type_id);
-    await client.updateGateway(gatewayUpdate, {}, (e, r) => {
+    await client.updateGateway(gatewayUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -562,7 +563,7 @@ export async function delete_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGateway(gatewayId, {}, (e, r) => {
+    await client.deleteGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -578,7 +579,7 @@ export async function read_device_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readDeviceConfig(configId, {}, (e, r) => {
+    await client.readDeviceConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_device_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -594,7 +595,7 @@ export async function list_device_config_by_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceConfig(deviceId, {}, (e, r) => {
+    await client.listDeviceConfig(deviceId, metadata(server), (e, r) => {
         const response = r ? get_device_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -615,7 +616,7 @@ export async function create_device_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createDeviceConfig(configSchema, {}, (e, r) => {
+    await client.createDeviceConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -636,7 +637,7 @@ export async function update_device_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateDeviceConfig(configUpdate, {}, (e, r) => {
+    await client.updateDeviceConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -651,7 +652,7 @@ export async function delete_device_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteDeviceConfig(configId, {}, (e, r) => {
+    await client.deleteDeviceConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -666,7 +667,7 @@ export async function read_gateway_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readGatewayConfig(configId, {}, (e, r) => {
+    await client.readGatewayConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_gateway_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -682,7 +683,7 @@ export async function list_gateway_config_by_gateway(server, request, callback) 
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayConfig(gatewayId, {}, (e, r) => {
+    await client.listGatewayConfig(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_gateway_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -703,7 +704,7 @@ export async function create_gateway_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createGatewayConfig(configSchema, {}, (e, r) => {
+    await client.createGatewayConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -724,7 +725,7 @@ export async function update_gateway_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateGatewayConfig(configUpdate, {}, (e, r) => {
+    await client.updateGatewayConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -739,7 +740,7 @@ export async function delete_gateway_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteGatewayConfig(configId, {}, (e, r) => {
+    await client.deleteGatewayConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }

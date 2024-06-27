@@ -1,4 +1,16 @@
 /**
+ * Construct request metadata
+ * @param {{address:string,token:string}} server 
+ * @returns {Object.<string,string>}
+ */
+export function metadata(server) {
+    if (server.token) {
+        return { "Authorization": "Bearer " + server.token };
+    }
+    return {};
+}
+
+/**
  * Convert base64 string to UUID hex representation
  * @param {string} str 
  * @returns {string}

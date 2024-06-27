@@ -2,6 +2,18 @@ import { pb_api, pb_role, pb_user, pb_token, pb_auth } from 'rmcs-auth-api';
 import { pb_model, pb_device, pb_group, pb_data, pb_buffer, pb_slice, pb_log } from 'rmcs-resource-api';
 
 /**
+ * Construct request metadata
+ * @param {{address:string,token:string}} server 
+ * @returns {Object.<string,string>}
+ */
+function metadata(server) {
+    if (server.token) {
+        return { "Authorization": "Bearer " + server.token };
+    }
+    return {};
+}
+
+/**
  * Convert base64 string to UUID hex representation
  * @param {string} str 
  * @returns {string}
@@ -126,6 +138,7 @@ var utility = /*#__PURE__*/Object.freeze({
     base64_to_bytes: base64_to_bytes,
     base64_to_uuid_hex: base64_to_uuid_hex,
     bytes_to_base64: bytes_to_base64,
+    metadata: metadata,
     random_base64: random_base64,
     random_binary: random_binary,
     string_to_array_buffer: string_to_array_buffer,
@@ -286,7 +299,7 @@ async function read_api(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.readApi(apiId, {}, (e, r) => {
+    await client.readApi(apiId, metadata(server), (e, r) => {
         const response = r ? get_api_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -302,7 +315,7 @@ async function read_api_by_name(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiName = new pb_api.ApiName();
     apiName.setName(request.name);
-    await client.readApiByName(apiName, {}, (e, r) => {
+    await client.readApiByName(apiName, metadata(server), (e, r) => {
         const response = r ? get_api_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -318,7 +331,7 @@ async function list_api_by_category(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiCategory = new pb_api.ApiCategory();
     apiCategory.setCategory(request.category);
-    await client.listApiByCategory(apiCategory, {}, (e, r) => {
+    await client.listApiByCategory(apiCategory, metadata(server), (e, r) => {
         const response = r ? get_api_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -340,7 +353,7 @@ async function create_api(server, request, callback) {
     apiSchema.setDescription(request.description);
     apiSchema.setPassword(request.password);
     apiSchema.setAccessKey(request.access_key);
-    await client.createApi(apiSchema, {}, (e, r) => {
+    await client.createApi(apiSchema, metadata(server), (e, r) => {
         const response = r ? getApiId(r.toObject()) : null;
         callback(e, response);
     });
@@ -362,7 +375,7 @@ async function update_api(server, request, callback) {
     apiUpdate.setDescription(request.description);
     apiUpdate.setPassword(request.password);
     apiUpdate.setAccessKey(request.access_key);
-    await client.updateApi(apiUpdate, {}, (e, r) => {
+    await client.updateApi(apiUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -378,7 +391,7 @@ async function delete_api(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteApi(apiId, {}, (e, r) => {
+    await client.deleteApi(apiId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -394,7 +407,7 @@ async function read_procedure(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
-    await client.readProcedure(procedureId, {}, (e, r) => {
+    await client.readProcedure(procedureId, metadata(server), (e, r) => {
         const response = r ? get_procedure_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -411,7 +424,7 @@ async function read_procedure_by_name(server, request, callback) {
     const procedureName = new pb_api.ProcedureName();
     procedureName.setApiId(uuid_hex_to_base64(request.api_id));
     procedureName.setName(request.name);
-    await client.readProcedureByName(procedureName, {}, (e, r) => {
+    await client.readProcedureByName(procedureName, metadata(server), (e, r) => {
         const response = r ? get_procedure_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -427,7 +440,7 @@ async function list_procedure_by_api(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.listProcedureByApi(apiId, {}, (e, r) => {
+    await client.listProcedureByApi(apiId, metadata(server), (e, r) => {
         const response = r ? get_procedure_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -446,7 +459,7 @@ async function create_procedure(server, request, callback) {
     procedureSchema.setApiId(uuid_hex_to_base64(request.api_id));
     procedureSchema.setName(request.name);
     procedureSchema.setDescription(request.description);
-    await client.createProcedure(procedureSchema, {}, (e, r) => {
+    await client.createProcedure(procedureSchema, metadata(server), (e, r) => {
         const response = r ? get_procedure_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -464,7 +477,7 @@ async function update_procedure(server, request, callback) {
     procedureUpdate.setId(uuid_hex_to_base64(request.id));
     procedureUpdate.setName(request.name);
     procedureUpdate.setDescription(request.description);
-    await client.updateProcedure(procedureUpdate, {}, (e, r) => {
+    await client.updateProcedure(procedureUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -480,7 +493,7 @@ async function delete_procedure(server, request, callback) {
     const client = new pb_api.ApiServiceClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteProcedure(procedureId, {}, (e, r) => {
+    await client.deleteProcedure(procedureId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -591,7 +604,7 @@ async function read_role(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.readRole(roleId, {}, (e, r) => {
+    await client.readRole(roleId, metadata(server), (e, r) => {
         const response = r ? get_role_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -608,7 +621,7 @@ async function read_role_by_name(server, request, callback) {
     const roleName = new pb_role.RoleName();
     roleName.setApiId(uuid_hex_to_base64(request.api_id));
     roleName.setName(request.name);
-    await client.readRoleByName(roleName, {}, (e, r) => {
+    await client.readRoleByName(roleName, metadata(server), (e, r) => {
         const response = r ? get_role_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -624,7 +637,7 @@ async function list_role_by_api(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const apiId = new pb_role.ApiId();
     apiId.setApiId(uuid_hex_to_base64(request.id));
-    await client.listRoleByApi(apiId, {}, (e, r) => {
+    await client.listRoleByApi(apiId, metadata(server), (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -640,7 +653,7 @@ async function list_role_by_user(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listRoleByUser(userId, {}, (e, r) => {
+    await client.listRoleByUser(userId, metadata(server), (e, r) => {
         const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -663,7 +676,7 @@ async function create_role(server, request, callback) {
     roleSchema.setAccessDuration(request.access_duration);
     roleSchema.setRefreshDuration(request.refresh_duration);
     roleSchema.setAccessKey(request.access_key);
-    await client.createRole(roleSchema, {}, (e, r) => {
+    await client.createRole(roleSchema, metadata(server), (e, r) => {
         const response = r ? get_role_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -684,7 +697,7 @@ async function update_role(server, request, callback) {
     roleUpdate.setIpLock(request.ip_lock);
     roleUpdate.setAccessDuration(request.access_duration);
     roleUpdate.setRefreshDuration(request.refresh_duration);
-    await client.updateRole(roleUpdate, {}, (e, r) => {
+    await client.updateRole(roleUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -700,7 +713,7 @@ async function delete_role(server, request, callback) {
     const client = new pb_role.RoleServiceClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteRole(roleId, {}, (e, r) => {
+    await client.deleteRole(roleId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -717,7 +730,7 @@ async function add_role_access(server, request, callback) {
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.addRoleAccess(roleAccess, {}, (e, r) => {
+    await client.addRoleAccess(roleAccess, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -734,7 +747,7 @@ async function remove_role_access(server, request, callback) {
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.removeRoleAccess(roleAccess, {}, (e, r) => {
+    await client.removeRoleAccess(roleAccess, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -860,7 +873,7 @@ async function read_user(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.readUser(userId, {}, (e, r) => {
+    await client.readUser(userId, metadata(server), (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -876,7 +889,7 @@ async function read_user_by_name(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userName = new pb_user.UserName();
     userName.setName(request.name);
-    await client.readUserByName(userName, {}, (e, r) => {
+    await client.readUserByName(userName, metadata(server), (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -892,7 +905,7 @@ async function list_user_by_role(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.listUserByRole(roleId, {}, (e, r) => {
+    await client.listUserByRole(roleId, metadata(server), (e, r) => {
         const response = r ? get_user_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -912,7 +925,7 @@ async function create_user(server, request, callback) {
     userSchema.setEmail(request.email);
     userSchema.setPhone(request.phone);
     userSchema.setPassword(request.password);
-    await client.createUser(userSchema, {}, (e, r) => {
+    await client.createUser(userSchema, metadata(server), (e, r) => {
         const response = r ? get_user_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -932,7 +945,7 @@ async function update_user(server, request, callback) {
     userUpdate.setEmail(request.email);
     userUpdate.setPhone(request.phone);
     userUpdate.setPassword(request.password);
-    await client.updateUser(userUpdate, {}, (e, r) => {
+    await client.updateUser(userUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -948,7 +961,7 @@ async function delete_user(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteUser(userId, {}, (e, r) => {
+    await client.deleteUser(userId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -965,7 +978,7 @@ async function add_user_role(server, request, callback) {
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.addUserRole(userRole, {}, (e, r) => {
+    await client.addUserRole(userRole, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -982,7 +995,7 @@ async function remove_user_role(server, request, callback) {
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.removeUserRole(userRole, {}, (e, r) => {
+    await client.removeUserRole(userRole, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1117,7 +1130,7 @@ async function read_access_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.readAccessToken(accessId, {}, (e, r) => {
+    await client.readAccessToken(accessId, metadata(server), (e, r) => {
         const response = r ? get_token_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -1133,7 +1146,7 @@ async function list_auth_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.listAuthToken(authToken, {}, (e, r) => {
+    await client.listAuthToken(authToken, metadata(server), (e, r) => {
         const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -1149,7 +1162,7 @@ async function list_token_by_user(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listTokenByUser(userId, {}, (e, r) => {
+    await client.listTokenByUser(userId, metadata(server), (e, r) => {
         const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -1168,7 +1181,7 @@ async function create_access_token(server, request, callback) {
     tokenSchema.setAuthToken(request.auth_token);
     tokenSchema.setExpire(request.expire.valueOf() * 1000);
     tokenSchema.setIp(bytes_to_base64(request.ip));
-    await client.createAccessToken(tokenSchema, {}, (e, r) => {
+    await client.createAccessToken(tokenSchema, metadata(server), (e, r) => {
         const response = r ? get_token_create_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -1187,7 +1200,7 @@ async function create_auth_token(server, request, callback) {
     authTokenCreate.setExpire(request.expire.valueOf() * 1000);
     authTokenCreate.setIp(bytes_to_base64(request.ip));
     authTokenCreate.setNumber(request.number);
-    await client.createAuthToken(authTokenCreate, {}, (e, r) => {
+    await client.createAuthToken(authTokenCreate, metadata(server), (e, r) => {
         const response = r ? get_token_create_response_vec(r.toObject().tokensList) : null;
         callback(e, response);
     });
@@ -1209,7 +1222,7 @@ async function update_access_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAccessToken(tokenUpdate, {}, (e, r) => {
+    await client.updateAccessToken(tokenUpdate, metadata(server), (e, r) => {
         const response = r ? get_token_update_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -1231,7 +1244,7 @@ async function update_auth_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAuthToken(tokenUpdate, {}, (e, r) => {
+    await client.updateAuthToken(tokenUpdate, metadata(server), (e, r) => {
         const response = r ? get_token_update_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -1247,7 +1260,7 @@ async function delete_access_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.deleteAccessToken(accessId, {}, (e, r) => {
+    await client.deleteAccessToken(accessId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1263,7 +1276,7 @@ async function delete_auth_token(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.deleteAuthToken(authToken, {}, (e, r) => {
+    await client.deleteAuthToken(authToken, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1279,7 +1292,7 @@ async function delete_token_by_user(server, request, callback) {
     const client = new pb_token.TokenServiceClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.deleteTokenByUser(userId, {}, (e, r) => {
+    await client.deleteTokenByUser(userId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1433,7 +1446,7 @@ async function encryptMessage(message, encryptionKey)
 async function user_login_key(server, request, callback) {
     const client = new pb_auth.AuthServiceClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
-    await client.userLoginKey(userKeyRequest, {}, (e, r) => {
+    await client.userLoginKey(userKeyRequest, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1456,7 +1469,7 @@ async function user_login(server, request, callback) {
             const pubkey = await importKey(key);
             const ciphertext = await encryptMessage(request.password, pubkey);
             userLoginRequest.setPassword(ciphertext);
-            await client.userLogin(userLoginRequest, {}, (e, r) => {
+            await client.userLogin(userLoginRequest, metadata(server), (e, r) => {
                 const response = r ? get_login_response(r.toObject()) : null;
                 callback(e, response);
             });
@@ -1476,7 +1489,7 @@ async function user_refresh(server, request, callback) {
     userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
     userRefreshRequest.setAccessToken(request.access_token);
     userRefreshRequest.setRefreshToken(request.refresh_token);
-    await client.userRefresh(userRefreshRequest, {}, (e, r) => {
+    await client.userRefresh(userRefreshRequest, metadata(server), (e, r) => {
         const response = r ? get_refresh_response(r.toObject()) : null;
         callback(e, response);
     });
@@ -1493,7 +1506,7 @@ async function user_logout(server, request, callback) {
     const userLogoutRequest = new pb_auth.UserLogoutRequest();
     userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
     userLogoutRequest.setAuthToken(request.auth_token);
-    await client.userLogout(userLogoutRequest, {}, (e, r) => {
+    await client.userLogout(userLogoutRequest, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -1975,7 +1988,7 @@ async function read_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.readModel(modelId, {}, (e, r) => {
+    await client.readModel(modelId, metadata(server), (e, r) => {
         const response = r ? get_model_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -1991,7 +2004,7 @@ async function list_model_by_name(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelName = new pb_model.ModelName();
     modelName.setName(request.name);
-    await client.listModelByName(modelName, {}, (e, r) => {
+    await client.listModelByName(modelName, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2007,7 +2020,7 @@ async function list_model_by_category(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelCategory = new pb_model.ModelCategory();
     modelCategory.setCategory(request.category);
-    await client.listModelByCategory(modelCategory, {}, (e, r) => {
+    await client.listModelByCategory(modelCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2024,7 +2037,7 @@ async function list_model_by_name_category(server, request, callback) {
     const modelNameCategory = new pb_model.ModelNameCategory();
     modelNameCategory.setName(request.name);
     modelNameCategory.setCategory(request.category);
-    await client.listModelByNameCategory(modelNameCategory, {}, (e, r) => {
+    await client.listModelByNameCategory(modelNameCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2040,7 +2053,7 @@ async function list_model_by_type(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const typeId = new pb_model.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listModelByType(modelNameCategory, {}, (e, r) => {
+    await client.listModelByType(modelNameCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2060,7 +2073,7 @@ async function create_model(server, request, callback) {
     modelSchema.setCategory(request.category);
     modelSchema.setName(request.name);
     modelSchema.setDescription(request.description);
-    await client.createModel(modelSchema, {}, (e, r) => {
+    await client.createModel(modelSchema, metadata(server), (e, r) => {
         const response = r ? get_model_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -2085,7 +2098,7 @@ async function update_model(server, request, callback) {
     modelUpdate.setCategory(request.category);
     modelUpdate.setName(request.name);
     modelUpdate.setDescription(request.description);
-    await client.updateModel(modelUpdate, {}, (e, r) => {
+    await client.updateModel(modelUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2101,7 +2114,7 @@ async function delete_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteModel(modelId, {}, (e, r) => {
+    await client.deleteModel(modelId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2117,7 +2130,7 @@ async function read_model_config(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
-    await client.readModelConfig(configId, {}, (e, r) => {
+    await client.readModelConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_model_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2133,7 +2146,7 @@ async function list_model_config_by_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.listModelConfig(modelId, {}, (e, r) => {
+    await client.listModelConfig(modelId, metadata(server), (e, r) => {
         const response = r ? get_model_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2155,7 +2168,7 @@ async function create_model_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createModelConfig(configSchema, {}, (e, r) => {
+    await client.createModelConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_model_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -2176,7 +2189,7 @@ async function update_model_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateModelConfig(configUpdate, {}, (e, r) => {
+    await client.updateModelConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -2191,7 +2204,7 @@ async function delete_model_config(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
-    await client.deleteModelConfig(configId, {}, (e, r) => {
+    await client.deleteModelConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -2279,7 +2292,7 @@ async function read_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.readType(typeId, {}, (e, r) => {
+    await client.readType(typeId, metadata(server), (e, r) => {
         const response = r ? get_type_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2295,7 +2308,7 @@ async function list_type_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeName = new pb_device.TypeName();
     typeName.setName(request.name);
-    await client.listTypeByName(typeName, {}, (e, r) => {
+    await client.listTypeByName(typeName, metadata(server), (e, r) => {
         const response = r ? get_type_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2313,7 +2326,7 @@ async function create_type(server, request, callback) {
     typeSchema.setId(uuid_hex_to_base64(request.id));
     typeSchema.setName(request.name);
     typeSchema.setDescription(request.description);
-    await client.createType(typeSchema, {}, (e, r) => {
+    await client.createType(typeSchema, metadata(server), (e, r) => {
         const response = r ? get_type_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -2331,7 +2344,7 @@ async function update_type(server, request, callback) {
     typeUpdate.setId(uuid_hex_to_base64(request.id));
     typeUpdate.setName(request.name);
     typeUpdate.setDescription(request.description);
-    await client.updateType(typeUpdate, {}, (e, r) => {
+    await client.updateType(typeUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2347,7 +2360,7 @@ async function delete_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteType(typeId, {}, (e, r) => {
+    await client.deleteType(typeId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2364,7 +2377,7 @@ async function add_type_model(server, request, callback) {
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.addTypeModel(typeModel, {}, (e, r) => {
+    await client.addTypeModel(typeModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2381,7 +2394,7 @@ async function remove_type_model(server, request, callback) {
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.removeTypeModel(typeModel, {}, (e, r) => {
+    await client.removeTypeModel(typeModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2660,7 +2673,7 @@ async function read_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.readDevice(deviceId, {}, (e, r) => {
+    await client.readDevice(deviceId, metadata(server), (e, r) => {
         const response = r ? get_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2676,7 +2689,7 @@ async function read_device_by_sn(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readDeviceBySn(serialNumber, {}, (e, r) => {
+    await client.readDeviceBySn(serialNumber, metadata(server), (e, r) => {
         const response = r ? get_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2692,7 +2705,7 @@ async function list_device_by_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByGateway(gatewayId, {}, (e, r) => {
+    await client.listDeviceByGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2708,7 +2721,7 @@ async function list_device_by_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByType(typeId, {}, (e, r) => {
+    await client.listDeviceByType(typeId, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2724,7 +2737,7 @@ async function list_device_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceName = new pb_device.DeviceName();
     deviceName.setName(request.name);
-    await client.listDeviceByName(deviceName, {}, (e, r) => {
+    await client.listDeviceByName(deviceName, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2741,7 +2754,7 @@ async function list_device_by_gateway_type(server, request, callback) {
     const gatewayType = new pb_device.DeviceGatewayType();
     gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayType.setId(uuid_hex_to_base64(request.type_id));
-    await client.listDeviceByGatewayType(gatewayType, {}, (e, r) => {
+    await client.listDeviceByGatewayType(gatewayType, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2758,7 +2771,7 @@ async function list_device_by_gateway_name(server, request, callback) {
     const gatewayName = new pb_device.DeviceGatewayName();
     gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayName.setId(request.name);
-    await client.listDeviceByGatewayName(gatewayName, {}, (e, r) => {
+    await client.listDeviceByGatewayName(gatewayName, metadata(server), (e, r) => {
         const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2781,7 +2794,7 @@ async function create_device(server, request, callback) {
     deviceSchema.setName(request.name);
     deviceSchema.setDescription(request.description);
     deviceSchema.setDeviceType(typeSchema);
-    await client.createDevice(deviceSchema, {}, (e, r) => {
+    await client.createDevice(deviceSchema, metadata(server), (e, r) => {
         const response = r ? get_device_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -2804,7 +2817,7 @@ async function update_device(server, request, callback) {
     deviceUpdate.setName(request.name);
     deviceUpdate.setDescription(request.description);
     deviceUpdate.setTypeId(request.type_id);
-    await client.updateDevice(deviceUpdate, {}, (e, r) => {
+    await client.updateDevice(deviceUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2820,7 +2833,7 @@ async function delete_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteDevice(deviceId, {}, (e, r) => {
+    await client.deleteDevice(deviceId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2836,7 +2849,7 @@ async function read_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.readGateway(gatewayId, {}, (e, r) => {
+    await client.readGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2852,7 +2865,7 @@ async function read_gateway_by_sn(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readGatewayBySn(serialNumber, {}, (e, r) => {
+    await client.readGatewayBySn(serialNumber, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2868,7 +2881,7 @@ async function list_gateway_by_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayByType(typeId, {}, (e, r) => {
+    await client.listGatewayByType(typeId, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2884,7 +2897,7 @@ async function list_gateway_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayName = new pb_device.GatewayName();
     gatewayName.setName(request.name);
-    await client.listGatewayByName(gatewayName, {}, (e, r) => {
+    await client.listGatewayByName(gatewayName, metadata(server), (e, r) => {
         const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2906,7 +2919,7 @@ async function create_gateway(server, request, callback) {
     gatewaySchema.setName(request.name);
     gatewaySchema.setDescription(request.description);
     gatewaySchema.setGatewayType(typeSchema);
-    await client.createGateway(gatewaySchema, {}, (e, r) => {
+    await client.createGateway(gatewaySchema, metadata(server), (e, r) => {
         const response = r ? get_gateway_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -2926,7 +2939,7 @@ async function update_gateway(server, request, callback) {
     gatewayUpdate.setName(request.name);
     gatewayUpdate.setDescription(request.description);
     gatewayUpdate.setTypeId(request.type_id);
-    await client.updateGateway(gatewayUpdate, {}, (e, r) => {
+    await client.updateGateway(gatewayUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2942,7 +2955,7 @@ async function delete_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGateway(gatewayId, {}, (e, r) => {
+    await client.deleteGateway(gatewayId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -2958,7 +2971,7 @@ async function read_device_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readDeviceConfig(configId, {}, (e, r) => {
+    await client.readDeviceConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_device_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -2974,7 +2987,7 @@ async function list_device_config_by_device(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceConfig(deviceId, {}, (e, r) => {
+    await client.listDeviceConfig(deviceId, metadata(server), (e, r) => {
         const response = r ? get_device_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -2995,7 +3008,7 @@ async function create_device_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createDeviceConfig(configSchema, {}, (e, r) => {
+    await client.createDeviceConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -3016,7 +3029,7 @@ async function update_device_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateDeviceConfig(configUpdate, {}, (e, r) => {
+    await client.updateDeviceConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -3031,7 +3044,7 @@ async function delete_device_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteDeviceConfig(configId, {}, (e, r) => {
+    await client.deleteDeviceConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -3046,7 +3059,7 @@ async function read_gateway_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readGatewayConfig(configId, {}, (e, r) => {
+    await client.readGatewayConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_gateway_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -3062,7 +3075,7 @@ async function list_gateway_config_by_gateway(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayConfig(gatewayId, {}, (e, r) => {
+    await client.listGatewayConfig(gatewayId, metadata(server), (e, r) => {
         const response = r ? get_gateway_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3083,7 +3096,7 @@ async function create_gateway_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createGatewayConfig(configSchema, {}, (e, r) => {
+    await client.createGatewayConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -3104,7 +3117,7 @@ async function update_gateway_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateGatewayConfig(configUpdate, {}, (e, r) => {
+    await client.updateGatewayConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -3119,7 +3132,7 @@ async function delete_gateway_config(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteGatewayConfig(configId, {}, (e, r) => {
+    await client.deleteGatewayConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -3295,7 +3308,7 @@ async function read_group_model(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupModel(groupId, {}, (e, r) => {
+    await client.readGroupModel(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -3311,7 +3324,7 @@ async function list_group_model_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupModelByName(groupName, {}, (e, r) => {
+    await client.listGroupModelByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3327,7 +3340,7 @@ async function list_group_model_by_category(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupModelByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupModelByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3344,7 +3357,7 @@ async function list_group_model_by_name_category(server, request, callback) {
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupModelByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupModelByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3363,7 +3376,7 @@ async function create_group_model(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupModel(groupSchema, {}, (e, r) => {
+    await client.createGroupModel(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -3382,7 +3395,7 @@ async function update_group_model(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupModel(groupUpdate, {}, (e, r) => {
+    await client.updateGroupModel(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3398,7 +3411,7 @@ async function delete_group_model(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupModel(groupId, {}, (e, r) => {
+    await client.deleteGroupModel(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3415,7 +3428,7 @@ async function add_group_model_member(server, request, callback) {
     const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.addGroupModelMember(groupModel, {}, (e, r) => {
+    await client.addGroupModelMember(groupModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3432,7 +3445,7 @@ async function remove_group_model_member(server, request, callback) {
     const groupModel = new pb_group.GroupModel();
     groupModel.setId(uuid_hex_to_base64(request.id));
     groupModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.removeGroupModelMember(groupModel, {}, (e, r) => {
+    await client.removeGroupModelMember(groupModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3448,7 +3461,7 @@ async function read_group_device(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupDevice(groupId, {}, (e, r) => {
+    await client.readGroupDevice(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -3464,7 +3477,7 @@ async function list_group_device_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupDeviceByName(groupName, {}, (e, r) => {
+    await client.listGroupDeviceByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3480,7 +3493,7 @@ async function list_group_device_by_category(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupDeviceByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupDeviceByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3497,7 +3510,7 @@ async function list_group_device_by_name_category(server, request, callback) {
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupDeviceByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupDeviceByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_device_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3516,7 +3529,7 @@ async function create_group_device(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupDevice(groupSchema, {}, (e, r) => {
+    await client.createGroupDevice(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -3535,7 +3548,7 @@ async function update_group_device(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupDevice(groupUpdate, {}, (e, r) => {
+    await client.updateGroupDevice(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3551,7 +3564,7 @@ async function delete_group_device(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupDevice(groupId, {}, (e, r) => {
+    await client.deleteGroupDevice(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3568,7 +3581,7 @@ async function add_group_device_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.addGroupDeviceMember(groupDevice, {}, (e, r) => {
+    await client.addGroupDeviceMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3585,7 +3598,7 @@ async function remove_group_device_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.removeGroupDeviceMember(groupDevice, {}, (e, r) => {
+    await client.removeGroupDeviceMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3601,7 +3614,7 @@ async function read_group_gateway(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.readGroupGateway(groupId, {}, (e, r) => {
+    await client.readGroupGateway(groupId, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -3617,7 +3630,7 @@ async function list_group_gateway_by_name(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupName = new pb_group.GroupName();
     groupName.setName(request.name);
-    await client.listGroupGatewayByName(groupName, {}, (e, r) => {
+    await client.listGroupGatewayByName(groupName, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3633,7 +3646,7 @@ async function list_group_gateway_by_category(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupCategory = new pb_group.GroupCategory();
     groupCategory.setCategory(request.category);
-    await client.listGroupGatewayByCategory(groupCategory, {}, (e, r) => {
+    await client.listGroupGatewayByCategory(groupCategory, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3650,7 +3663,7 @@ async function list_group_gateway_by_name_category(server, request, callback) {
     const groupNameCategory = new pb_group.GroupNameCategory();
     groupNameCategory.setName(request.name);
     groupNameCategory.setCategory(request.category);
-    await client.listGroupGatewayByNameCategory(groupNameCategory, {}, (e, r) => {
+    await client.listGroupGatewayByNameCategory(groupNameCategory, metadata(server), (e, r) => {
         const response = r ? get_group_gateway_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3669,7 +3682,7 @@ async function create_group_gateway(server, request, callback) {
     groupSchema.setName(request.name);
     groupSchema.setCategory(request.category);
     groupSchema.setDescription(request.description);
-    await client.createGroupGateway(groupSchema, {}, (e, r) => {
+    await client.createGroupGateway(groupSchema, metadata(server), (e, r) => {
         const response = r ? get_group_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -3688,7 +3701,7 @@ async function update_group_gateway(server, request, callback) {
     groupUpdate.setName(request.name);
     groupUpdate.setCategory(request.category);
     groupUpdate.setDescription(request.description);
-    await client.updateGroupGateway(groupUpdate, {}, (e, r) => {
+    await client.updateGroupGateway(groupUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3704,7 +3717,7 @@ async function delete_group_gateway(server, request, callback) {
     const client = new pb_group.GroupServiceClient(server.address, null, null);
     const groupId = new pb_group.GroupId();
     groupId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGroupGateway(groupId, {}, (e, r) => {
+    await client.deleteGroupGateway(groupId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3721,7 +3734,7 @@ async function add_group_gateway_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
-    await client.addGroupGatewayMember(groupDevice, {}, (e, r) => {
+    await client.addGroupGatewayMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3738,7 +3751,7 @@ async function remove_group_gateway_member(server, request, callback) {
     const groupDevice = new pb_group.GroupDevice();
     groupDevice.setId(uuid_hex_to_base64(request.id));
     groupDevice.setDeviceId(uuid_hex_to_base64(request.gateway_id));
-    await client.removeGroupGatewayMember(groupDevice, {}, (e, r) => {
+    await client.removeGroupGatewayMember(groupDevice, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3826,7 +3839,7 @@ async function read_data(server, request, callback) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.readData(dataId, {}, (e, r) => {
+    await client.readData(dataId, metadata(server), (e, r) => {
         const response = r ? get_data_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -3844,7 +3857,7 @@ async function list_data_by_time(server, request, callback) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByTime(dataTime, {}, (e, r) => {
+    await client.listDataByTime(dataTime, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3862,7 +3875,7 @@ async function list_data_by_last_time(server, request, callback) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByLastTime(dataTime, {}, (e, r) => {
+    await client.listDataByLastTime(dataTime, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3881,7 +3894,7 @@ async function list_data_by_range_time(server, request, callback) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
-    await client.listDataByRangeTime(dataRange, {}, (e, r) => {
+    await client.listDataByRangeTime(dataRange, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3900,7 +3913,7 @@ async function list_data_by_number_before(server, request, callback) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberBefore(dataNumber, {}, (e, r) => {
+    await client.listDataByNumberBefore(dataNumber, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3919,7 +3932,7 @@ async function list_data_by_number_after(server, request, callback) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberAfter(dataNumber, {}, (e, r) => {
+    await client.listDataByNumberAfter(dataNumber, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -3942,7 +3955,7 @@ async function create_data(server, request, callback) {
     for (const type of value.types) {
         dataSchema.addDataType(type);
     }
-    await client.createData(dataSchema, {}, (e, r) => {
+    await client.createData(dataSchema, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -3960,7 +3973,7 @@ async function delete_data(server, request, callback) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.deleteData(dataId, {}, (e, r) => {
+    await client.deleteData(dataId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4137,7 +4150,7 @@ async function read_buffer(server, request, callback) {
     const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.readBuffer(bufferId, {}, (e, r) => {
+    await client.readBuffer(bufferId, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4156,7 +4169,7 @@ async function read_buffer_by_time(server, request, callback) {
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferTime.setStatus(set_buffer_status(request.status));
-    await client.readBufferByTime(bufferTime, {}, (e, r) => {
+    await client.readBufferByTime(bufferTime, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4180,7 +4193,7 @@ async function read_buffer_first(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferFirst(bufferSelector, {}, (e, r) => {
+    await client.readBufferFirst(bufferSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4204,7 +4217,7 @@ async function read_buffer_last(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferLast(bufferSelector, {}, (e, r) => {
+    await client.readBufferLast(bufferSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4229,7 +4242,7 @@ async function list_buffer_first(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferFirst(buffersSelector, {}, (e, r) => {
+    await client.listBufferFirst(buffersSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4254,7 +4267,7 @@ async function list_buffer_last(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferLast(buffersSelector, {}, (e, r) => {
+    await client.listBufferLast(buffersSelector, metadata(server), (e, r) => {
         const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4278,7 +4291,7 @@ async function create_buffer(server, request, callback) {
         bufferSchema.addDataType(type);
     }
     bufferSchema.setStatus(set_buffer_status(request.status));
-    await client.createBuffer(bufferSchema, {}, (e, r) => {
+    await client.createBuffer(bufferSchema, metadata(server), (e, r) => {
         const response = r ? get_buffer_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -4303,7 +4316,7 @@ async function update_buffer(server, request, callback) {
         }
     }
     bufferUpdate.setStatus(set_buffer_status(request.status));
-    await client.updateBuffer(bufferUpdate, {}, (e, r) => {
+    await client.updateBuffer(bufferUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4319,7 +4332,7 @@ async function delete_buffer(server, request, callback) {
     const client = new pb_buffer.BufferServiceClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.deleteBuffer(bufferId, {}, (e, r) => {
+    await client.deleteBuffer(bufferId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4426,7 +4439,7 @@ async function read_slice(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.readSlice(sliceId, {}, (e, r) => {
+    await client.readSlice(sliceId, metadata(server), (e, r) => {
         const response = r ? get_slice_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4442,7 +4455,7 @@ async function list_slice_by_name(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceName = new pb_slice.SliceName();
     sliceName.setName(request.name);
-    await client.listSliceByName(sliceName, {}, (e, r) => {
+    await client.listSliceByName(sliceName, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4458,7 +4471,7 @@ async function list_slice_by_device(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceDevice = new pb_slice.SliceDevice();
     sliceDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.listSliceByDevice(sliceDevice, {}, (e, r) => {
+    await client.listSliceByDevice(sliceDevice, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4474,7 +4487,7 @@ async function list_slice_by_model(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceModel = new pb_slice.SliceModel();
     sliceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByModel(sliceModel, {}, (e, r) => {
+    await client.listSliceByModel(sliceModel, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4491,7 +4504,7 @@ async function list_slice_by_device_model(server, request, callback) {
     const sliceDeviceModel = new pb_slice.SliceDeviceModel();
     sliceDeviceModel.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceDeviceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByDeviceModel(sliceDeviceModel, {}, (e, r) => {
+    await client.listSliceByDeviceModel(sliceDeviceModel, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4512,7 +4525,7 @@ async function create_slice(server, request, callback) {
     sliceSchema.setTimestampEnd(request.timestamp_end.valueOf() * 1000);
     sliceSchema.setName(request.name);
     sliceSchema.setDescription(request.description);
-    await client.createSlice(sliceSchema, {}, (e, r) => {
+    await client.createSlice(sliceSchema, metadata(server), (e, r) => {
         const response = r ? get_slice_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -4536,7 +4549,7 @@ async function update_slice(server, request, callback) {
     }
     sliceUpdate.setName(request.name);
     sliceUpdate.setDescription(request.description);
-    await client.updateSlice(sliceUpdate, {}, (e, r) => {
+    await client.updateSlice(sliceUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4552,7 +4565,7 @@ async function delete_slice(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.deleteSlice(sliceId, {}, (e, r) => {
+    await client.deleteSlice(sliceId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4692,7 +4705,7 @@ async function read_log(server, request, callback) {
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.readLog(logId, {}, (e, r) => {
+    await client.readLog(logId, metadata(server), (e, r) => {
         const response = r ? get_log_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -4714,7 +4727,7 @@ async function list_log_by_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByTime(logTime, {}, (e, r) => {
+    await client.listLogByTime(logTime, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4736,7 +4749,7 @@ async function list_log_by_last_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByLastTime(logTime, {}, (e, r) => {
+    await client.listLogByLastTime(logTime, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4759,7 +4772,7 @@ async function list_log_by_range_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logRange.setStatus(request.status);
     }
-    await client.listLogByRangeTime(logRange, {}, (e, r) => {
+    await client.listLogByRangeTime(logRange, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -4780,7 +4793,7 @@ async function create_log(server, request, callback) {
     const value = set_config_value(request.value);
     logSchema.setLogBytes(value.bytes);
     logSchema.setLogType(value.type);
-    await client.createLog(logSchema, {}, (e, r) => {
+    await client.createLog(logSchema, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4803,7 +4816,7 @@ async function update_log(server, request, callback) {
     const value = set_config_value(request.value);
     logUpdate.setLogBytes(value.bytes);
     logUpdate.setLogType(value.type);
-    await client.updateLog(logUpdate, {}, (e, r) => {
+    await client.updateLog(logUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -4820,7 +4833,7 @@ async function delete_log(server, request, callback) {
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.deleteLog(logId, {}, (e, r) => {
+    await client.deleteLog(logId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

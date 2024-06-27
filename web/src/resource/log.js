@@ -1,6 +1,7 @@
 import { get_config_value, set_config_value } from './common.js';
 import { pb_log } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -140,7 +141,7 @@ export async function read_log(server, request, callback) {
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.readLog(logId, {}, (e, r) => {
+    await client.readLog(logId, metadata(server), (e, r) => {
         const response = r ? get_log_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -162,7 +163,7 @@ export async function list_log_by_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByTime(logTime, {}, (e, r) => {
+    await client.listLogByTime(logTime, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -184,7 +185,7 @@ export async function list_log_by_last_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByLastTime(logTime, {}, (e, r) => {
+    await client.listLogByLastTime(logTime, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -207,7 +208,7 @@ export async function list_log_by_range_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logRange.setStatus(request.status);
     }
-    await client.listLogByRangeTime(logRange, {}, (e, r) => {
+    await client.listLogByRangeTime(logRange, metadata(server), (e, r) => {
         const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -228,7 +229,7 @@ export async function create_log(server, request, callback) {
     const value = set_config_value(request.value);
     logSchema.setLogBytes(value.bytes);
     logSchema.setLogType(value.type);
-    await client.createLog(logSchema, {}, (e, r) => {
+    await client.createLog(logSchema, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -251,7 +252,7 @@ export async function update_log(server, request, callback) {
     const value = set_config_value(request.value);
     logUpdate.setLogBytes(value.bytes);
     logUpdate.setLogType(value.type);
-    await client.updateLog(logUpdate, {}, (e, r) => {
+    await client.updateLog(logUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -268,7 +269,7 @@ export async function delete_log(server, request, callback) {
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.deleteLog(logId, {}, (e, r) => {
+    await client.deleteLog(logId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

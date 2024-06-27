@@ -1,5 +1,6 @@
 import { pb_device } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -88,7 +89,7 @@ export async function read_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.readType(typeId, {}, (e, r) => {
+    await client.readType(typeId, metadata(server), (e, r) => {
         const response = r ? get_type_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -104,7 +105,7 @@ export async function list_type_by_name(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeName = new pb_device.TypeName();
     typeName.setName(request.name);
-    await client.listTypeByName(typeName, {}, (e, r) => {
+    await client.listTypeByName(typeName, metadata(server), (e, r) => {
         const response = r ? get_type_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -122,7 +123,7 @@ export async function create_type(server, request, callback) {
     typeSchema.setId(uuid_hex_to_base64(request.id));
     typeSchema.setName(request.name);
     typeSchema.setDescription(request.description);
-    await client.createType(typeSchema, {}, (e, r) => {
+    await client.createType(typeSchema, metadata(server), (e, r) => {
         const response = r ? get_type_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -140,7 +141,7 @@ export async function update_type(server, request, callback) {
     typeUpdate.setId(uuid_hex_to_base64(request.id));
     typeUpdate.setName(request.name);
     typeUpdate.setDescription(request.description);
-    await client.updateType(typeUpdate, {}, (e, r) => {
+    await client.updateType(typeUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -156,7 +157,7 @@ export async function delete_type(server, request, callback) {
     const client = new pb_device.DeviceServiceClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteType(typeId, {}, (e, r) => {
+    await client.deleteType(typeId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -173,7 +174,7 @@ export async function add_type_model(server, request, callback) {
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.addTypeModel(typeModel, {}, (e, r) => {
+    await client.addTypeModel(typeModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -190,7 +191,7 @@ export async function remove_type_model(server, request, callback) {
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.removeTypeModel(typeModel, {}, (e, r) => {
+    await client.removeTypeModel(typeModel, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

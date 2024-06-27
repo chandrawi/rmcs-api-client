@@ -1,6 +1,7 @@
 import { get_data_value, set_data_value } from './common.js';
 import { pb_data } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -88,7 +89,7 @@ export async function read_data(server, request, callback) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.readData(dataId, {}, (e, r) => {
+    await client.readData(dataId, metadata(server), (e, r) => {
         const response = r ? get_data_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -106,7 +107,7 @@ export async function list_data_by_time(server, request, callback) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByTime(dataTime, {}, (e, r) => {
+    await client.listDataByTime(dataTime, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -124,7 +125,7 @@ export async function list_data_by_last_time(server, request, callback) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByLastTime(dataTime, {}, (e, r) => {
+    await client.listDataByLastTime(dataTime, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -143,7 +144,7 @@ export async function list_data_by_range_time(server, request, callback) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
-    await client.listDataByRangeTime(dataRange, {}, (e, r) => {
+    await client.listDataByRangeTime(dataRange, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -162,7 +163,7 @@ export async function list_data_by_number_before(server, request, callback) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberBefore(dataNumber, {}, (e, r) => {
+    await client.listDataByNumberBefore(dataNumber, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -181,7 +182,7 @@ export async function list_data_by_number_after(server, request, callback) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberAfter(dataNumber, {}, (e, r) => {
+    await client.listDataByNumberAfter(dataNumber, metadata(server), (e, r) => {
         const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -204,7 +205,7 @@ export async function create_data(server, request, callback) {
     for (const type of value.types) {
         dataSchema.addDataType(type);
     }
-    await client.createData(dataSchema, {}, (e, r) => {
+    await client.createData(dataSchema, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -222,7 +223,7 @@ export async function delete_data(server, request, callback) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.deleteData(dataId, {}, (e, r) => {
+    await client.deleteData(dataId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

@@ -1,5 +1,6 @@
 import { pb_user } from "rmcs-auth-api";
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -125,7 +126,7 @@ export async function read_user(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.readUser(userId, {}, (e, r) => {
+    await client.readUser(userId, metadata(server), (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -141,7 +142,7 @@ export async function read_user_by_name(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userName = new pb_user.UserName();
     userName.setName(request.name);
-    await client.readUserByName(userName, {}, (e, r) => {
+    await client.readUserByName(userName, metadata(server), (e, r) => {
         const response = r ? get_user_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -157,7 +158,7 @@ export async function list_user_by_role(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.listUserByRole(roleId, {}, (e, r) => {
+    await client.listUserByRole(roleId, metadata(server), (e, r) => {
         const response = r ? get_user_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -177,7 +178,7 @@ export async function create_user(server, request, callback) {
     userSchema.setEmail(request.email);
     userSchema.setPhone(request.phone);
     userSchema.setPassword(request.password);
-    await client.createUser(userSchema, {}, (e, r) => {
+    await client.createUser(userSchema, metadata(server), (e, r) => {
         const response = r ? get_user_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -197,7 +198,7 @@ export async function update_user(server, request, callback) {
     userUpdate.setEmail(request.email);
     userUpdate.setPhone(request.phone);
     userUpdate.setPassword(request.password);
-    await client.updateUser(userUpdate, {}, (e, r) => {
+    await client.updateUser(userUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -213,7 +214,7 @@ export async function delete_user(server, request, callback) {
     const client = new pb_user.UserServiceClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteUser(userId, {}, (e, r) => {
+    await client.deleteUser(userId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -230,7 +231,7 @@ export async function add_user_role(server, request, callback) {
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.addUserRole(userRole, {}, (e, r) => {
+    await client.addUserRole(userRole, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -247,7 +248,7 @@ export async function remove_user_role(server, request, callback) {
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.removeUserRole(userRole, {}, (e, r) => {
+    await client.removeUserRole(userRole, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

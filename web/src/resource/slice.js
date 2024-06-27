@@ -1,5 +1,6 @@
 import { pb_slice } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -106,7 +107,7 @@ export async function read_slice(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.readSlice(sliceId, {}, (e, r) => {
+    await client.readSlice(sliceId, metadata(server), (e, r) => {
         const response = r ? get_slice_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -122,7 +123,7 @@ export async function list_slice_by_name(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceName = new pb_slice.SliceName();
     sliceName.setName(request.name);
-    await client.listSliceByName(sliceName, {}, (e, r) => {
+    await client.listSliceByName(sliceName, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -138,7 +139,7 @@ export async function list_slice_by_device(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceDevice = new pb_slice.SliceDevice();
     sliceDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.listSliceByDevice(sliceDevice, {}, (e, r) => {
+    await client.listSliceByDevice(sliceDevice, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -154,7 +155,7 @@ export async function list_slice_by_model(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceModel = new pb_slice.SliceModel();
     sliceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByModel(sliceModel, {}, (e, r) => {
+    await client.listSliceByModel(sliceModel, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -171,7 +172,7 @@ export async function list_slice_by_device_model(server, request, callback) {
     const sliceDeviceModel = new pb_slice.SliceDeviceModel();
     sliceDeviceModel.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceDeviceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByDeviceModel(sliceDeviceModel, {}, (e, r) => {
+    await client.listSliceByDeviceModel(sliceDeviceModel, metadata(server), (e, r) => {
         const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -192,7 +193,7 @@ export async function create_slice(server, request, callback) {
     sliceSchema.setTimestampEnd(request.timestamp_end.valueOf() * 1000);
     sliceSchema.setName(request.name);
     sliceSchema.setDescription(request.description);
-    await client.createSlice(sliceSchema, {}, (e, r) => {
+    await client.createSlice(sliceSchema, metadata(server), (e, r) => {
         const response = r ? get_slice_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -216,7 +217,7 @@ export async function update_slice(server, request, callback) {
     }
     sliceUpdate.setName(request.name);
     sliceUpdate.setDescription(request.description);
-    await client.updateSlice(sliceUpdate, {}, (e, r) => {
+    await client.updateSlice(sliceUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -232,7 +233,7 @@ export async function delete_slice(server, request, callback) {
     const client = new pb_slice.SliceServiceClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.deleteSlice(sliceId, {}, (e, r) => {
+    await client.deleteSlice(sliceId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });

@@ -1,6 +1,7 @@
 import { get_config_value, set_config_value, get_data_type, set_data_type } from './common.js';
 import { pb_model } from 'rmcs-resource-api';
 import {
+    metadata,
     base64_to_uuid_hex,
     uuid_hex_to_base64
 } from "../utility.js";
@@ -161,7 +162,7 @@ export async function read_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.readModel(modelId, {}, (e, r) => {
+    await client.readModel(modelId, metadata(server), (e, r) => {
         const response = r ? get_model_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -177,7 +178,7 @@ export async function list_model_by_name(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelName = new pb_model.ModelName();
     modelName.setName(request.name);
-    await client.listModelByName(modelName, {}, (e, r) => {
+    await client.listModelByName(modelName, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -193,7 +194,7 @@ export async function list_model_by_category(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelCategory = new pb_model.ModelCategory();
     modelCategory.setCategory(request.category);
-    await client.listModelByCategory(modelCategory, {}, (e, r) => {
+    await client.listModelByCategory(modelCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -210,7 +211,7 @@ export async function list_model_by_name_category(server, request, callback) {
     const modelNameCategory = new pb_model.ModelNameCategory();
     modelNameCategory.setName(request.name);
     modelNameCategory.setCategory(request.category);
-    await client.listModelByNameCategory(modelNameCategory, {}, (e, r) => {
+    await client.listModelByNameCategory(modelNameCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -226,7 +227,7 @@ export async function list_model_by_type(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const typeId = new pb_model.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listModelByType(modelNameCategory, {}, (e, r) => {
+    await client.listModelByType(modelNameCategory, metadata(server), (e, r) => {
         const response = r ? get_model_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -246,7 +247,7 @@ export async function create_model(server, request, callback) {
     modelSchema.setCategory(request.category);
     modelSchema.setName(request.name);
     modelSchema.setDescription(request.description);
-    await client.createModel(modelSchema, {}, (e, r) => {
+    await client.createModel(modelSchema, metadata(server), (e, r) => {
         const response = r ? get_model_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -271,7 +272,7 @@ export async function update_model(server, request, callback) {
     modelUpdate.setCategory(request.category);
     modelUpdate.setName(request.name);
     modelUpdate.setDescription(request.description);
-    await client.updateModel(modelUpdate, {}, (e, r) => {
+    await client.updateModel(modelUpdate, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -287,7 +288,7 @@ export async function delete_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteModel(modelId, {}, (e, r) => {
+    await client.deleteModel(modelId, metadata(server), (e, r) => {
         const response = r ? r.toObject() : null;
         callback(e, response);
     });
@@ -303,7 +304,7 @@ export async function read_model_config(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
-    await client.readModelConfig(configId, {}, (e, r) => {
+    await client.readModelConfig(configId, metadata(server), (e, r) => {
         const response = r ? get_model_config_schema(r.toObject().result) : null;
         callback(e, response);
     });
@@ -319,7 +320,7 @@ export async function list_model_config_by_model(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const modelId = new pb_model.ModelId();
     modelId.setId(uuid_hex_to_base64(request.id));
-    await client.listModelConfig(modelId, {}, (e, r) => {
+    await client.listModelConfig(modelId, metadata(server), (e, r) => {
         const response = r ? get_model_config_schema_vec(r.toObject().resultsList) : null;
         callback(e, response);
     });
@@ -341,7 +342,7 @@ export async function create_model_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createModelConfig(configSchema, {}, (e, r) => {
+    await client.createModelConfig(configSchema, metadata(server), (e, r) => {
         const response = r ? get_model_config_id(r.toObject()) : null;
         callback(e, response);
     });
@@ -362,7 +363,7 @@ export async function update_model_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateModelConfig(configUpdate, {}, (e, r) => {
+    await client.updateModelConfig(configUpdate, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
@@ -377,7 +378,7 @@ export async function delete_model_config(server, request, callback) {
     const client = new pb_model.ModelServiceClient(server.address, null, null);
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
-    await client.deleteModelConfig(configId, {}, (e, r) => {
+    await client.deleteModelConfig(configId, metadata(server), (e, r) => {
         callback(e, r.toObject());
     });
 }
