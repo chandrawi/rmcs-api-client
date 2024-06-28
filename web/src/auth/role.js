@@ -38,11 +38,13 @@ function get_role_id(r) {
  */
 
 /**
- * @typedef {import('./api.js').ApiId} ApiId
+ * @typedef {Object} ApiId
+ * @property {Uuid} id
  */
 
 /**
- * @typedef {import('./user.js').UserId} UserId
+ * @typedef {Object} UserId
+ * @property {Uuid} id
  */
 
 /**
@@ -103,77 +105,69 @@ function get_role_schema_vec(r) {
 
 /**
  * Read a role by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-export async function read_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function read_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.readRole(roleId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readRole(roleId, metadata(server))
+        .then(response => get_role_schema(response.toObject().result));
 }
 
 /**
  * Read a role by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleName} request role name: api_id, name
- * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-export async function read_role_by_name(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function read_role_by_name(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleName = new pb_role.RoleName();
     roleName.setApiId(uuid_hex_to_base64(request.api_id));
     roleName.setName(request.name);
-    await client.readRoleByName(roleName, metadata(server), (e, r) => {
-        const response = r ? get_role_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readRoleByName(roleName, metadata(server))
+        .then(response => get_role_schema(response.toObject().result));
 }
 
 /**
  * Read roles by api uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-export async function list_role_by_api(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function list_role_by_api(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const apiId = new pb_role.ApiId();
     apiId.setApiId(uuid_hex_to_base64(request.id));
-    await client.listRoleByApi(apiId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listRoleByApi(apiId, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read roles by user uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserId} request user uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-export async function list_role_by_user(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function list_role_by_user(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listRoleByUser(userId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listRoleByUser(userId, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a role
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleSchema} request role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key
- * @param {function(?grpc.web.RpcError, ?RoleId)} callback The callback function(error, response)
+ * @returns {Promise<RoleId>} role id: id
  */
-export async function create_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function create_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleSchema = new pb_role.RoleSchema();
     roleSchema.setId(uuid_hex_to_base64(request.id));
     roleSchema.setApiId(uuid_hex_to_base64(request.api_id));
@@ -183,20 +177,18 @@ export async function create_role(server, request, callback) {
     roleSchema.setAccessDuration(request.access_duration);
     roleSchema.setRefreshDuration(request.refresh_duration);
     roleSchema.setAccessKey(request.access_key);
-    await client.createRole(roleSchema, metadata(server), (e, r) => {
-        const response = r ? get_role_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createRole(roleSchema, metadata(server))
+        .then(response => get_role_id(response.toObject()));
 }
 
 /**
  * Update a role
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleUpdate} request role update: id, name, multi, ip_lock, access_duration, refresh_duration
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function update_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleUpdate = new pb_role.RoleUpdate();
     roleUpdate.setId(uuid_hex_to_base64(request.id));
     roleUpdate.setName(request.name);
@@ -204,58 +196,50 @@ export async function update_role(server, request, callback) {
     roleUpdate.setIpLock(request.ip_lock);
     roleUpdate.setAccessDuration(request.access_duration);
     roleUpdate.setRefreshDuration(request.refresh_duration);
-    await client.updateRole(roleUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateRole(roleUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a role
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function delete_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteRole(roleId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteRole(roleId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Add a role access
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleAccess} request role access: id, procedure_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function add_role_access(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function add_role_access(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.addRoleAccess(roleAccess, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.addRoleAccess(roleAccess, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Remove a role access
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleAccess} request role access: id, procedure_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function remove_role_access(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+export async function remove_role_access(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.removeRoleAccess(roleAccess, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.removeRoleAccess(roleAccess, metadata(server))
+        .then(response => response.toObject());
 }

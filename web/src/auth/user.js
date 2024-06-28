@@ -37,7 +37,8 @@ function get_user_id(r) {
  */
 
 /**
- * @typedef {import('./role.js').RoleId} RoleId
+ * @typedef {Object} RoleId
+ * @property {Uuid} id
  */
 
 /**
@@ -118,138 +119,122 @@ function get_user_schema_vec(r) {
 
 /**
  * Read a user by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserId} request user uuid: id
- * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
+ * @returns {Promise<UserSchema>} user schema: id, name, email, phone, password, roles
  */
-export async function read_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function read_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.readUser(userId, metadata(server), (e, r) => {
-        const response = r ? get_user_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readUser(userId, metadata(server))
+        .then(response => get_user_schema(response.toObject().result));
 }
 
 /**
  * Read a user by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserName} request user name: name
- * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
+ * @returns {Promise<UserSchema>} user schema: id, name, email, phone, password, roles
  */
-export async function read_user_by_name(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function read_user_by_name(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userName = new pb_user.UserName();
     userName.setName(request.name);
-    await client.readUserByName(userName, metadata(server), (e, r) => {
-        const response = r ? get_user_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readUserByName(userName, metadata(server))
+        .then(response => get_user_schema(response.toObject().result));
 }
 
 /**
  * Read users by role uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?UserSchema[])} callback The callback function(error, response)
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
  */
-export async function list_user_by_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function list_user_by_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.listUserByRole(roleId, metadata(server), (e, r) => {
-        const response = r ? get_user_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listUserByRole(roleId, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create an user
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserSchema} request user schema: id, name, email, phone, password
- * @param {function(?grpc.web.RpcError, ?UserId)} callback The callback function(error, response)
+ * @returns {Promise<UserId>} user id: id
  */
-export async function create_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function create_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userSchema = new pb_user.UserSchema();
     userSchema.setId(uuid_hex_to_base64(request.id));
     userSchema.setName(request.name);
     userSchema.setEmail(request.email);
     userSchema.setPhone(request.phone);
     userSchema.setPassword(request.password);
-    await client.createUser(userSchema, metadata(server), (e, r) => {
-        const response = r ? get_user_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createUser(userSchema, metadata(server))
+        .then(response => get_user_id(response.toObject()));
 }
 
 /**
  * Update an user
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserUpdate} request user update: id, name, email, phone, password
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function update_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userUpdate = new pb_user.UserUpdate();
     userUpdate.setId(uuid_hex_to_base64(request.id));
     userUpdate.setName(request.name);
     userUpdate.setEmail(request.email);
     userUpdate.setPhone(request.phone);
     userUpdate.setPassword(request.password);
-    await client.updateUser(userUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateUser(userUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete an user
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserId} request user uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function delete_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteUser(userId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteUser(userId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Add a role to user
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserRole} request user role: user_id, role_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function add_user_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function add_user_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.addUserRole(userRole, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.addUserRole(userRole, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Remove a role from user
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {UserRole} request user role: user_id, role_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function remove_user_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+export async function remove_user_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.removeUserRole(userRole, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.removeUserRole(userRole, metadata(server))
+        .then(response => response.toObject());
 }

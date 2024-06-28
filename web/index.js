@@ -293,58 +293,52 @@ function get_procedure_schema_vec(r) {
  * Read an api by uuid
  * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
+ * @returns {Promise<ApiSchema>} api schema: id, name, address, category, description, password, access_key, procedures
  */
-async function read_api(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function read_api(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.readApi(apiId, metadata(server), (e, r) => {
-        const response = r ? get_api_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readApi(apiId, metadata(server))
+        .then(response => response.toObject().result);
 }
 
 /**
  * Read an api by name
  * @param {ServerConfig} server Server configuration
- * @param {ApiName} request api name: id, name
- * @param {function(?grpc.web.RpcError, ?ApiSchema)} callback The callback function(error, response)
+ * @param {ApiName} request api name: name
+ * @returns {Promise<ApiSchema>} api schema: id, name, address, category, description, password, access_key, procedures
  */
-async function read_api_by_name(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function read_api_by_name(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiName = new pb_api.ApiName();
     apiName.setName(request.name);
-    await client.readApiByName(apiName, metadata(server), (e, r) => {
-        const response = r ? get_api_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readApiByName(apiName, metadata(server))
+        .then(response => get_api_schema(response.toObject().result));
 }
 
 /**
  * Read apis by category
  * @param {ServerConfig} server Server configuration
  * @param {ApiCategory} request api category: category
- * @param {function(?grpc.web.RpcError, ?ApiSchema[])} callback The callback function(error, response)
+ * @returns {Promise<ApiSchema[]>} api schema: id, name, address, category, description, password, access_key, procedures
  */
-async function list_api_by_category(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function list_api_by_category(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiCategory = new pb_api.ApiCategory();
     apiCategory.setCategory(request.category);
-    await client.listApiByCategory(apiCategory, metadata(server), (e, r) => {
-        const response = r ? get_api_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listApiByCategory(apiCategory, metadata(server))
+        .then(response => get_api_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create an api
  * @param {ServerConfig} server Server configuration
  * @param {ApiSchema} request api schema: id, name, address, category, description, password, access_key
- * @param {function(?grpc.web.RpcError, ?ApiId)} callback The callback function(error, response)
+ * @returns {Promise<ApiId>} api id: id
  */
-async function create_api(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function create_api(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiSchema = new pb_api.ApiSchema();
     apiSchema.setId(uuid_hex_to_base64(request.id));
     apiSchema.setName(request.name);
@@ -353,20 +347,18 @@ async function create_api(server, request, callback) {
     apiSchema.setDescription(request.description);
     apiSchema.setPassword(request.password);
     apiSchema.setAccessKey(request.access_key);
-    await client.createApi(apiSchema, metadata(server), (e, r) => {
-        const response = r ? getApiId(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createApi(apiSchema, metadata(server))
+        .then(response => getApiId(response.toObject()));
 }
 
 /**
  * Update an api
  * @param {ServerConfig} server Server configuration
  * @param {ApiUpdate} request api update: id, name, address, category, description, password, access_key
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-async function update_api(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function update_api(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiUpdate = new pb_api.ApiUpdate();
     apiUpdate.setId(uuid_hex_to_base64(request.id));
     apiUpdate.setName(request.name);
@@ -375,128 +367,112 @@ async function update_api(server, request, callback) {
     apiUpdate.setDescription(request.description);
     apiUpdate.setPassword(request.password);
     apiUpdate.setAccessKey(request.access_key);
-    await client.updateApi(apiUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateApi(apiUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete an api
  * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_api(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function delete_api(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteApi(apiId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteApi(apiId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Read an procedure by uuid
  * @param {ServerConfig} server Server configuration
  * @param {ProcedureId} request procedure uuid: id
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @returns {Promise<ProcedureSchema>} procedure schema: id, api_id, name, description, roles
  */
-async function read_procedure(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function read_procedure(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
-    await client.readProcedure(procedureId, metadata(server), (e, r) => {
-        const response = r ? get_procedure_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readProcedure(procedureId, metadata(server))
+        .then(response => response.toObject().result);
 }
 
 /**
  * Read an procedure by name
  * @param {ServerConfig} server Server configuration
  * @param {ProcedureName} request procedure name: api_id, name
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @returns {Promise<ProcedureSchema>} procedure schema: id, api_id, name, description, roles
  */
-async function read_procedure_by_name(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function read_procedure_by_name(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const procedureName = new pb_api.ProcedureName();
     procedureName.setApiId(uuid_hex_to_base64(request.api_id));
     procedureName.setName(request.name);
-    await client.readProcedureByName(procedureName, metadata(server), (e, r) => {
-        const response = r ? get_procedure_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readProcedureByName(procedureName, metadata(server))
+        .then(response => get_procedure_schema(response.toObject().result));
 }
 
 /**
  * Read procedures by api uuid
  * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema[])} callback The callback function(error, response)
+ * @returns {Promise<ProcedureSchema[]>} procedure schema: id, api_id, name, description, roles
  */
-async function list_procedure_by_api(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function list_procedure_by_api(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
-    await client.listProcedureByApi(apiId, metadata(server), (e, r) => {
-        const response = r ? get_procedure_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listProcedureByApi(apiId, metadata(server))
+        .then(response => get_procedure_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a procedure
  * @param {ServerConfig} server Server configuration
  * @param {ProcedureSchema} request procedure schema: id, api_id, name, description
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @returns {Promise<ProcedureId>} procedure id: id
  */
-async function create_procedure(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function create_procedure(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const procedureSchema = new pb_api.ProcedureSchema();
     procedureSchema.setId(uuid_hex_to_base64(request.id));
     procedureSchema.setApiId(uuid_hex_to_base64(request.api_id));
     procedureSchema.setName(request.name);
     procedureSchema.setDescription(request.description);
-    await client.createProcedure(procedureSchema, metadata(server), (e, r) => {
-        const response = r ? get_procedure_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createProcedure(procedureSchema, metadata(server))
+        .then(response => get_procedure_id(response.toObject()));
 }
 
 /**
  * Update a procedure
  * @param {ServerConfig} server Server configuration
  * @param {ProcedureUpdate} request procedure update: id, name, description
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-async function update_procedure(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function update_procedure(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const procedureUpdate = new pb_api.ProcedureUpdate();
     procedureUpdate.setId(uuid_hex_to_base64(request.id));
     procedureUpdate.setName(request.name);
     procedureUpdate.setDescription(request.description);
-    await client.updateProcedure(procedureUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateProcedure(procedureUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a procedure
  * @param {ServerConfig} server Server configuration
  * @param {ProcedureId} request procedure uuid: id
- * @param {function(?grpc.web.RpcError, ?ProcedureSchema)} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-async function delete_procedure(server, request, callback) {
-    const client = new pb_api.ApiServiceClient(server.address, null, null);
+async function delete_procedure(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
     const procedureId = new pb_api.ProcedureId();
     procedureId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteProcedure(procedureId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteProcedure(procedureId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
@@ -531,11 +507,13 @@ function get_role_id(r) {
  */
 
 /**
- * @typedef {import('./api.js').ApiId} ApiId
+ * @typedef {Object} ApiId
+ * @property {Uuid} id
  */
 
 /**
- * @typedef {import('./user.js').UserId} UserId
+ * @typedef {Object} UserId
+ * @property {Uuid} id
  */
 
 /**
@@ -598,75 +576,67 @@ function get_role_schema_vec(r) {
  * Read a role by uuid
  * @param {ServerConfig} server Server configuration
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-async function read_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function read_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.readRole(roleId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readRole(roleId, metadata(server))
+        .then(response => get_role_schema(response.toObject().result));
 }
 
 /**
  * Read a role by name
  * @param {ServerConfig} server Server configuration
  * @param {RoleName} request role name: api_id, name
- * @param {function(?grpc.web.RpcError, ?RoleSchema)} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-async function read_role_by_name(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function read_role_by_name(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleName = new pb_role.RoleName();
     roleName.setApiId(uuid_hex_to_base64(request.api_id));
     roleName.setName(request.name);
-    await client.readRoleByName(roleName, metadata(server), (e, r) => {
-        const response = r ? get_role_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readRoleByName(roleName, metadata(server))
+        .then(response => get_role_schema(response.toObject().result));
 }
 
 /**
  * Read roles by api uuid
  * @param {ServerConfig} server Server configuration
  * @param {ApiId} request api uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-async function list_role_by_api(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function list_role_by_api(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const apiId = new pb_role.ApiId();
     apiId.setApiId(uuid_hex_to_base64(request.id));
-    await client.listRoleByApi(apiId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listRoleByApi(apiId, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read roles by user uuid
  * @param {ServerConfig} server Server configuration
  * @param {UserId} request user uuid: id
- * @param {function(?grpc.web.RpcError, ?RoleSchema[])} callback The callback function(error, response)
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
  */
-async function list_role_by_user(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function list_role_by_user(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listRoleByUser(userId, metadata(server), (e, r) => {
-        const response = r ? get_role_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listRoleByUser(userId, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a role
  * @param {ServerConfig} server Server configuration
  * @param {RoleSchema} request role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key
- * @param {function(?grpc.web.RpcError, ?RoleId)} callback The callback function(error, response)
+ * @returns {Promise<RoleId>} role id: id
  */
-async function create_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function create_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleSchema = new pb_role.RoleSchema();
     roleSchema.setId(uuid_hex_to_base64(request.id));
     roleSchema.setApiId(uuid_hex_to_base64(request.api_id));
@@ -676,20 +646,18 @@ async function create_role(server, request, callback) {
     roleSchema.setAccessDuration(request.access_duration);
     roleSchema.setRefreshDuration(request.refresh_duration);
     roleSchema.setAccessKey(request.access_key);
-    await client.createRole(roleSchema, metadata(server), (e, r) => {
-        const response = r ? get_role_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createRole(roleSchema, metadata(server))
+        .then(response => get_role_id(response.toObject()));
 }
 
 /**
  * Update a role
  * @param {ServerConfig} server Server configuration
  * @param {RoleUpdate} request role update: id, name, multi, ip_lock, access_duration, refresh_duration
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-async function update_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function update_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleUpdate = new pb_role.RoleUpdate();
     roleUpdate.setId(uuid_hex_to_base64(request.id));
     roleUpdate.setName(request.name);
@@ -697,60 +665,52 @@ async function update_role(server, request, callback) {
     roleUpdate.setIpLock(request.ip_lock);
     roleUpdate.setAccessDuration(request.access_duration);
     roleUpdate.setRefreshDuration(request.refresh_duration);
-    await client.updateRole(roleUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateRole(roleUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a role
  * @param {ServerConfig} server Server configuration
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_role(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function delete_role(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleId = new pb_role.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteRole(roleId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteRole(roleId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Add a role access
  * @param {ServerConfig} server Server configuration
  * @param {RoleAccess} request role access: id, procedure_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-async function add_role_access(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function add_role_access(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.addRoleAccess(roleAccess, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.addRoleAccess(roleAccess, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Remove a role access
  * @param {ServerConfig} server Server configuration
  * @param {RoleAccess} request role access: id, procedure_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-async function remove_role_access(server, request, callback) {
-    const client = new pb_role.RoleServiceClient(server.address, null, null);
+async function remove_role_access(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
     const roleAccess = new pb_role.RoleAccess();
     roleAccess.setId(uuid_hex_to_base64(request.id));
     roleAccess.setProcedureId(uuid_hex_to_base64(request.procedure_id));
-    await client.removeRoleAccess(roleAccess, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.removeRoleAccess(roleAccess, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
@@ -784,7 +744,8 @@ function get_user_id(r) {
  */
 
 /**
- * @typedef {import('./role.js').RoleId} RoleId
+ * @typedef {Object} RoleId
+ * @property {Uuid} id
  */
 
 /**
@@ -868,137 +829,122 @@ function get_user_schema_vec(r) {
  * @param {ServerConfig} server Server configuration
  * @param {UserId} request user uuid: id
  * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
+ * @returns {Promise<UserSchema>} user schema: id, name, email, phone, password, roles
  */
-async function read_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function read_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.readUser(userId, metadata(server), (e, r) => {
-        const response = r ? get_user_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readUser(userId, metadata(server))
+        .then(response => get_user_schema(response.toObject().result));
 }
 
 /**
  * Read a user by name
  * @param {ServerConfig} server Server configuration
  * @param {UserName} request user name: name
- * @param {function(?grpc.web.RpcError, ?UserSchema)} callback The callback function(error, response)
+ * @returns {Promise<UserSchema>} user schema: id, name, email, phone, password, roles
  */
-async function read_user_by_name(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function read_user_by_name(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userName = new pb_user.UserName();
     userName.setName(request.name);
-    await client.readUserByName(userName, metadata(server), (e, r) => {
-        const response = r ? get_user_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readUserByName(userName, metadata(server))
+        .then(response => get_user_schema(response.toObject().result));
 }
 
 /**
  * Read users by role uuid
  * @param {ServerConfig} server Server configuration
  * @param {RoleId} request role uuid: id
- * @param {function(?grpc.web.RpcError, ?UserSchema[])} callback The callback function(error, response)
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
  */
-async function list_user_by_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function list_user_by_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
-    await client.listUserByRole(roleId, metadata(server), (e, r) => {
-        const response = r ? get_user_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listUserByRole(roleId, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create an user
  * @param {ServerConfig} server Server configuration
  * @param {UserSchema} request user schema: id, name, email, phone, password
- * @param {function(?grpc.web.RpcError, ?UserId)} callback The callback function(error, response)
+ * @returns {Promise<UserId>} user id: id
  */
-async function create_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function create_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userSchema = new pb_user.UserSchema();
     userSchema.setId(uuid_hex_to_base64(request.id));
     userSchema.setName(request.name);
     userSchema.setEmail(request.email);
     userSchema.setPhone(request.phone);
     userSchema.setPassword(request.password);
-    await client.createUser(userSchema, metadata(server), (e, r) => {
-        const response = r ? get_user_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createUser(userSchema, metadata(server))
+        .then(response => get_user_id(response.toObject()));
 }
 
 /**
  * Update an user
  * @param {ServerConfig} server Server configuration
  * @param {UserUpdate} request user update: id, name, email, phone, password
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-async function update_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function update_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userUpdate = new pb_user.UserUpdate();
     userUpdate.setId(uuid_hex_to_base64(request.id));
     userUpdate.setName(request.name);
     userUpdate.setEmail(request.email);
     userUpdate.setPhone(request.phone);
     userUpdate.setPassword(request.password);
-    await client.updateUser(userUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateUser(userUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete an user
  * @param {ServerConfig} server Server configuration
  * @param {UserId} request user uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_user(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function delete_user(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userId = new pb_user.UserId();
     userId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteUser(userId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteUser(userId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Add a role to user
  * @param {ServerConfig} server Server configuration
  * @param {UserRole} request user role: user_id, role_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-async function add_user_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function add_user_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.addUserRole(userRole, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.addUserRole(userRole, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Remove a role from user
  * @param {ServerConfig} server Server configuration
  * @param {UserRole} request user role: user_id, role_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-async function remove_user_role(server, request, callback) {
-    const client = new pb_user.UserServiceClient(server.address, null, null);
+async function remove_user_role(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
     const userRole = new pb_user.UserRole();
     userRole.setUserId(uuid_hex_to_base64(request.user_id));
     userRole.setRoleId(uuid_hex_to_base64(request.role_id));
-    await client.removeUserRole(userRole, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.removeUserRole(userRole, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
@@ -1022,7 +968,8 @@ async function remove_user_role(server, request, callback) {
  */
 
 /**
- * @typedef {import('./user.js').UserId} UserId
+ * @typedef {Object} UserId
+ * @property {Uuid} id
  */
 
 /**
@@ -1124,96 +1071,86 @@ function get_token_update_response(r) {
  * Read an access token by access id
  * @param {ServerConfig} server Server configuration
  * @param {AccessId} request access id: access_id
- * @param {function(?grpc.web.RpcError, ?TokenSchema)} callback The callback function(error, response)
+ * @returns {Promise<TokenSchema>} token schema: access_id, user_id, refresh_token, auth_token, expire, ip
  */
-async function read_access_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function read_access_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.readAccessToken(accessId, metadata(server), (e, r) => {
-        const response = r ? get_token_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readAccessToken(accessId, metadata(server))
+        .then(response => get_token_schema(response.toObject().result));
 }
 
 /**
  * Read tokens by auth token
  * @param {ServerConfig} server Server configuration
  * @param {AuthToken} request auth token: auth_token
- * @param {function(?grpc.web.RpcError, ?TokenSchema[])} callback The callback function(error, response)
+ * @returns {Promise<TokenSchema[]>} token schema: access_id, user_id, refresh_token, auth_token, expire, ip
  */
-async function list_auth_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function list_auth_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.listAuthToken(authToken, metadata(server), (e, r) => {
-        const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listAuthToken(authToken, metadata(server))
+        .then(response => get_token_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read tokens by user id
  * @param {ServerConfig} server Server configuration
  * @param {UserId} request user id: id
- * @param {function(?grpc.web.RpcError, ?TokenSchema[])} callback The callback function(error, response)
+ * @returns {Promise<TokenSchema[]>} token schema: access_id, user_id, refresh_token, auth_token, expire, ip
  */
-async function list_token_by_user(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function list_token_by_user(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.listTokenByUser(userId, metadata(server), (e, r) => {
-        const response = r ? get_token_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listTokenByUser(userId, metadata(server))
+        .then(response => get_token_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create an access token
  * @param {ServerConfig} server Server configuration
  * @param {TokenSchema} request token schema: user_id, auth_token, expire, ip
- * @param {function(?grpc.web.RpcError, ?TokenCreateResponse)} callback The callback function(error, response)
+ * @returns {Promise<TokenCreateResponse>} create response: access_id, refresh_token, auth_token
  */
-async function create_access_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function create_access_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const tokenSchema = new pb_token.TokenSchema();
     tokenSchema.setUserId(uuid_hex_to_base64(request.user_id));
     tokenSchema.setAuthToken(request.auth_token);
     tokenSchema.setExpire(request.expire.valueOf() * 1000);
     tokenSchema.setIp(bytes_to_base64(request.ip));
-    await client.createAccessToken(tokenSchema, metadata(server), (e, r) => {
-        const response = r ? get_token_create_response(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createAccessToken(tokenSchema, metadata(server))
+        .then(response => get_token_create_response(response.toObject()));
 }
 
 /**
  * Create tokens with shared auth token
  * @param {ServerConfig} server Server configuration
  * @param {AuthTokenCreate} request token schema: user_id, expire, ip, number
- * @param {function(?grpc.web.RpcError, ?TokenCreateResponse[])} callback The callback function(error, response)
+ * @returns {Promise<TokenCreateResponse[]>} create response: access_id, refresh_token, auth_token
  */
-async function create_auth_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function create_auth_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const authTokenCreate = new pb_token.AuthTokenCreate();
     authTokenCreate.setUserId(uuid_hex_to_base64(request.user_id));
     authTokenCreate.setExpire(request.expire.valueOf() * 1000);
     authTokenCreate.setIp(bytes_to_base64(request.ip));
     authTokenCreate.setNumber(request.number);
-    await client.createAuthToken(authTokenCreate, metadata(server), (e, r) => {
-        const response = r ? get_token_create_response_vec(r.toObject().tokensList) : null;
-        callback(e, response);
-    });
+    return client.createAuthToken(authTokenCreate, metadata(server))
+        .then(response => get_token_create_response_vec(response.toObject().tokensList));
 }
 
 /**
  * Update an access token
  * @param {ServerConfig} server Server configuration
  * @param {TokenUpdate} request token update: access_id, expire, ip
- * @param {function(?grpc.web.RpcError, ?TokenUpdateResponse)} callback The callback function(error, response)
+ * @returns {Promise<TokenUpdateResponse>} update response: refresh_token, auth_token
  */
-async function update_access_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function update_access_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const tokenUpdate = new pb_token.TokenUpdate();
     tokenUpdate.setAccessId(request.access_id);
     if (request.expire instanceof Date) {
@@ -1222,20 +1159,18 @@ async function update_access_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAccessToken(tokenUpdate, metadata(server), (e, r) => {
-        const response = r ? get_token_update_response(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.updateAccessToken(tokenUpdate, metadata(server))
+        .then(response => get_token_update_response(response.toObject()));
 }
 
 /**
  * Update all tokens with shared auth token
  * @param {ServerConfig} server Server configuration
  * @param {TokenUpdate} request token update: auth_token, expire, ip
- * @param {function(?grpc.web.RpcError, ?TokenUpdateResponse)} callback The callback function(error, response)
+ * @returns {Promise<TokenUpdateResponse>} update response: refresh_token, auth_token
  */
-async function update_auth_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function update_auth_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const tokenUpdate = new pb_token.TokenUpdate();
     tokenUpdate.setAuthToken(request.auth_token);
     if (request.expire instanceof Date) {
@@ -1244,58 +1179,50 @@ async function update_auth_token(server, request, callback) {
     if (request.ip) {
         tokenUpdate.setIp(bytes_to_base64(request.ip));
     }
-    await client.updateAuthToken(tokenUpdate, metadata(server), (e, r) => {
-        const response = r ? get_token_update_response(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.updateAuthToken(tokenUpdate, metadata(server))
+        .then(response => get_token_update_response(response.toObject()));
 }
 
 /**
  * Delete an access token by access id
  * @param {ServerConfig} server Server configuration
  * @param {AccessId} request access id: access_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_access_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function delete_access_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const accessId = new pb_token.AccessId();
     accessId.setAccessId(request.access_id);
-    await client.deleteAccessToken(accessId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteAccessToken(accessId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete tokens by auth token
  * @param {ServerConfig} server Server configuration
  * @param {AuthToken} request auth token: auth_token
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_auth_token(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function delete_auth_token(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const authToken = new pb_token.AuthToken();
     authToken.setAuthToken(request.auth_token);
-    await client.deleteAuthToken(authToken, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteAuthToken(authToken, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete tokens by user id
  * @param {ServerConfig} server Server configuration
  * @param {UserId} request user id: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-async function delete_token_by_user(server, request, callback) {
-    const client = new pb_token.TokenServiceClient(server.address, null, null);
+async function delete_token_by_user(server, request) {
+    const client = new pb_token.TokenServicePromiseClient(server.address, null, null);
     const userId = new pb_token.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
-    await client.deleteTokenByUser(userId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteTokenByUser(userId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
@@ -1441,75 +1368,64 @@ async function encryptMessage(message, encryptionKey)
  * Get user login key
  * @param {ServerConfig} server Server configuration
  * @param {} request empty object
- * @param {function(?grpc.web.RpcError, ?UserKeyResponse)} callback The callback function(error, response)
+ * @return {Promise<UserKeyResponse>} user key: public_key
  */
-async function user_login_key(server, request, callback) {
-    const client = new pb_auth.AuthServiceClient(server.address, null, null);
+async function user_login_key(server, request) {
+    const client = new pb_auth.AuthServicePromiseClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
-    await client.userLoginKey(userKeyRequest, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.userLoginKey(userKeyRequest, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * User login
  * @param {ServerConfig} server Server configuration
  * @param {UserLoginRequest} request user login request: username, password
- * @param {function(?grpc.web.RpcError, ?UserLoginResponse)} callback The callback function(error, response)
+ * @return {Promise<UserLoginResponse>} user login response: user_id, auth_token, access_tokens
  */
-async function user_login(server, request, callback) {
-    const client = new pb_auth.AuthServiceClient(server.address, null, null);
+async function user_login(server, request) {
+    const client = new pb_auth.AuthServicePromiseClient(server.address, null, null);
     const userKeyRequest = new pb_auth.UserKeyRequest();
     const userLoginRequest = new pb_auth.UserLoginRequest();
     userLoginRequest.setUsername(request.username);
-    await client.userLoginKey(userKeyRequest, {}, async (e, r) => {
-        if (r) {
-            const key = r.toObject().publicKey;
-            const pubkey = await importKey(key);
-            const ciphertext = await encryptMessage(request.password, pubkey);
-            userLoginRequest.setPassword(ciphertext);
-            await client.userLogin(userLoginRequest, metadata(server), (e, r) => {
-                const response = r ? get_login_response(r.toObject()) : null;
-                callback(e, response);
-            });
-        }
-    });
+    const key = await client.userLoginKey(userKeyRequest, metadata(server))
+        .then(response => response.toObject().publicKey);
+    const pubkey = await importKey(key);
+    const ciphertext = await encryptMessage(request.password, pubkey);
+    userLoginRequest.setPassword(ciphertext);
+    return client.userLogin(userLoginRequest, metadata(server))
+        .then(response => get_login_response(response.toObject()));
 }
 
 /**
  * Refresh user token
  * @param {ServerConfig} server Server configuration
  * @param {UserRefreshRequest} request user refresh request: api_id, access_token, refresh_token
- * @param {function(?grpc.web.RpcError, ?UserRefreshResponse)} callback The callback function(error, response)
+ * @return {Promise<UserRefreshResponse>} user refresh response: access_token, refresh_token
  */
-async function user_refresh(server, request, callback) {
-    const client = new pb_auth.AuthServiceClient(server.address, null, null);
+async function user_refresh(server, request) {
+    const client = new pb_auth.AuthServicePromiseClient(server.address, null, null);
     const userRefreshRequest = new pb_auth.UserRefreshRequest();
     userRefreshRequest.setApiId(uuid_hex_to_base64(request.api_id));
     userRefreshRequest.setAccessToken(request.access_token);
     userRefreshRequest.setRefreshToken(request.refresh_token);
-    await client.userRefresh(userRefreshRequest, metadata(server), (e, r) => {
-        const response = r ? get_refresh_response(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.userRefresh(userRefreshRequest, metadata(server))
+        .then(response => get_refresh_response(response.toObject()));
 }
 
 /**
  * User logout
  * @param {ServerConfig} server Server configuration
  * @param {UserLogoutRequest} request user logout request: user_id, auth_token
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @return {Promise<{}>} user logout response
  */
-async function user_logout(server, request, callback) {
-    const client = new pb_auth.AuthServiceClient(server.address, null, null);
+async function user_logout(server, request) {
+    const client = new pb_auth.AuthServicePromiseClient(server.address, null, null);
     const userLogoutRequest = new pb_auth.UserLogoutRequest();
     userLogoutRequest.setUserId(uuid_hex_to_base64(request.user_id));
     userLogoutRequest.setAuthToken(request.auth_token);
-    await client.userLogout(userLogoutRequest, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.userLogout(userLogoutRequest, metadata(server))
+        .then(response => response.toObject());
 }
 
 var index$1 = /*#__PURE__*/Object.freeze({
