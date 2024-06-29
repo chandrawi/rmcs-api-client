@@ -99,93 +99,83 @@ function get_slice_schema_vec(r) {
 
 /**
  * Read a data slice by id
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceId} request data slice id: id
- * @param {function(?grpc.web.RpcError, ?SliceSchema)} callback The callback function(error, response)
+ * @returns {Promise<SliceSchema>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function read_slice(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function read_slice(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.readSlice(sliceId, metadata(server), (e, r) => {
-        const response = r ? get_slice_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readSlice(sliceId, metadata(server))
+        .then(response => get_slice_schema(response.toObject().result));
 }
 
 /**
  * Read data slices by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceName} request data slice name: name
- * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_name(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function list_slice_by_name(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceName = new pb_slice.SliceName();
     sliceName.setName(request.name);
-    await client.listSliceByName(sliceName, metadata(server), (e, r) => {
-        const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listSliceByName(sliceName, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data slices by device
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceDevice} request data slice device: device_id
- * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_device(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function list_slice_by_device(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceDevice = new pb_slice.SliceDevice();
     sliceDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.listSliceByDevice(sliceDevice, metadata(server), (e, r) => {
-        const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listSliceByDevice(sliceDevice, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data slices by model
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceModel} request data slice model: model_id
- * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_model(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function list_slice_by_model(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceModel = new pb_slice.SliceModel();
     sliceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByModel(sliceModel, metadata(server), (e, r) => {
-        const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listSliceByModel(sliceModel, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data slices by device and model
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceDeviceModel} request data slice device and model: device_id, model_id
- * @param {function(?grpc.web.RpcError, ?SliceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_device_model(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function list_slice_by_device_model(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceDeviceModel = new pb_slice.SliceDeviceModel();
     sliceDeviceModel.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceDeviceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.listSliceByDeviceModel(sliceDeviceModel, metadata(server), (e, r) => {
-        const response = r ? get_slice_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listSliceByDeviceModel(sliceDeviceModel, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a data slice
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceSchema} request data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
- * @param {function(?grpc.web.RpcError, ?SliceId)} callback The callback function(error, response)
+ * @returns {Promise<SliceId>} data slice id: id
  */
-export async function create_slice(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function create_slice(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceSchema = new pb_slice.SliceSchema();
     sliceSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -193,20 +183,18 @@ export async function create_slice(server, request, callback) {
     sliceSchema.setTimestampEnd(request.timestamp_end.valueOf() * 1000);
     sliceSchema.setName(request.name);
     sliceSchema.setDescription(request.description);
-    await client.createSlice(sliceSchema, metadata(server), (e, r) => {
-        const response = r ? get_slice_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createSlice(sliceSchema, metadata(server))
+        .then(response => get_slice_id(response.toObject()));
 }
 
 /**
  * Update a data slice
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceUpdate} request data slice update: id, timestamp_begin, timestamp_end, name, description
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_slice(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function update_slice(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceUpdate = new pb_slice.SliceUpdate();
     sliceUpdate.setId(request.id);
     if (request.timestamp_begin instanceof Date) {
@@ -217,24 +205,20 @@ export async function update_slice(server, request, callback) {
     }
     sliceUpdate.setName(request.name);
     sliceUpdate.setDescription(request.description);
-    await client.updateSlice(sliceUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateSlice(sliceUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a data slice
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SliceId} request data slice id: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_slice(server, request, callback) {
-    const client = new pb_slice.SliceServiceClient(server.address, null, null);
+export async function delete_slice(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
-    await client.deleteSlice(sliceId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteSlice(sliceId, metadata(server))
+        .then(response => response.toObject());
 }

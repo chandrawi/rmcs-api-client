@@ -39,7 +39,16 @@ function get_device_id(r) {
  */
 
 /**
- * @typedef {import('./types.js').TypeId} TypeId
+ * @typedef {Object} TypeId
+ * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} TypeSchema
+ * @property {Uuid} id
+ * @property {string} name
+ * @property {string} description
+ * @property {Uuid[]} models
  */
 
 /**
@@ -66,7 +75,7 @@ function get_device_id(r) {
  * @property {string} serial_number
  * @property {string} name
  * @property {string} description
- * @property {import('./types.js').TypeSchema} device_type
+ * @property {TypeSchema} device_type
  * @property {DeviceConfigSchema[]} configs
  */
 
@@ -140,7 +149,7 @@ function get_gateway_id(r) {
  * @property {string} serial_number
  * @property {string} name
  * @property {string} description
- * @property {import('./types.js').TypeSchema} gateway_type
+ * @property {TypeSchema} gateway_type
  * @property {GatewayConfigSchema[]} configs
  */
 
@@ -273,126 +282,112 @@ function get_gateway_config_schema_vec(r) {
 
 /**
  * Read a device by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceId} request device uuid: id
- * @param {function(?grpc.web.RpcError, ?DeviceSchema)} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function read_device(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_device(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.readDevice(deviceId, metadata(server), (e, r) => {
-        const response = r ? get_device_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readDevice(deviceId, metadata(server))
+        .then(response => get_device_schema(response.toObject().result));
 }
 
 /**
  * Read a device by serial number
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SerialNumber} request serial number: serial_number
- * @param {function(?grpc.web.RpcError, ?DeviceSchema)} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function read_device_by_sn(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_device_by_sn(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readDeviceBySn(serialNumber, metadata(server), (e, r) => {
-        const response = r ? get_device_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readDeviceBySn(serialNumber, metadata(server))
+        .then(response => get_device_schema(response.toObject().result));
 }
 
 /**
  * Read devices by gateway
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
- * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_by_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByGateway(gatewayId, metadata(server), (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceByGateway(gatewayId, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read devices by type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeId} request type uuid: id
- * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_by_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceByType(typeId, metadata(server), (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceByType(typeId, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read devices by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceName} request device name: name
- * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_name(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_by_name(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const deviceName = new pb_device.DeviceName();
     deviceName.setName(request.name);
-    await client.listDeviceByName(deviceName, metadata(server), (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceByName(deviceName, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read devices by gateway and type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceGatewayType} request gateway and type: gateway_id, type_id
- * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_gateway_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_by_gateway_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayType = new pb_device.DeviceGatewayType();
     gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayType.setId(uuid_hex_to_base64(request.type_id));
-    await client.listDeviceByGatewayType(gatewayType, metadata(server), (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceByGatewayType(gatewayType, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read devices by gateway and name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceGatewayName} request gateway and name: gateway_id, name
- * @param {function(?grpc.web.RpcError, ?DeviceSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_gateway_name(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_by_gateway_name(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayName = new pb_device.DeviceGatewayName();
     gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
     gatewayName.setId(request.name);
-    await client.listDeviceByGatewayName(gatewayName, metadata(server), (e, r) => {
-        const response = r ? get_device_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceByGatewayName(gatewayName, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a device
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceCreate} request device schema: id, gateway_id, serial_number, name, description, type_id
- * @param {function(?grpc.web.RpcError, ?DeviceId)} callback The callback function(error, response)
+ * @returns {Promise<DeviceId>} device uuid: id
  */
-export async function create_device(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function create_device(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeSchema = new pb_device.TypeSchema();
     typeSchema.setId(uuid_hex_to_base64(request.type_id));
     const deviceSchema = new pb_device.DeviceSchema();
@@ -402,20 +397,18 @@ export async function create_device(server, request, callback) {
     deviceSchema.setName(request.name);
     deviceSchema.setDescription(request.description);
     deviceSchema.setDeviceType(typeSchema);
-    await client.createDevice(deviceSchema, metadata(server), (e, r) => {
-        const response = r ? get_device_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createDevice(deviceSchema, metadata(server))
+        .then(response => get_device_id(response.toObject()));
 }
 
 /**
  * Update a device
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceUpdate} request device update: id, gateway_id, serial_number, name, description, type_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_device(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function update_device(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const deviceUpdate = new pb_device.DeviceUpdate();
     deviceUpdate.setId(uuid_hex_to_base64(request.id));
     if (request.gateway_id) {
@@ -425,100 +418,88 @@ export async function update_device(server, request, callback) {
     deviceUpdate.setName(request.name);
     deviceUpdate.setDescription(request.description);
     deviceUpdate.setTypeId(request.type_id);
-    await client.updateDevice(deviceUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateDevice(deviceUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a device
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceId} request device uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_device(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function delete_device(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteDevice(deviceId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteDevice(deviceId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Read a gateway by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
- * @param {function(?grpc.web.RpcError, ?GatewaySchema)} callback The callback function(error, response)
+ * @returns {Promise<GatewaySchema>} gateway schema: id, serial_number, name, description, gateway_type, configs
  */
-export async function read_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.readGateway(gatewayId, metadata(server), (e, r) => {
-        const response = r ? get_gateway_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readGateway(gatewayId, metadata(server))
+        .then(response => get_gateway_schema(response.toObject().result));
 }
 
 /**
  * Read a gateway by serial number
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {SerialNumber} request serial number: serial_number
- * @param {function(?grpc.web.RpcError, ?GatewaySchema)} callback The callback function(error, response)
+ * @returns {Promise<GatewaySchema>} gateway schema: id, serial_number, name, description, gateway_type, configs
  */
-export async function read_gateway_by_sn(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_gateway_by_sn(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const serialNumber = new pb_device.SerialNumber();
     serialNumber.setSerialNumber(request.serial_number);
-    await client.readGatewayBySn(serialNumber, metadata(server), (e, r) => {
-        const response = r ? get_gateway_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readGatewayBySn(serialNumber, metadata(server))
+        .then(response => get_gateway_schema(response.toObject().result));
 }
 
 /**
  * Read gateways by type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeId} request type uuid: id
- * @param {function(?grpc.web.RpcError, ?GatewaySchema[])} callback The callback function(error, response)
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
  */
-export async function list_gateway_by_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_gateway_by_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayByType(typeId, metadata(server), (e, r) => {
-        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listGatewayByType(typeId, metadata(server))
+        .then(response => get_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read gateways by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayName} request gateway name: name
- * @param {function(?grpc.web.RpcError, ?GatewaySchema[])} callback The callback function(error, response)
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
  */
-export async function list_gateway_by_name(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_gateway_by_name(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayName = new pb_device.GatewayName();
     gatewayName.setName(request.name);
-    await client.listGatewayByName(gatewayName, metadata(server), (e, r) => {
-        const response = r ? get_gateway_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listGatewayByName(gatewayName, metadata(server))
+        .then(response => get_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a gateway
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayCreate} request gateway schema: id, serial_number, name, description, type_id
- * @param {function(?grpc.web.RpcError, ?GatewayId)} callback The callback function(error, response)
+ * @returns {Promise<GatewayId>} gateway uuid: id
  */
-export async function create_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function create_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeSchema = new pb_device.TypeSchema();
     typeSchema.setId(uuid_hex_to_base64(request.type_id));
     const gatewaySchema = new pb_device.GatewaySchema();
@@ -527,88 +508,78 @@ export async function create_gateway(server, request, callback) {
     gatewaySchema.setName(request.name);
     gatewaySchema.setDescription(request.description);
     gatewaySchema.setGatewayType(typeSchema);
-    await client.createGateway(gatewaySchema, metadata(server), (e, r) => {
-        const response = r ? get_gateway_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createGateway(gatewaySchema, metadata(server))
+        .then(response => get_gateway_id(response.toObject()));
 }
 
 /**
  * Update a gateway
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayUpdate} request gateway update: id, serial_number, name, description, type_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response 
  */
-export async function update_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function update_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayUpdate = new pb_device.GatewayUpdate();
     gatewayUpdate.setId(uuid_hex_to_base64(request.id));
     gatewayUpdate.setSerialNumber(request.serial_number);
     gatewayUpdate.setName(request.name);
     gatewayUpdate.setDescription(request.description);
     gatewayUpdate.setTypeId(request.type_id);
-    await client.updateGateway(gatewayUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateGateway(gatewayUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a gateway
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function delete_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteGateway(gatewayId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteGateway(gatewayId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Read a device configuration by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigId} request device config uuid: id
- * @param {function(?grpc.web.RpcError, ?DeviceConfigSchema)} callback The callback function(error, response)
+ * @returns {Promise<DeviceConfigSchema>} device config schema: id, device_id, name, value, category
  */
-export async function read_device_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_device_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readDeviceConfig(configId, metadata(server), (e, r) => {
-        const response = r ? get_device_config_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readDeviceConfig(configId, metadata(server))
+        .then(response => get_device_config_schema(response.toObject().result));
 }
 
 /**
  * Read device configurations by device uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceId} request device uuid: id
- * @param {function(?grpc.web.RpcError, ?DeviceConfigSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DeviceConfigSchema[]>} device config schema: id, device_id, name, value, category
  */
-export async function list_device_config_by_device(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_device_config_by_device(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const deviceId = new pb_device.DeviceId();
     deviceId.setId(uuid_hex_to_base64(request.id));
-    await client.listDeviceConfig(deviceId, metadata(server), (e, r) => {
-        const response = r ? get_device_config_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDeviceConfig(deviceId, metadata(server))
+        .then(response => get_device_config_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a device configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DeviceConfigSchema} request device config schema: device_id, name, value, category
- * @param {function(?grpc.web.RpcError, ?ConfigId)} callback The callback function(error, response)
+ * @returns {Promise<ConfigId>} device config uuid: id
  */
-export async function create_device_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function create_device_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configSchema = new pb_device.ConfigSchema();
     configSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     configSchema.setName(request.name);
@@ -616,20 +587,18 @@ export async function create_device_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createDeviceConfig(configSchema, metadata(server), (e, r) => {
-        const response = r ? get_config_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createDeviceConfig(configSchema, metadata(server))
+        .then(response => get_config_id(response.toObject()));
 }
 
 /**
  * Update a device configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigUpdate} request device config update: id, name, value, category
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_device_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function update_device_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configUpdate = new pb_device.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
@@ -637,66 +606,60 @@ export async function update_device_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateDeviceConfig(configUpdate, metadata(server), (e, r) => {
-        callback(e, r.toObject());
-    });
+    return client.updateDeviceConfig(configUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a device configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigId} request device config uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_device_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function delete_device_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteDeviceConfig(configId, metadata(server), (e, r) => {
-        callback(e, r.toObject());
-    });
+    return client.deleteDeviceConfig(configId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Read a gateway configuration by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigId} request gateway config uuid: id
- * @param {function(?grpc.web.RpcError, ?GatewayConfigSchema)} callback The callback function(error, response)
+ * @returns {Promise<GatewayConfigSchema>} gateway config schema: id, gateway_id, name, value, category
  */
-export async function read_gateway_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_gateway_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.readGatewayConfig(configId, metadata(server), (e, r) => {
-        const response = r ? get_gateway_config_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readGatewayConfig(configId, metadata(server))
+        .then(response => get_gateway_config_schema(response.toObject().result));
 }
 
 /**
  * Read gateway configurations by gateway uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
- * @param {function(?grpc.web.RpcError, ?GatewayConfigSchema[])} callback The callback function(error, response)
+ * @returns {Promise<GatewayConfigSchema[]>} gateway config schema: id, gateway_id, name, value, category
  */
-export async function list_gateway_config_by_gateway(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_gateway_config_by_gateway(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const gatewayId = new pb_device.GatewayId();
     gatewayId.setId(uuid_hex_to_base64(request.id));
-    await client.listGatewayConfig(gatewayId, metadata(server), (e, r) => {
-        const response = r ? get_gateway_config_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listGatewayConfig(gatewayId, metadata(server))
+        .then(response => get_gateway_config_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a gateway configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayConfigSchema} request gateway config schema: gateway_id, name, value, category
- * @param {function(?grpc.web.RpcError, ?ConfigId)} callback The callback function(error, response)
+ * @returns {Promise<ConfigId>} gateway config id: id
  */
-export async function create_gateway_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function create_gateway_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configSchema = new pb_device.ConfigSchema();
     configSchema.setDeviceId(uuid_hex_to_base64(request.gateway_id));
     configSchema.setName(request.name);
@@ -704,20 +667,18 @@ export async function create_gateway_config(server, request, callback) {
     configSchema.setConfigBytes(value.bytes);
     configSchema.setConfigType(value.type);
     configSchema.setCategory(request.category);
-    await client.createGatewayConfig(configSchema, metadata(server), (e, r) => {
-        const response = r ? get_config_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createGatewayConfig(configSchema, metadata(server))
+        .then(response => get_config_id(response.toObject()));
 }
 
 /**
  * Update a gateway configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigUpdate} request gateway config update: id, name, value, category
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_gateway_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function update_gateway_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configUpdate = new pb_device.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
@@ -725,22 +686,20 @@ export async function update_gateway_config(server, request, callback) {
     configUpdate.setConfigBytes(value.bytes);
     configUpdate.setConfigType(value.type);
     configUpdate.setCategory(request.category);
-    await client.updateGatewayConfig(configUpdate, metadata(server), (e, r) => {
-        callback(e, r.toObject());
-    });
+    return client.updateGatewayConfig(configUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a gateway configuration
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {ConfigId} request gateway config uuid: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_gateway_config(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function delete_gateway_config(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const configId = new pb_device.ConfigId();
     configId.setId(request.id);
-    await client.deleteGatewayConfig(configId, metadata(server), (e, r) => {
-        callback(e, r.toObject());
-    });
+    return client.deleteGatewayConfig(configId, metadata(server))
+        .then(response => response.toObject());
 }

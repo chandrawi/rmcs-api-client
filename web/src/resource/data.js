@@ -79,123 +79,111 @@ function get_data_schema_vec(r) {
 
 /**
  * Read a data by id
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataId} request data id: device_id, model_id, timestamp
- * @param {function(?grpc.web.RpcError, ?DataSchema)} callback The callback function(error, response)
+ * @returns {Promise<DataSchema>} data schema: device_id, model_id, timestamp, data
  */
-export async function read_data(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function read_data(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.readData(dataId, metadata(server), (e, r) => {
-        const response = r ? get_data_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readData(dataId, metadata(server))
+        .then(response => get_data_schema(response.toObject().result));
 }
 
 /**
  * Read multiple data by specific time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataTime} request data time: device_id, model_id, timestamp
- * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
-export async function list_data_by_time(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function list_data_by_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByTime(dataTime, metadata(server), (e, r) => {
-        const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDataByTime(dataTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read multiple data by last time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataTime} request data time: device_id, model_id, timestamp
- * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
-export async function list_data_by_last_time(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function list_data_by_last_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataTime = new pb_data.DataTime();
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.listDataByLastTime(dataTime, metadata(server), (e, r) => {
-        const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDataByLastTime(dataTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read multiple data by range time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataRange} request data range: device_id, model_id, begin, end
- * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
-export async function list_data_by_range_time(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function list_data_by_range_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataRange = new pb_data.DataRange();
     dataRange.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
-    await client.listDataByRangeTime(dataRange, metadata(server), (e, r) => {
-        const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDataByRangeTime(dataRange, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read multiple data by specific time and number before
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
- * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
-export async function list_data_by_number_before(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function list_data_by_number_before(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberBefore(dataNumber, metadata(server), (e, r) => {
-        const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDataByNumberBefore(dataNumber, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read multiple data by specific time and number after
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
- * @param {function(?grpc.web.RpcError, ?DataSchema[])} callback The callback function(error, response)
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
-export async function list_data_by_number_after(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function list_data_by_number_after(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataNumber = new pb_data.DataNumber();
     dataNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
-    await client.listDataByNumberAfter(dataNumber, metadata(server), (e, r) => {
-        const response = r ? get_data_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listDataByNumberAfter(dataNumber, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a data
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataSchema} request data schema: device_id, model_id, timestamp, data
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} create response
  */
-export async function create_data(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function create_data(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataSchema = new pb_data.DataSchema();
     dataSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -205,26 +193,22 @@ export async function create_data(server, request, callback) {
     for (const type of value.types) {
         dataSchema.addDataType(type);
     }
-    await client.createData(dataSchema, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.createData(dataSchema, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a data
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {DataId} request data id: device_id, model_id, timestamp
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_data(server, request, callback) {
-    const client = new pb_data.DataServiceClient(server.address, null, null);
+export async function delete_data(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataId = new pb_data.DataId();
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    await client.deleteData(dataId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteData(dataId, metadata(server))
+        .then(response => response.toObject());
 }

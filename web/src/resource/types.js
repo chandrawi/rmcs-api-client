@@ -81,118 +81,104 @@ function get_type_schema_vec(r) {
 
 /**
  * Read a device type by uuid
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeId} request type uuid: id
- * @param {function(?grpc.web.RpcError, ?TypeSchema)} callback The callback function(error, response)
+ * @returns {Promise<TypeSchema>} type schema: id, name, description, models
  */
-export async function read_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function read_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.readType(typeId, metadata(server), (e, r) => {
-        const response = r ? get_type_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readType(typeId, metadata(server))
+        .then(response => get_type_schema(response.toObject().result));
 }
 
 /**
  * Read device types by name
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeName} request type name: name
- * @param {function(?grpc.web.RpcError, ?TypeSchema[])} callback The callback function(error, response)
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
  */
-export async function list_type_by_name(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function list_type_by_name(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeName = new pb_device.TypeName();
     typeName.setName(request.name);
-    await client.listTypeByName(typeName, metadata(server), (e, r) => {
-        const response = r ? get_type_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listTypeByName(typeName, metadata(server))
+        .then(response => get_type_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a device type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeSchema} request type schema: id, name, description
- * @param {function(?grpc.web.RpcError, ?TypeId)} callback The callback function(error, response)
+ * @returns {Promise<TypeId>} type uuid: id
  */
-export async function create_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function create_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeSchema = new pb_device.TypeSchema();
     typeSchema.setId(uuid_hex_to_base64(request.id));
     typeSchema.setName(request.name);
     typeSchema.setDescription(request.description);
-    await client.createType(typeSchema, metadata(server), (e, r) => {
-        const response = r ? get_type_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createType(typeSchema, metadata(server))
+        .then(response => get_type_id(response.toObject()));
 }
 
 /**
  * Update a device type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeUpdate} request type update: id, name, description
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function update_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeUpdate = new pb_device.TypeUpdate();
     typeUpdate.setId(uuid_hex_to_base64(request.id));
     typeUpdate.setName(request.name);
     typeUpdate.setDescription(request.description);
-    await client.updateType(typeUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateType(typeUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a device type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeId} request type id: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_type(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function delete_type(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeId = new pb_device.TypeId();
     typeId.setId(uuid_hex_to_base64(request.id));
-    await client.deleteType(typeId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteType(typeId, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Add model to a device type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeModel} request type id: id, model_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function add_type_model(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function add_type_model(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.addTypeModel(typeModel, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.addTypeModel(typeModel, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Remove model from a device type
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {TypeModel} request type id: id, model_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} change response
  */
-export async function remove_type_model(server, request, callback) {
-    const client = new pb_device.DeviceServiceClient(server.address, null, null);
+export async function remove_type_model(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
     const typeModel = new pb_device.TypeModel();
     typeModel.setId(uuid_hex_to_base64(request.id));
     typeModel.setModelId(uuid_hex_to_base64(request.model_id));
-    await client.removeTypeModel(typeModel, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.removeTypeModel(typeModel, metadata(server))
+        .then(response => response.toObject());
 }

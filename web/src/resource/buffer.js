@@ -170,47 +170,43 @@ function set_buffer_status(status) {
 
 /**
  * Read a data buffer by id
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferId} request data buffer id: id
- * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function read_buffer(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function read_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.readBuffer(bufferId, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readBuffer(bufferId, metadata(server))
+        .then(response => get_buffer_schema(response.toObject().result));
 }
 
 /**
  * Read a data buffer by time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, status
- * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function read_buffer_by_time(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function read_buffer_by_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferTime = new pb_buffer.BufferTime();
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferTime.setStatus(set_buffer_status(request.status));
-    await client.readBufferByTime(bufferTime, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readBufferByTime(bufferTime, metadata(server))
+        .then(response => get_buffer_schema(response.toObject().result));
 }
 
 /**
  * Read first of a data buffer
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferSelector} request data buffer selector: device_id, model_id, status
- * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function read_buffer_first(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function read_buffer_first(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -221,20 +217,18 @@ export async function read_buffer_first(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferFirst(bufferSelector, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readBufferFirst(bufferSelector, metadata(server))
+        .then(response => get_buffer_schema(response.toObject().result));
 }
 
 /**
  * Read last of a data buffer
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferSelector} request data buffer selector: device_id, model_id, status
- * @param {function(?grpc.web.RpcError, ?BufferSchema)} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function read_buffer_last(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function read_buffer_last(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
         bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -245,20 +239,18 @@ export async function read_buffer_last(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    await client.readBufferLast(bufferSelector, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readBufferLast(bufferSelector, metadata(server))
+        .then(response => get_buffer_schema(response.toObject().result));
 }
 
 /**
  * Read first of data buffers
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
- * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function list_buffer_first(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function list_buffer_first(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -270,20 +262,18 @@ export async function list_buffer_first(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferFirst(buffersSelector, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listBufferFirst(buffersSelector, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read last of data buffers
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
- * @param {function(?grpc.web.RpcError, ?BufferSchema[])} callback The callback function(error, response)
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
  */
-export async function list_buffer_last(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function list_buffer_last(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSelector = new pb_buffer.BuffersSelector();
     if (request.device_id) {
         buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -295,20 +285,18 @@ export async function list_buffer_last(server, request, callback) {
         buffersSelector.setStatus(set_buffer_status(request.status));
     }
     buffersSelector.setNumber(request.number);
-    await client.listBufferLast(buffersSelector, metadata(server), (e, r) => {
-        const response = r ? get_buffer_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listBufferLast(buffersSelector, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a data buffer
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferSchema} request data buffer schema: device_id, model_id, timestamp, data, status
- * @param {function(?grpc.web.RpcError, ?BufferId)} callback The callback function(error, response)
+ * @returns {Promise<BufferId>} data buffer id: id
  */
-export async function create_buffer(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function create_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSchema = new pb_buffer.BufferSchema();
     bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferSchema.setModelId(uuid_hex_to_base64(request.model_id));
@@ -319,20 +307,18 @@ export async function create_buffer(server, request, callback) {
         bufferSchema.addDataType(type);
     }
     bufferSchema.setStatus(set_buffer_status(request.status));
-    await client.createBuffer(bufferSchema, metadata(server), (e, r) => {
-        const response = r ? get_buffer_id(r.toObject()) : null;
-        callback(e, response);
-    });
+    return client.createBuffer(bufferSchema, metadata(server))
+        .then(response => get_buffer_id(response.toObject()));
 }
 
 /**
  * Update a data buffer
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferUpdate} request data buffer update: id, data, status
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+* @returns {Promise<{}>} update response
  */
-export async function update_buffer(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function update_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferUpdate = new pb_buffer.BufferUpdate();
     bufferUpdate.setId(request.id);
     const ty = typeof request.data;
@@ -344,24 +330,20 @@ export async function update_buffer(server, request, callback) {
         }
     }
     bufferUpdate.setStatus(set_buffer_status(request.status));
-    await client.updateBuffer(bufferUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    })
+    return client.updateBuffer(bufferUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a data buffer
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {BufferId} request data buffer id: id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+* @returns {Promise<{}>} delete response
  */
-export async function delete_buffer(server, request, callback) {
-    const client = new pb_buffer.BufferServiceClient(server.address, null, null);
+export async function delete_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
-    await client.deleteBuffer(bufferId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteBuffer(bufferId, metadata(server))
+        .then(response => response.toObject());
 }

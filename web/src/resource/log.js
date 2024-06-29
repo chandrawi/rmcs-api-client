@@ -132,29 +132,27 @@ function set_log_status(status) {
 
 /**
  * Read a system log by id
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogId} request system log id: timestamp, device_id
- * @param {function(?grpc.web.RpcError, ?LogSchema)} callback The callback function(error, response)
+ * @returns {Promise<LogSchema>} system log schema: timestamp, device_id, status, value
  */
-export async function read_log(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function read_log(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.readLog(logId, metadata(server), (e, r) => {
-        const response = r ? get_log_schema(r.toObject().result) : null;
-        callback(e, response);
-    });
+    return client.readLog(logId, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
 }
 
 /**
  * Read system logs by time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogTime} request system log time: timestamp, device_id, status
- * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
+ * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
  */
-export async function list_log_by_time(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function list_log_by_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
@@ -163,20 +161,18 @@ export async function list_log_by_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByTime(logTime, metadata(server), (e, r) => {
-        const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listLogByTime(logTime, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read system logs by last time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogTime} request system log last time: timestamp, device_id, status
- * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
+ * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
  */
-export async function list_log_by_last_time(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function list_log_by_last_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
     if (request.device_id) {
@@ -185,20 +181,18 @@ export async function list_log_by_last_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logTime.setStatus(request.status);
     }
-    await client.listLogByLastTime(logTime, metadata(server), (e, r) => {
-        const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listLogByLastTime(logTime, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read system logs by range time
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogRange} request system log time: begin, end, device_id, status
- * @param {function(?grpc.web.RpcError, ?LogSchema[])} callback The callback function(error, response)
+ * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
  */
-export async function list_log_by_range_time(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function list_log_by_range_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logRange = new pb_log.LogRange();
     logRange.setBegin(request.begin.valueOf() * 1000);
     logRange.setEnd(request.end.valueOf() * 1000);
@@ -208,20 +202,18 @@ export async function list_log_by_range_time(server, request, callback) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logRange.setStatus(request.status);
     }
-    await client.listLogByRangeTime(logRange, metadata(server), (e, r) => {
-        const response = r ? get_log_schema_vec(r.toObject().resultsList) : null;
-        callback(e, response);
-    });
+    return client.listLogByRangeTime(logRange, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Create a system log
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogSchema} request system log schema: timestamp, device_id, status, value
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} create response
  */
-export async function create_log(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function create_log(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logSchema = new pb_log.LogSchema();
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -229,20 +221,18 @@ export async function create_log(server, request, callback) {
     const value = set_config_value(request.value);
     logSchema.setLogBytes(value.bytes);
     logSchema.setLogType(value.type);
-    await client.createLog(logSchema, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.createLog(logSchema, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Update a system log
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogUpdate} request system log id: timestamp, device_id, status, value
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} update response
  */
-export async function update_log(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function update_log(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logUpdate = new pb_log.LogUpdate();
     logUpdate.setTimestamp(request.timestamp.valueOf() * 1000);
     logUpdate.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -252,25 +242,21 @@ export async function update_log(server, request, callback) {
     const value = set_config_value(request.value);
     logUpdate.setLogBytes(value.bytes);
     logUpdate.setLogType(value.type);
-    await client.updateLog(logUpdate, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.updateLog(logUpdate, metadata(server))
+        .then(response => response.toObject());
 }
 
 /**
  * Delete a system log
- * @param {ServerConfig} server Server configuration
+ * @param {ServerConfig} server server configuration: address, token
  * @param {LogId} request system log id: timestamp, device_id
- * @param {function(?grpc.web.RpcError, ?{})} callback The callback function(error, response)
+ * @returns {Promise<{}>} delete response
  */
-export async function delete_log(server, request, callback) {
-    const client = new pb_log.LogServiceClient(server.address, null, null);
+export async function delete_log(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logId = new pb_log.LogId();
     logId.setTimestamp(request.timestamp.valueOf() * 1000);
     logId.setDeviceId(uuid_hex_to_base64(request.device_id));
-    await client.deleteLog(logId, metadata(server), (e, r) => {
-        const response = r ? r.toObject() : null;
-        callback(e, response);
-    });
+    return client.deleteLog(logId, metadata(server))
+        .then(response => response.toObject());
 }
