@@ -23,6 +23,11 @@ import {
  */
 
 /**
+ * @typedef {Object} ModelIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {ModelId}
  */
@@ -164,6 +169,20 @@ export async function read_model(server, request) {
     modelId.setId(uuid_hex_to_base64(request.id));
     return client.readModel(modelId, metadata(server))
         .then(response => get_model_schema(response.toObject().result));
+}
+
+/**
+ * Read models by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ModelIds} request model uuid list: ids
+ * @returns {Promise<ModelSchema[]>} model schema: id, category, name, description, data_type, configs
+ */
+export async function list_model_by_ids(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const modelIds = new pb_model.ModelIds();
+    modelIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listModelByIds(modelIds, metadata(server))
+        .then(response => get_model_schema_vec(response.toObject().resultsList));
 }
 
 /**

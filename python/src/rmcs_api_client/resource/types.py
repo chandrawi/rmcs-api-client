@@ -25,6 +25,15 @@ def read_type(resource, id: UUID):
         response = stub.ReadType(request=request, metadata=resource.metadata)
         return TypeSchema.from_response(response.result)
 
+def list_type_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = device_pb2_grpc.DeviceServiceStub(channel)
+        request = device_pb2.TypeIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListTypeByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(TypeSchema.from_response(result))
+        return ls
+
 def list_type_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)

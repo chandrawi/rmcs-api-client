@@ -1764,6 +1764,11 @@ function set_config_value(value) {
  */
 
 /**
+ * @typedef {Object} ModelIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {ModelId}
  */
@@ -1905,6 +1910,20 @@ async function read_model(server, request) {
     modelId.setId(uuid_hex_to_base64(request.id));
     return client.readModel(modelId, metadata(server))
         .then(response => get_model_schema(response.toObject().result));
+}
+
+/**
+ * Read models by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ModelIds} request model uuid list: ids
+ * @returns {Promise<ModelSchema[]>} model schema: id, category, name, description, data_type, configs
+ */
+async function list_model_by_ids(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const modelIds = new pb_model.ModelIds();
+    modelIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listModelByIds(modelIds, metadata(server))
+        .then(response => get_model_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -2116,6 +2135,11 @@ async function delete_model_config(server, request) {
  */
 
 /**
+ * @typedef {Object} TypeIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @typedef {Object} TypeName
  * @property {string} name
  */
@@ -2185,6 +2209,20 @@ async function read_type(server, request) {
     typeId.setId(uuid_hex_to_base64(request.id));
     return client.readType(typeId, metadata(server))
         .then(response => get_type_schema(response.toObject().result));
+}
+
+/**
+ * Read device types by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TypeIds} request type uuid list: ids
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ */
+async function list_type_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const typeIds = new pb_device.TypeIds();
+    typeIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listTypeByIds(typeIds, metadata(server))
+        .then(response => get_type_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -2293,6 +2331,11 @@ async function remove_type_model(server, request) {
  */
 
 /**
+ * @typedef {Object} DeviceIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {DeviceId}
  */
@@ -2395,6 +2438,11 @@ function get_device_schema_vec(r) {
 /**
  * @typedef {Object} GatewayId
  * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} GatewayIds
+ * @property {Uuid[]} ids
  */
 
 /**
@@ -2578,6 +2626,20 @@ async function read_device_by_sn(server, request) {
 }
 
 /**
+ * Read devices by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DeviceIds} request device uuid list: ids
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
+ */
+async function list_device_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const deviceIds = new pb_device.DeviceIds();
+    deviceIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listDeviceByIds(deviceIds, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read devices by gateway
  * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
@@ -2731,6 +2793,20 @@ async function read_gateway_by_sn(server, request) {
     serialNumber.setSerialNumber(request.serial_number);
     return client.readGatewayBySn(serialNumber, metadata(server))
         .then(response => get_gateway_schema(response.toObject().result));
+}
+
+/**
+ * Read gateways by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GatewayIds} request gateway uuid list: ids
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
+ */
+async function list_gateway_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const gatewayIds = new pb_device.GatewayIds();
+    gatewayIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGatewayByIds(gatewayIds, metadata(server))
+        .then(response => get_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -2989,6 +3065,11 @@ async function delete_gateway_config(server, request) {
  */
 
 /**
+ * @typedef {Object} GroupIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {GroupId}
  */
@@ -3149,6 +3230,20 @@ async function read_group_model(server, request) {
 }
 
 /**
+ * Read groups of model by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ */
+async function list_group_model_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupModelByIds(groupIds, metadata(server))
+        .then(response => get_group_model_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read groups of model by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group model name: name
@@ -3284,6 +3379,20 @@ async function read_group_device(server, request) {
 }
 
 /**
+ * Read groups of device by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ */
+async function list_group_device_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupDeviceByIds(groupIds, metadata(server))
+        .then(response => get_group_device_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read groups of device by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group device name: name
@@ -3416,6 +3525,20 @@ async function read_group_gateway(server, request) {
     groupId.setId(uuid_hex_to_base64(request.id));
     return client.readGroupGateway(groupId, metadata(server))
         .then(response => get_group_gateway_schema(response.toObject().result));
+}
+
+/**
+ * Read groups of gateway by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ */
+async function list_group_gateway_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupGatewayByIds(groupIds, metadata(server))
+        .then(response => get_group_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -4601,25 +4724,31 @@ var index = /*#__PURE__*/Object.freeze({
     list_device_by_gateway: list_device_by_gateway,
     list_device_by_gateway_name: list_device_by_gateway_name,
     list_device_by_gateway_type: list_device_by_gateway_type,
+    list_device_by_ids: list_device_by_ids,
     list_device_by_name: list_device_by_name,
     list_device_by_type: list_device_by_type,
     list_device_config_by_device: list_device_config_by_device,
+    list_gateway_by_ids: list_gateway_by_ids,
     list_gateway_by_name: list_gateway_by_name,
     list_gateway_by_type: list_gateway_by_type,
     list_gateway_config_by_gateway: list_gateway_config_by_gateway,
     list_group_device_by_category: list_group_device_by_category,
+    list_group_device_by_ids: list_group_device_by_ids,
     list_group_device_by_name: list_group_device_by_name,
     list_group_device_by_name_category: list_group_device_by_name_category,
     list_group_gateway_by_category: list_group_gateway_by_category,
+    list_group_gateway_by_ids: list_group_gateway_by_ids,
     list_group_gateway_by_name: list_group_gateway_by_name,
     list_group_gateway_by_name_category: list_group_gateway_by_name_category,
     list_group_model_by_category: list_group_model_by_category,
+    list_group_model_by_ids: list_group_model_by_ids,
     list_group_model_by_name: list_group_model_by_name,
     list_group_model_by_name_category: list_group_model_by_name_category,
     list_log_by_last_time: list_log_by_last_time,
     list_log_by_range_time: list_log_by_range_time,
     list_log_by_time: list_log_by_time,
     list_model_by_category: list_model_by_category,
+    list_model_by_ids: list_model_by_ids,
     list_model_by_name: list_model_by_name,
     list_model_by_name_category: list_model_by_name_category,
     list_model_by_type: list_model_by_type,
@@ -4628,6 +4757,7 @@ var index = /*#__PURE__*/Object.freeze({
     list_slice_by_device_model: list_slice_by_device_model,
     list_slice_by_model: list_slice_by_model,
     list_slice_by_name: list_slice_by_name,
+    list_type_by_ids: list_type_by_ids,
     list_type_by_name: list_type_by_name,
     read_buffer: read_buffer,
     read_buffer_by_time: read_buffer_by_time,
@@ -4667,4 +4797,4 @@ var index = /*#__PURE__*/Object.freeze({
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_slice, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_slice, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_last, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_time, list_device_by_gateway, list_device_by_gateway_name, list_device_by_gateway_type, list_device_by_name, list_device_by_type, list_device_config_by_device, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_group_device_by_category, list_group_device_by_name, list_group_device_by_name_category, list_group_gateway_by_category, list_group_gateway_by_name, list_group_gateway_by_name_category, list_group_model_by_category, list_group_model_by_name, list_group_model_by_name_category, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_name, list_model_by_name_category, list_model_by_type, list_model_config_by_model, list_procedure_by_api, list_role_by_api, list_role_by_user, list_slice_by_device, list_slice_by_device_model, list_slice_by_model, list_slice_by_name, list_token_by_user, list_type_by_name, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_slice, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_type_model, remove_user_role, index as resource, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_slice, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };
+export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_slice, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_slice, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_last, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_time, list_device_by_gateway, list_device_by_gateway_name, list_device_by_gateway_type, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_by_name_category, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_by_name_category, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_by_name_category, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_name_category, list_model_by_type, list_model_config_by_model, list_procedure_by_api, list_role_by_api, list_role_by_user, list_slice_by_device, list_slice_by_device_model, list_slice_by_model, list_slice_by_name, list_token_by_user, list_type_by_ids, list_type_by_name, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_slice, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_type_model, remove_user_role, index as resource, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_slice, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };

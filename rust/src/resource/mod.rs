@@ -63,6 +63,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_model_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<ModelSchema>, Status>
+    {
+        model::list_model_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_model_by_name(&self, name: &str)
         -> Result<Vec<ModelSchema>, Status>
     {
@@ -169,6 +177,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_device_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<DeviceSchema>, Status>
+    {
+        device::list_device_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_device_by_gateway(&self, gateway_id: Uuid)
         -> Result<Vec<DeviceSchema>, Status>
     {
@@ -244,6 +260,14 @@ impl Resource {
         device::read_gateway_by_sn(&self, serial_number)
         .await
         .map(|s| s.into())
+    }
+
+    pub async fn list_gateway_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<GatewaySchema>, Status>
+    {
+        device::list_gateway_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_gateway_by_type(&self, type_id: Uuid)
@@ -365,6 +389,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_type_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<TypeSchema>, Status>
+    {
+        types::list_type_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_type_by_name(&self, name: &str)
         -> Result<Vec<TypeSchema>, Status>
     {
@@ -414,6 +446,14 @@ impl Resource {
         group::read_group_model(&self, id)
         .await
         .map(|s| s.into())
+    }
+
+    pub async fn list_group_model_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<GroupModelSchema>, Status>
+    {
+        group::list_group_model_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_group_model_by_name(&self, name: &str)
@@ -483,6 +523,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_group_device_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<GroupDeviceSchema>, Status>
+    {
+        group::list_group_device_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_group_device_by_name(&self, name: &str)
         -> Result<Vec<GroupDeviceSchema>, Status>
     {
@@ -548,6 +596,14 @@ impl Resource {
         group::read_group_gateway(&self, id)
         .await
         .map(|s| s.into())
+    }
+
+    pub async fn list_group_gateway_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<GroupGatewaySchema>, Status>
+    {
+        group::list_group_gateway_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_group_gateway_by_name(&self, name: &str)

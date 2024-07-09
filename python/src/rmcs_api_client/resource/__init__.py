@@ -23,6 +23,9 @@ class Resource:
     def read_model(self, id: UUID) -> ModelSchema:
         return _model.read_model(self, id)
 
+    def list_model_by_ids(self, ids: list[UUID]) -> List[ModelSchema]:
+        return _model.list_model_by_ids(self, ids)
+
     def list_model_by_name(self, name: str) -> List[ModelSchema]:
         return _model.list_model_by_name(self, name)
 
@@ -65,6 +68,9 @@ class Resource:
     def read_device_by_sn(self, serial_number: str) -> DeviceSchema:
         return _device.read_device_by_sn(self, serial_number)
 
+    def list_device_by_ids(self, ids: list[UUID]) -> List[DeviceSchema]:
+        return _device.list_device_by_ids(self, ids)
+
     def list_device_by_gateway(self, gateway_id: UUID) -> List[DeviceSchema]:
         return _device.list_device_by_gateway(self, gateway_id)
 
@@ -94,6 +100,9 @@ class Resource:
 
     def read_gateway_by_sn(self, serial_number: str) -> GatewaySchema:
         return _device.read_gateway_by_sn(self, serial_number)
+
+    def list_gateway_by_ids(self, ids: list[UUID]) -> List[GatewaySchema]:
+        return _device.list_gateway_by_ids(self, ids)
 
     def list_gateway_by_type(self, type_id: UUID) -> List[GatewaySchema]:
         return _device.list_gateway_by_type(self, type_id)
@@ -143,6 +152,9 @@ class Resource:
     def read_type(self, id: UUID) -> TypeSchema:
         return _types.read_type(self, id)
 
+    def list_type_by_ids(self, ids: list[UUID]) -> List[TypeSchema]:
+        return _types.list_type_by_ids(self, ids)
+
     def list_type_by_name(self, name: str) -> List[TypeSchema]:
         return _types.list_type_by_name(self, name)
 
@@ -163,6 +175,9 @@ class Resource:
 
     def read_group_model(self, id: UUID) -> GroupModelSchema:
         return _group.read_group_model(self, id)
+
+    def list_group_model_by_ids(self, ids: list[UUID]) -> List[GroupModelSchema]:
+        return _group.list_group_model_by_ids(self, ids)
 
     def list_group_model_by_name(self, name: str) -> List[GroupModelSchema]:
         return _group.list_group_model_by_name(self, name)
@@ -191,6 +206,9 @@ class Resource:
     def read_group_device(self, id: UUID) -> GroupDeviceSchema:
         return _group.read_group_device(self, id)
 
+    def list_group_device_by_ids(self, ids: list[UUID]) -> List[GroupDeviceSchema]:
+        return _group.list_group_device_by_ids(self, ids)
+
     def list_group_device_by_name(self, name: str) -> List[GroupDeviceSchema]:
         return _group.list_group_device_by_name(self, name)
 
@@ -217,6 +235,9 @@ class Resource:
 
     def read_group_gateway(self, id: UUID) -> GroupGatewaySchema:
         return _group.read_group_gateway(self, id)
+
+    def list_group_gateway_by_ids(self, ids: list[UUID]) -> List[GroupGatewaySchema]:
+        return _group.list_group_gateway_by_ids(self, ids)
 
     def list_group_gateway_by_name(self, name: str) -> List[GroupGatewaySchema]:
         return _group.list_group_gateway_by_name(self, name)

@@ -53,6 +53,15 @@ def read_group_model(resource, id: UUID):
         response = stub.ReadGroupModel(request=request, metadata=resource.metadata)
         return GroupModelSchema.from_response(response.result)
 
+def list_group_model_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = group_pb2_grpc.GroupServiceStub(channel)
+        request = group_pb2.GroupIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListGroupModelByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(GroupModelSchema.from_response(result))
+        return ls
+
 def list_group_model_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
@@ -128,6 +137,15 @@ def read_group_device(resource, id: UUID):
         response = stub.ReadGroupDevice(request=request, metadata=resource.metadata)
         return GroupDeviceSchema.from_response(response.result)
 
+def list_group_device_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = group_pb2_grpc.GroupServiceStub(channel)
+        request = group_pb2.GroupIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListGroupDeviceByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(GroupDeviceSchema.from_response(result))
+        return ls
+
 def list_group_device_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
@@ -202,6 +220,15 @@ def read_group_gateway(resource, id: UUID):
         request = group_pb2.GroupId(id=id.bytes)
         response = stub.ReadGroupGateway(request=request, metadata=resource.metadata)
         return GroupGatewaySchema.from_response(response.result)
+
+def list_group_gateway_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = group_pb2_grpc.GroupServiceStub(channel)
+        request = group_pb2.GroupIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListGroupGatewayByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(GroupGatewaySchema.from_response(result))
+        return ls
 
 def list_group_gateway_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:

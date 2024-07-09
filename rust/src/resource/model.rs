@@ -4,7 +4,7 @@ use rmcs_resource_db::schema::value::{DataType, ConfigValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
-    ModelSchema, ModelId, ModelName, ModelCategory, ModelNameCategory, TypeId, ModelUpdate, 
+    ModelSchema, ModelId, ModelIds, ModelName, ModelCategory, ModelNameCategory, TypeId, ModelUpdate, 
     ConfigSchema, ConfigId, ConfigUpdate
 };
 use crate::resource::Resource;
@@ -26,6 +26,21 @@ pub(crate) async fn read_model(resource: &Resource, id: Uuid)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(MODEL_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_model_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<ModelSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(ModelIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_model_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_model_by_name(resource: &Resource, name: &str)

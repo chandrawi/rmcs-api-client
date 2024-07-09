@@ -22,6 +22,11 @@ import {
  */
 
 /**
+ * @typedef {Object} TypeIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @typedef {Object} TypeName
  * @property {string} name
  */
@@ -91,6 +96,20 @@ export async function read_type(server, request) {
     typeId.setId(uuid_hex_to_base64(request.id));
     return client.readType(typeId, metadata(server))
         .then(response => get_type_schema(response.toObject().result));
+}
+
+/**
+ * Read device types by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TypeIds} request type uuid list: ids
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ */
+export async function list_type_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const typeIds = new pb_device.TypeIds();
+    typeIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listTypeByIds(typeIds, metadata(server))
+        .then(response => get_type_schema_vec(response.toObject().resultsList));
 }
 
 /**

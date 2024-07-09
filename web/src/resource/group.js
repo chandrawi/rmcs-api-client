@@ -22,6 +22,11 @@ import {
  */
 
 /**
+ * @typedef {Object} GroupIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {GroupId}
  */
@@ -182,6 +187,20 @@ export async function read_group_model(server, request) {
 }
 
 /**
+ * Read groups of model by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ */
+export async function list_group_model_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupModelByIds(groupIds, metadata(server))
+        .then(response => get_group_model_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read groups of model by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group model name: name
@@ -317,6 +336,20 @@ export async function read_group_device(server, request) {
 }
 
 /**
+ * Read groups of device by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ */
+export async function list_group_device_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupDeviceByIds(groupIds, metadata(server))
+        .then(response => get_group_device_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read groups of device by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group device name: name
@@ -449,6 +482,20 @@ export async function read_group_gateway(server, request) {
     groupId.setId(uuid_hex_to_base64(request.id));
     return client.readGroupGateway(groupId, metadata(server))
         .then(response => get_group_gateway_schema(response.toObject().result));
+}
+
+/**
+ * Read groups of gateway by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GroupIds} request group uuid list: ids
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ */
+export async function list_group_gateway_by_ids(server, request) {
+    const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
+    const groupIds = new pb_group.GroupIds();
+    groupIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGroupGatewayByIds(groupIds, metadata(server))
+        .then(response => get_group_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**

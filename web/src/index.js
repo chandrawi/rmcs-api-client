@@ -60,6 +60,7 @@ export {
 
 export {
   read_model,
+  list_model_by_ids,
   list_model_by_name,
   list_model_by_category,
   list_model_by_name_category,
@@ -76,6 +77,7 @@ export {
 export {
   read_device,
   read_device_by_sn,
+  list_device_by_ids,
   list_device_by_gateway,
   list_device_by_type,
   list_device_by_name,
@@ -86,6 +88,7 @@ export {
   delete_device,
   read_gateway,
   read_gateway_by_sn,
+  list_gateway_by_ids,
   list_gateway_by_type,
   list_gateway_by_name,
   create_gateway,
@@ -104,6 +107,7 @@ export {
 } from './resource/device.js';
 export {
   read_type,
+  list_type_by_ids,
   list_type_by_name,
   create_type,
   update_type,
@@ -113,6 +117,7 @@ export {
 } from './resource/types.js';
 export {
   read_group_model,
+  list_group_model_by_ids,
   list_group_model_by_name,
   list_group_model_by_category,
   list_group_model_by_name_category,
@@ -122,6 +127,7 @@ export {
   add_group_model_member,
   remove_group_model_member,
   read_group_device,
+  list_group_device_by_ids,
   list_group_device_by_name,
   list_group_device_by_category,
   list_group_device_by_name_category,
@@ -131,6 +137,7 @@ export {
   add_group_device_member,
   remove_group_device_member,
   read_group_gateway,
+  list_group_gateway_by_ids,
   list_group_gateway_by_name,
   list_group_gateway_by_category,
   list_group_gateway_by_name_category,

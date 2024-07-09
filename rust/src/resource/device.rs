@@ -4,8 +4,8 @@ use rmcs_resource_db::schema::value::ConfigValue;
 use rmcs_resource_api::common;
 use rmcs_resource_api::device::device_service_client::DeviceServiceClient;
 use rmcs_resource_api::device::{
-    DeviceSchema, DeviceId, DeviceName, DeviceGatewayType, DeviceGatewayName, DeviceUpdate,
-    GatewaySchema, GatewayId, GatewayName, SerialNumber, GatewayUpdate,
+    DeviceSchema, DeviceId, DeviceIds, DeviceName, DeviceGatewayType, DeviceGatewayName, DeviceUpdate,
+    GatewaySchema, GatewayId, GatewayIds, GatewayName, SerialNumber, GatewayUpdate,
     ConfigSchema, ConfigId, ConfigUpdate,
     TypeSchema, TypeId
 };
@@ -44,6 +44,21 @@ pub(crate) async fn read_device_by_sn(resource: &Resource, serial_number: &str)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(DEVICE_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_device_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<DeviceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DeviceIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_device_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_device_by_gateway(resource: &Resource, gateway_id: Uuid)
@@ -209,6 +224,21 @@ pub(crate) async fn read_gateway_by_sn(resource: &Resource, serial_number: &str)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(GATEWAY_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_gateway_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<GatewaySchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(GatewayIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_gateway_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_gateway_by_type(resource: &Resource, type_id: Uuid)

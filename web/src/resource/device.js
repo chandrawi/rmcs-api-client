@@ -24,6 +24,11 @@ import { get_type_schema } from './types.js';
  */
 
 /**
+ * @typedef {Object} DeviceIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {DeviceId}
  */
@@ -126,6 +131,11 @@ function get_device_schema_vec(r) {
 /**
  * @typedef {Object} GatewayId
  * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} GatewayIds
+ * @property {Uuid[]} ids
  */
 
 /**
@@ -309,6 +319,20 @@ export async function read_device_by_sn(server, request) {
 }
 
 /**
+ * Read devices by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DeviceIds} request device uuid list: ids
+ * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
+ */
+export async function list_device_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const deviceIds = new pb_device.DeviceIds();
+    deviceIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listDeviceByIds(deviceIds, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read devices by gateway
  * @param {ServerConfig} server server configuration: address, token
  * @param {GatewayId} request gateway uuid: id
@@ -462,6 +486,20 @@ export async function read_gateway_by_sn(server, request) {
     serialNumber.setSerialNumber(request.serial_number);
     return client.readGatewayBySn(serialNumber, metadata(server))
         .then(response => get_gateway_schema(response.toObject().result));
+}
+
+/**
+ * Read gateways by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GatewayIds} request gateway uuid list: ids
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
+ */
+export async function list_gateway_by_ids(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const gatewayIds = new pb_device.GatewayIds();
+    gatewayIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listGatewayByIds(gatewayIds, metadata(server))
+        .then(response => get_gateway_schema_vec(response.toObject().resultsList));
 }
 
 /**

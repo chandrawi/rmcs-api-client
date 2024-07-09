@@ -48,6 +48,15 @@ def read_model(resource, id: UUID):
         response = stub.ReadModel(request=request, metadata=resource.metadata)
         return ModelSchema.from_response(response.result)
 
+def list_model_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.ModelIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListModelByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(ModelSchema.from_response(result))
+        return ls
+
 def list_model_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)

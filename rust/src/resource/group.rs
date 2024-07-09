@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_api::group::group_service_client::GroupServiceClient;
 use rmcs_resource_api::group::{
-    GroupModelSchema, GroupDeviceSchema, GroupId, GroupName, GroupNameCategory, GroupCategory, GroupUpdate,
+    GroupModelSchema, GroupDeviceSchema, GroupId, GroupIds, GroupName, GroupNameCategory, GroupCategory, GroupUpdate,
     GroupModel, GroupDevice
 };
 use crate::resource::Resource;
@@ -23,6 +23,21 @@ pub(crate) async fn read_group_model(resource: &Resource, id: Uuid)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_group_model_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<GroupModelSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(GroupIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_group_model_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_group_model_by_name(resource: &Resource, name: &str)
@@ -166,6 +181,21 @@ pub(crate) async fn read_group_device(resource: &Resource, id: Uuid)
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
 }
 
+pub(crate) async fn list_group_device_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<GroupDeviceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(GroupIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_group_device_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
 pub(crate) async fn list_group_device_by_name(resource: &Resource, name: &str)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
@@ -305,6 +335,21 @@ pub(crate) async fn read_group_gateway(resource: &Resource, id: Uuid)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(GROUP_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_group_gateway_by_ids(resource: &Resource, ids: &[Uuid])
+    -> Result<Vec<GroupDeviceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(GroupIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_group_gateway_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_group_gateway_by_name(resource: &Resource, name: &str)

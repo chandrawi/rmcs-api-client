@@ -80,6 +80,15 @@ def read_device_by_sn(resource, serial_number: str):
         response = stub.ReadDeviceBySn(request=request, metadata=resource.metadata)
         return DeviceSchema.from_response(response.result)
 
+def list_device_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = device_pb2_grpc.DeviceServiceStub(channel)
+        request = device_pb2.DeviceIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListDeviceByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DeviceSchema.from_response(result))
+        return ls
+
 def list_device_by_gateway(resource, gateway_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
@@ -176,6 +185,15 @@ def read_gateway_by_sn(resource, serial_number: str):
         request = device_pb2.SerialNumber(serial_number=serial_number)
         response = stub.ReadGatewayBySn(request=request, metadata=resource.metadata)
         return GatewaySchema.from_response(response.result)
+
+def list_gateway_by_ids(resource, ids: list[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = device_pb2_grpc.DeviceServiceStub(channel)
+        request = device_pb2.GatewayIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListGatewayByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(GatewaySchema.from_response(result))
+        return ls
 
 def list_gateway_by_type(resource, type_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
