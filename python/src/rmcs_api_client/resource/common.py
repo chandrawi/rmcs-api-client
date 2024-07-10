@@ -22,14 +22,16 @@ class DataType(Enum):
     I16 = 2
     I32 = 3
     I64 = 4
-    U8 = 5
-    U16 = 6
-    U32 = 7
-    U64 = 8
-    F32 = 9
-    F64 = 10
-    CHAR = 11
-    BOOL = 12
+    I128 = 5
+    U8 = 6
+    U16 = 7
+    U32 = 8
+    U64 = 9
+    U128 = 10
+    F32 = 12
+    F64 = 13
+    BOOL = 15
+    CHAR = 16
 
     def from_value(value: Union[int, float, str, bool, None]):
         if type(value) == int: return DataType.I64
@@ -121,6 +123,8 @@ def unpack_data(binary: bytes, type: DataType) -> Union[int, float, str, bool, N
         return unpack('>l', binary)[0]
     elif type == DataType.I64:
         return unpack('>q', binary)[0]
+    elif type == DataType.I128:
+        return unpack('>q', binary)[0]
     elif type == DataType.U8:
         return unpack('B', binary)[0]
     elif type == DataType.U16:
@@ -128,6 +132,8 @@ def unpack_data(binary: bytes, type: DataType) -> Union[int, float, str, bool, N
     elif type == DataType.U32:
         return unpack('>L', binary)[0]
     elif type == DataType.U64:
+        return unpack('>Q', binary)[0]
+    elif type == DataType.U128:
         return unpack('>Q', binary)[0]
     elif type == DataType.F32:
         return unpack('>f', binary)[0]
@@ -154,6 +160,8 @@ def unpack_data_array(binary: bytes, types: List[DataType]) -> List[Union[int, f
             size = 4
         elif ty == DataType.I64 or ty == DataType.U64 or ty == DataType.F64:
             size = 8
+        elif ty == DataType.I128 or ty == DataType.U128:
+            size = 16
         value = unpack_data(binary[index:index + size], ty)
         values.append(value)
         index += size

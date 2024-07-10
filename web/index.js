@@ -1483,14 +1483,16 @@ const DataType = {
     I16: 2,
     I32: 3,
     I64: 4,
-    U8: 5,
-    U16: 6,
-    U32: 7,
-    U64: 8,
-    F32: 9,
-    F64: 10,
-    CHAR: 11,
-    BOOL: 12
+    I128: 5,
+    U8: 6,
+    U16: 7,
+    U32: 8,
+    U64: 9,
+    U128: 10,
+    F32: 12,
+    F64: 13,
+    BOOL: 15,
+    CHAR: 16
 };
 
 /**
@@ -1519,10 +1521,12 @@ function set_data_type(type) {
             case "I16": return DataType.I16;
             case "I32": return DataType.I32;
             case "I64": return DataType.I64;
+            case "I128": return DataType.I128;
             case "U8": return DataType.U8;
             case "U16": return DataType.U16;
             case "U32": return DataType.U32;
             case "U64": return DataType.U64;
+            case "U128": return DataType.U128;
             case "F32": return DataType.F32;
             case "F64": return DataType.F64;
             case "CHAR": return DataType.CHAR;
@@ -1542,10 +1546,12 @@ function get_data_type(type) {
         case DataType.I16: return "I16";
         case DataType.I32: return "I32";
         case DataType.I64: return "I64";
+        case DataType.I128: return "I128";
         case DataType.U8: return "U8";
         case DataType.U16: return "U16";
         case DataType.U32: return "U32";
         case DataType.U64: return "U64";
+        case DataType.U128: return "U128";
         case DataType.F32: return "F32";
         case DataType.F64: return "F64";
         case DataType.CHAR: return "CHAR";
@@ -1604,6 +1610,10 @@ function get_data_value(base64, types) {
                 values.push(view.getBigInt64(offset));
                 offset += 8;
                 break;
+            case DataType.I128: 
+                values.push(view.getBigInt64(offset));
+                offset += 16;
+                break;
             case DataType.U8: 
                 values.push(view.getUint8(offset));
                 offset += 1;
@@ -1619,6 +1629,10 @@ function get_data_value(base64, types) {
             case DataType.U64: 
                 values.push(view.getBigUint64(offset));
                 offset += 8;
+                break;
+            case DataType.U128: 
+                values.push(view.getBigUint64(offset));
+                offset += 16;
                 break;
             case DataType.F32: 
                 values.push(view.getFloat32(offset));
@@ -1703,7 +1717,14 @@ function set_data_value(values) {
 function get_config_value(base64, type) {
     const view = new DataView(base64_to_array_buffer(base64));
     if (type == ConfigType.STR) {
-        return atob(base64);
+        const text = atob(base64);
+        const length = text.length;
+        const bytes = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+            bytes[i] = text.charCodeAt(i);
+        }
+        const decoder = new TextDecoder();
+        return decoder.decode(bytes);
     }
     else if (type == ConfigType.INT) {
         return view.getInt32(4);
