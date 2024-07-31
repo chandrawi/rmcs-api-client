@@ -2,6 +2,7 @@ pub mod model;
 pub mod device;
 pub mod types;
 pub mod group;
+pub mod set;
 pub mod data;
 pub mod buffer;
 pub mod slice;
@@ -14,6 +15,7 @@ use rmcs_resource_db::schema::value::{DataType, DataValue, ConfigValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
+use rmcs_resource_db::schema::set::{SetSchema, SetTemplateSchema};
 use rmcs_resource_db::schema::data::DataSchema;
 use rmcs_resource_db::schema::buffer::{BufferSchema, BufferStatus};
 use rmcs_resource_db::schema::slice::SliceSchema;
@@ -664,6 +666,146 @@ impl Resource {
         -> Result<(), Status>
     {
         group::remove_group_gateway_member(&self, id, gateway_id)
+        .await
+    }
+
+    pub async fn read_set(&self, id: Uuid)
+        -> Result<SetSchema, Status>
+    {
+        set::read_set(&self, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_set_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<SetSchema>, Status>
+    {
+        set::list_set_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_set_by_template(&self, template_id: Uuid)
+        -> Result<Vec<SetSchema>, Status>
+    {
+        set::list_set_by_template(&self, template_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_set_by_name(&self, name: &str)
+        -> Result<Vec<SetSchema>, Status>
+    {
+        set::list_set_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_set(&self, id: Uuid, template_id: Uuid, name: &str, description: Option<&str>)
+        -> Result<Uuid, Status>
+    {
+        set::create_set(&self, id, template_id, name, description)
+        .await
+    }
+
+    pub async fn update_set(&self, id: Uuid, template_id: Option<Uuid>, name: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        set::update_set(&self, id, template_id, name, description)
+        .await
+    }
+
+    pub async fn delete_set(&self, id: Uuid)
+        -> Result<(), Status>
+    {
+        set::delete_set(&self, id)
+        .await
+    }
+
+    pub async fn add_set_member(&self, id: Uuid, device_id: Uuid, model_id: Uuid, data_index: &[u8])
+        -> Result<(), Status>
+    {
+        set::add_set_member(&self, id, device_id, model_id, data_index)
+        .await
+    }
+
+    pub async fn remove_set_member(&self, id: Uuid, device_id: Uuid, model_id: Uuid)
+        -> Result<(), Status>
+    {
+        set::remove_set_member(&self, id, device_id, model_id)
+        .await
+    }
+
+    pub async fn swap_set_member(&self, id: Uuid, device_id_1: Uuid, model_id_1: Uuid, device_id_2: Uuid, model_id_2: Uuid)
+        -> Result<(), Status>
+    {
+        set::swap_set_member(&self, id, device_id_1, model_id_1, device_id_2, model_id_2)
+        .await
+    }
+
+    pub async fn read_set_template(&self, id: Uuid)
+        -> Result<SetTemplateSchema, Status>
+    {
+        set::read_set_template(&self, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_set_template_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<SetTemplateSchema>, Status>
+    {
+        set::list_set_template_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_set_template_by_name(&self, name: &str)
+        -> Result<Vec<SetTemplateSchema>, Status>
+    {
+        set::list_set_template_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_set_template(&self, id: Uuid, name: &str, description: Option<&str>)
+        -> Result<Uuid, Status>
+    {
+        set::create_set_template(&self, id, name, description)
+        .await
+    }
+
+    pub async fn update_set_template(&self, id: Uuid, name: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        set::update_set_template(&self, id, name, description)
+        .await
+    }
+
+    pub async fn delete_set_template(&self, id: Uuid)
+        -> Result<(), Status>
+    {
+        set::delete_set_template(&self, id)
+        .await
+    }
+
+    pub async fn add_set_template_member(&self, id: Uuid, type_id: Uuid, model_id: Uuid, data_index: &[u8])
+        -> Result<(), Status>
+    {
+        set::add_set_template_member(&self, id, type_id, model_id, data_index)
+        .await
+    }
+
+    pub async fn remove_set_template_member(&self, id: Uuid, index: usize)
+        -> Result<(), Status>
+    {
+        set::remove_set_template_member(&self, id, index)
+        .await
+    }
+
+    pub async fn swap_set_template_member(&self, id: Uuid, index_1: usize, index_2: usize)
+        -> Result<(), Status>
+    {
+        set::swap_set_template_member(&self, id, index_1, index_2)
         .await
     }
 
