@@ -1,5 +1,5 @@
 import { pb_api, pb_role, pb_user, pb_token, pb_auth } from 'rmcs-auth-api';
-import { pb_model, pb_device, pb_group, pb_data, pb_buffer, pb_slice, pb_log } from 'rmcs-resource-api';
+import { pb_model, pb_device, pb_group, pb_set, pb_data, pb_buffer, pb_slice, pb_log } from 'rmcs-resource-api';
 
 /**
  * Construct request metadata
@@ -3694,6 +3694,495 @@ async function remove_group_gateway_member(server, request) {
  */
 
 /**
+ * @typedef {Object} SetId
+ * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} SetIds
+ * @property {Uuid[]} ids
+ */
+
+/**
+ * @typedef {Object} SetName
+ * @property {string} name
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SetId}
+ */
+function get_set_id(r) {
+    return {
+        id: base64_to_uuid_hex(r.id)
+    };
+}
+
+/**
+* @typedef {Object} SetName
+* @property {string} name
+*/
+
+/**
+ * @typedef {Object} SetSchema
+ * @property {Uuid} id
+ * @property {Uuid} template_id
+ * @property {string} name
+ * @property {string} description
+ * @property {SetMember} members
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SetSchema}
+ */
+function get_set_schema(r) {
+    return {
+        id: base64_to_uuid_hex(r.id),
+        template_id: base64_to_uuid_hex(r.template_id),
+        name: r.name,
+        description: r.description,
+        members: r.members.map((v) => {return get_set_member(v)})
+    };
+}
+
+/**
+ * @param {*} r 
+ * @returns {SetSchema[]}
+ */
+function get_set_schema_vec(r) {
+    return r.map((v) => {return get_set_schema(v)});
+}
+
+/**
+ * @typedef {Object} SetMember
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {number[]} data_index
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SetMember}
+ */
+function get_set_member(r) {
+    return {
+        device_id: base64_to_uuid_hex(r.device_id),
+        model_id: base64_to_uuid_hex(r.model_id),
+        data_index: base64_to_bytes(r.data_index)
+    };
+}
+
+/**
+ * @typedef {Object} SetUpdate
+ * @property {Uuid} id
+ * @property {?Uuid} template_id
+ * @property {?string} name
+ * @property {?string} description
+ */
+
+/**
+ * @typedef {Object} SetMemberRequest
+ * @property {Uuid} set_id
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {number[]} data_index
+ */
+
+/**
+ * @typedef {Object} SetMemberSwap
+ * @property {Uuid} set_id
+ * @property {Uuid} device_id_1
+ * @property {Uuid} model_id_1
+ * @property {Uuid} device_id_2
+ * @property {Uuid} model_id_2
+ */
+
+/**
+ * @typedef {Object} SetTemplateId
+ * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} SetTemplateIds
+ * @property {Uuid[]} ids
+ */
+
+/**
+ * @typedef {Object} SetTemplateName
+ * @property {string} name
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SetTemplateId}
+ */
+function get_set_template_id(r) {
+    return {
+        id: base64_to_uuid_hex(r.id)
+    };
+}
+
+/**
+* @typedef {Object} SetTemplateName
+* @property {string} name
+*/
+
+/**
+ * @typedef {Object} SetTemplateSchema
+ * @property {Uuid} id
+ * @property {string} name
+ * @property {string} description
+ * @property {SetMember} members
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SetTemplateSchema}
+ */
+function get_set_template_schema(r) {
+    return {
+        id: base64_to_uuid_hex(r.id),
+        name: r.name,
+        description: r.description,
+        members: r.members.map((v) => {return get_set_member(v)})
+    };
+}
+
+/**
+ * @param {*} r 
+ * @returns {SetTemplateSchema[]}
+ */
+function get_set_template_schema_vec(r) {
+    return r.map((v) => {return get_set_template_schema(v)});
+}
+
+/**
+ * @typedef {Object} SetTemplateUpdate
+ * @property {Uuid} id
+ * @property {?string} name
+ * @property {?string} description
+ */
+
+/**
+ * @typedef {Object} SetTemplateMemberRequest
+ * @property {Uuid} set_id
+ * @property {Uuid} type_id
+ * @property {Uuid} model_id
+ * @property {number[]} data_index
+ * @property {number} template_index
+ */
+
+/**
+ * @typedef {Object} SetTemplateMemberSwap
+ * @property {Uuid} set_id
+ * @property {number} template_index_1
+ * @property {number} template_index_2
+ */
+
+
+/**
+ * Read a set by uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetId} request set uuid: id
+ * @returns {Promise<SetSchema>} set schema: id, template_id, name, description, members
+ */
+async function read_set(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setId = new pb_set.SetId();
+    setId.setId(uuid_hex_to_base64(request.id));
+    return client.readSet(setId, metadata(server))
+        .then(response => get_set_schema(response.toObject().result));
+}
+
+/**
+ * Read sets by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetIds} request set uuid list: ids
+ * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
+ */
+async function list_set_by_ids(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setIds = new pb_set.SetIds();
+    setIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listSetByIds(setIds, metadata(server))
+        .then(response => get_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read sets by template uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateId} request set template uuid: id
+ * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
+ */
+async function list_set_by_template(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateId = new pb_set.SetTemplateId();
+    templateId.setTemplateId(uuid_hex_to_base64(request.id));
+    return client.listSetByTemplate(templateId, metadata(server))
+        .then(response => get_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read sets by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetName} request set name: name
+ * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
+ */
+async function list_set_by_name(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setName = new pb_set.SetName();
+    setName.setName(request.name);
+    return client.listSetByName(setName, metadata(server))
+        .then(response => get_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Create a set
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetSchema} request set schema: id, template_id, name, description, members
+ * @returns {Promise<SetId>} set uuid: id
+ */
+async function create_set(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setSchema = new pb_set.SetSchema();
+    setSchema.setId(uuid_hex_to_base64(request.id));
+    setSchema.setTemplateId(uuid_hex_to_base64(request.template_id));
+    setSchema.setName(request.name);
+    setSchema.setDescription(request.description);
+    return client.createSet(setSchema, metadata(server))
+        .then(response => get_set_id(response.toObject()));
+}
+
+/**
+ * Update a set
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetUpdate} request set update: id, template_id, name, description
+ * @returns {Promise<{}>} update response
+ */
+async function update_set(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setUpdate = new pb_set.SetUpdate();
+    setUpdate.setId(uuid_hex_to_base64(request.id));
+    setUpdate.setTemplateId(uuid_hex_to_base64(request.template_id));
+    setUpdate.setName(request.name);
+    setUpdate.setDescription(request.description);
+    return client.updateSet(setUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a set
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetId} request set uuid: id
+ * @returns {Promise<{}>} delete response
+ */
+async function delete_set(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setId = new pb_set.SetId();
+    setId.setId(uuid_hex_to_base64(request.id));
+    return client.deleteSet(setId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Add a member to a set
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetMemberRequest} request set member request: set_id, device_id, model_id, data_index
+ * @returns {Promise<{}>} change response
+ */
+async function add_set_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setMember = new pb_set.SetMemberRequest();
+    setMember.setId(uuid_hex_to_base64(request.id));
+    setMember.setDeviceId(uuid_hex_to_base64(request.device_id));
+    setMember.setModelId(uuid_hex_to_base64(request.model_id));
+    setMember.setDataIndex(bytes_to_base64(request.data_index));
+    return client.addSetMember(setMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Remove a member from a set
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetMemberRequest} request set member request: set_id, device_id, model_id, data_index
+ * @returns {Promise<{}>} change response
+ */
+async function remove_set_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setMember = new pb_set.SetMemberRequest();
+    setMember.setId(uuid_hex_to_base64(request.id));
+    setMember.setDeviceId(uuid_hex_to_base64(request.device_id));
+    setMember.setModelId(uuid_hex_to_base64(request.model_id));
+    return client.removeSetMember(setMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Swap a set member index position 
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetMemberSwap} request set member request: set_id, device_id_1, model_id_1, device_id_2, model_id_2
+ * @returns {Promise<{}>} change response
+ */
+async function swap_set_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setMember = new pb_set.SetMemberSwap();
+    setMember.setId(uuid_hex_to_base64(request.id));
+    setMember.setDeviceId1(uuid_hex_to_base64(request.device_id_1));
+    setMember.setModelId1(uuid_hex_to_base64(request.model_id_1));
+    setMember.setDeviceId2(uuid_hex_to_base64(request.device_id_2));
+    setMember.setModelId2(uuid_hex_to_base64(request.model_id_2));
+    return client.swapSetMember(setMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Read a set template by uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateId} request set template uuid: id
+ * @returns {Promise<SetTemplateSchema>} set template schema: id, name, description, members
+ */
+async function read_set_template(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateId = new pb_set.SetTemplateId();
+    templateId.setId(uuid_hex_to_base64(request.id));
+    return client.readSetTemplate(templateId, metadata(server))
+        .then(response => get_set_template_schema(response.toObject().result));
+}
+
+/**
+ * Read set templates by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateIds} request set template uuid list: ids
+ * @returns {Promise<SetTemplateSchema[]>} set template schema: id, name, description, members
+ */
+async function list_set_template_by_ids(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateIds = new pb_set.SetTemplateIds();
+    templateIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listSetTemplateByIds(templateIds, metadata(server))
+        .then(response => get_set_template_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read set templates by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateName} request set template name: name
+ * @returns {Promise<SetTemplateSchema[]>} set template schema: id, name, description, members
+ */
+async function list_set_template_by_name(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateName = new pb_set.SetTemplateName();
+    templateName.setName(request.name);
+    return client.listSetTemplateByName(templateName, metadata(server))
+        .then(response => get_set_template_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Create a set template
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateSchema} request set template schema: id, name, description, members
+ * @returns {Promise<SetTemplateId>} set template uuid: id
+ */
+async function create_set_template(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateSchema = new pb_set.SetTemplateSchema();
+    templateSchema.setId(uuid_hex_to_base64(request.id));
+    templateSchema.setName(request.name);
+    templateSchema.setDescription(request.description);
+    return client.createSetTemplate(templateSchema, metadata(server))
+        .then(response => get_set_template_id(response.toObject()));
+}
+
+/**
+ * Update a set template
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateUpdate} request set template update: id, name, description
+ * @returns {Promise<{}>} update response
+ */
+async function update_set_template(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateUpdate = new pb_set.SetTemplateUpdate();
+    templateUpdate.setId(uuid_hex_to_base64(request.id));
+    templateUpdate.setName(request.name);
+    templateUpdate.setDescription(request.description);
+    return client.updateSetTemplate(templateUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a set template
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateId} request set template uuid: id
+ * @returns {Promise<{}>} delete response
+ */
+async function delete_set_template(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateId = new pb_set.SetTemplateId();
+    templateId.setId(uuid_hex_to_base64(request.id));
+    return client.deleteSetTemplate(templateId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Add a member to a set template
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateMemberRequest} request set member request: set_id, type_id, model_id, data_index
+ * @returns {Promise<{}>} change response
+ */
+async function add_set_template_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateMember = new pb_set.SetTemplateMemberRequest();
+    templateMember.setId(uuid_hex_to_base64(request.id));
+    templateMember.setTypeId(uuid_hex_to_base64(request.type_id));
+    templateMember.setModelId(uuid_hex_to_base64(request.model_id));
+    templateMember.setDataIndex(bytes_to_base64(request.data_index));
+    return client.addSetTemplateMember(templateMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Remove a member from a set template
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateMemberRequest} request set member request: set_id, template_index
+ * @returns {Promise<{}>} change response
+ */
+async function remove_set_template_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateMember = new pb_set.SetTemplateMemberRequest();
+    templateMember.setId(uuid_hex_to_base64(request.id));
+    templateMember.setTemplateIndex(uuid_hex_to_base64(request.device_id));
+    return client.removeSetTemplateMember(templateMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Swap a set template member index position 
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateMemberSwap} request set template member swap: set_id, template_index_1, template_index_2
+ * @returns {Promise<{}>} change response
+ */
+async function swap_set_template_member(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const templateMember = new pb_set.SetTemplateMemberSwap();
+    templateMember.setId(uuid_hex_to_base64(request.id));
+    templateMember.setTemplateIndex1(uuid_hex_to_base64(request.template_index_1));
+    templateMember.setTemplateIndex2(uuid_hex_to_base64(request.template_index_2));
+    return client.swapSetTemplateMember(templateMember, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * @typedef {(string|Uint8Array)} Uuid
+ */
+
+/**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
  * @typedef {Object} DataId
  * @property {Uuid} device_id
  * @property {Uuid} model_id
@@ -4706,6 +5195,8 @@ var index = /*#__PURE__*/Object.freeze({
     add_group_device_member: add_group_device_member,
     add_group_gateway_member: add_group_gateway_member,
     add_group_model_member: add_group_model_member,
+    add_set_member: add_set_member,
+    add_set_template_member: add_set_template_member,
     add_type_model: add_type_model,
     create_buffer: create_buffer,
     create_data: create_data,
@@ -4719,6 +5210,8 @@ var index = /*#__PURE__*/Object.freeze({
     create_log: create_log,
     create_model: create_model,
     create_model_config: create_model_config,
+    create_set: create_set,
+    create_set_template: create_set_template,
     create_slice: create_slice,
     create_type: create_type,
     delete_buffer: delete_buffer,
@@ -4733,6 +5226,8 @@ var index = /*#__PURE__*/Object.freeze({
     delete_log: delete_log,
     delete_model: delete_model,
     delete_model_config: delete_model_config,
+    delete_set: delete_set,
+    delete_set_template: delete_set_template,
     delete_slice: delete_slice,
     delete_type: delete_type,
     list_buffer_first: list_buffer_first,
@@ -4774,6 +5269,11 @@ var index = /*#__PURE__*/Object.freeze({
     list_model_by_name_category: list_model_by_name_category,
     list_model_by_type: list_model_by_type,
     list_model_config_by_model: list_model_config_by_model,
+    list_set_by_ids: list_set_by_ids,
+    list_set_by_name: list_set_by_name,
+    list_set_by_template: list_set_by_template,
+    list_set_template_by_ids: list_set_template_by_ids,
+    list_set_template_by_name: list_set_template_by_name,
     list_slice_by_device: list_slice_by_device,
     list_slice_by_device_model: list_slice_by_device_model,
     list_slice_by_model: list_slice_by_model,
@@ -4797,12 +5297,18 @@ var index = /*#__PURE__*/Object.freeze({
     read_log: read_log,
     read_model: read_model,
     read_model_config: read_model_config,
+    read_set: read_set,
+    read_set_template: read_set_template,
     read_slice: read_slice,
     read_type: read_type,
     remove_group_device_member: remove_group_device_member,
     remove_group_gateway_member: remove_group_gateway_member,
     remove_group_model_member: remove_group_model_member,
+    remove_set_member: remove_set_member,
+    remove_set_template_member: remove_set_template_member,
     remove_type_model: remove_type_model,
+    swap_set_member: swap_set_member,
+    swap_set_template_member: swap_set_template_member,
     update_buffer: update_buffer,
     update_device: update_device,
     update_device_config: update_device_config,
@@ -4814,8 +5320,10 @@ var index = /*#__PURE__*/Object.freeze({
     update_log: update_log,
     update_model: update_model,
     update_model_config: update_model_config,
+    update_set: update_set,
+    update_set_template: update_set_template,
     update_slice: update_slice,
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_slice, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_slice, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_last, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_time, list_device_by_gateway, list_device_by_gateway_name, list_device_by_gateway_type, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_by_name_category, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_by_name_category, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_by_name_category, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_name_category, list_model_by_type, list_model_config_by_model, list_procedure_by_api, list_role_by_api, list_role_by_user, list_slice_by_device, list_slice_by_device_model, list_slice_by_model, list_slice_by_name, list_token_by_user, list_type_by_ids, list_type_by_name, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_slice, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_type_model, remove_user_role, index as resource, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_slice, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };
+export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_last, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_time, list_device_by_gateway, list_device_by_gateway_name, list_device_by_gateway_type, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_by_name_category, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_by_name_category, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_by_name_category, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_name_category, list_model_by_type, list_model_config_by_model, list_procedure_by_api, list_role_by_api, list_role_by_user, list_set_by_ids, list_set_by_name, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_slice_by_device, list_slice_by_device_model, list_slice_by_model, list_slice_by_name, list_token_by_user, list_type_by_ids, list_type_by_name, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };

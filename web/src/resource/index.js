@@ -88,6 +88,27 @@ export {
     remove_group_gateway_member,
 } from './group.js';
 export {
+    read_set,
+    list_set_by_ids,
+    list_set_by_template,
+    list_set_by_name,
+    create_set,
+    update_set,
+    delete_set,
+    add_set_member,
+    remove_set_member,
+    swap_set_member,
+    read_set_template,
+    list_set_template_by_ids,
+    list_set_template_by_name,
+    create_set_template,
+    update_set_template,
+    delete_set_template,
+    add_set_template_member,
+    remove_set_template_member,
+    swap_set_template_member
+} from './set.js';
+export {
     read_data,
     list_data_by_time,
     list_data_by_last_time,

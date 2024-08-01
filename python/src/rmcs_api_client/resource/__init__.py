@@ -1,13 +1,14 @@
 from datetime import datetime
 from uuid import UUID
 from typing import Optional, Union, List
-from . import model as _model, device as _device, types as _types, group as _group
+from . import model as _model, device as _device, types as _types, group as _group, set as _set
 from . import data as _data, buffer as _buffer, slice as _slice, log as _log
 from .common import DataType
 from .model import ModelSchema, ModelConfigSchema
 from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConfigSchema
 from .types import TypeSchema
 from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
+from .set import SetSchema, SetTemplateSchema
 from .data import DataSchema, DataModel
 from .buffer import BufferSchema
 from .slice import SliceSchema
@@ -262,6 +263,63 @@ class Resource:
 
     def remove_group_gateway_member(self, id: UUID, gateway_id: UUID):
         return _group.remove_group_gateway_member(self, id, gateway_id)
+
+    def read_set(self, id: UUID) -> SetSchema:
+        return _set.read_set(self, id)
+
+    def list_set_by_ids(self, ids: List[UUID]) -> List[SetSchema]:
+        return _set.list_set_by_ids(self, ids)
+
+    def list_set_by_template(self, template_id: UUID) -> List[SetSchema]:
+        return _set.list_set_by_template(self, template_id)
+
+    def list_set_by_name(self, name: str) -> List[SetSchema]:
+        return _set.list_set_by_name(self, name)
+
+    def create_set(self, id: UUID, template_id: UUID, name: str, description: str) -> UUID:
+        return _set.create_set(self, id, template_id, name, description)
+
+    def update_set(self, id: UUID, template_id: Optional[UUID], name: Optional[str], description: Optional[str]):
+        return _set.update_set(self, id, template_id, name, description)
+
+    def delete_set(self, id: UUID):
+        return _set.delete_set(self, id)
+
+    def add_set_member(self, id: UUID, device_id: UUID, model_id: UUID, data_index: List[int]):
+        return _set.add_set_member(self, id, device_id, model_id, data_index)
+
+    def remove_set_member(self, id: UUID, device_id: UUID, model_id: UUID):
+        return _set.remove_set_member(self, id, device_id, model_id)
+
+    def swap_set_member(self, id: UUID, device_id_1: UUID, model_id_1: UUID, device_id_2: UUID, model_id_2: UUID):
+        return _set.swap_set_member(self, id, device_id_1, model_id_1, device_id_2, model_id_2)
+
+    def read_set_template(self, id: UUID) -> SetTemplateSchema:
+        return _set.read_set_template(self, id)
+
+    def list_set_template_by_ids(self, ids: List[UUID]) -> List[SetTemplateSchema]:
+        return _set.list_set_template_by_ids(self, ids)
+
+    def list_set_template_by_name(self, name: str) -> List[SetTemplateSchema]:
+        return _set.list_set_template_by_name(self, name)
+
+    def create_set_template(self, id: UUID, name: str, description: str) -> UUID:
+        return _set.create_set_template(self, id, name, description)
+
+    def update_set_template(self, id: UUID, name: Optional[str], description: Optional[str]):
+        return _set.update_set_template(self, id, name, description)
+
+    def delete_set_template(self, id: UUID):
+        return _set.delete_set_template(self, id)
+
+    def add_set_template_member(self, id: UUID, type_id: UUID, model_id: UUID, data_index: List[int]):
+        return _set.add_set_template_member(self, id, type_id, model_id, data_index)
+
+    def remove_set_template_member(self, id: UUID, index: int):
+        return _set.remove_set_template_member(self, id, index)
+
+    def swap_set_template_member(self, id: UUID, index_1: int, index_2: int):
+        return _set.swap_set_template_member(self, id, index_1, index_2)
 
     def read_data(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> DataSchema:
         return _data.read_data(self, device_id, model_id, timestamp)
