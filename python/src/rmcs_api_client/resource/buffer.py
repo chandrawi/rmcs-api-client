@@ -148,6 +148,25 @@ def list_buffer_first(resource, number: int, device_id: Optional[UUID]=None, mod
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls
 
+def list_buffer_first_offset(resource, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        device_bytes = None
+        if device_id != None: device_bytes = device_id.bytes
+        model_bytes = None
+        if model_id != None: model_bytes = model_id.bytes
+        request = buffer_pb2.BuffersSelector(
+            device_id=device_bytes,
+            model_id=model_bytes,
+            status=status_to_int(status),
+            number=number,
+            offset=offset
+        )
+        response = stub.ListBufferFirstOffset(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
 def list_buffer_last(resource, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
@@ -162,6 +181,25 @@ def list_buffer_last(resource, number: int, device_id: Optional[UUID]=None, mode
             number=number
         )
         response = stub.ListBufferLast(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_last_offset(resource, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        device_bytes = None
+        if device_id != None: device_bytes = device_id.bytes
+        model_bytes = None
+        if model_id != None: model_bytes = model_id.bytes
+        request = buffer_pb2.BuffersSelector(
+            device_id=device_bytes,
+            model_id=model_bytes,
+            status=status_to_int(status),
+            number=number,
+            offset=offset
+        )
+        response = stub.ListBufferLastOffset(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls

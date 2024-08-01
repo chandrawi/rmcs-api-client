@@ -9,7 +9,7 @@ from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConf
 from .types import TypeSchema
 from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
 from .set import SetSchema, SetTemplateSchema
-from .data import DataSchema, DatasetSchema
+from .data import DataSchema, DataSetSchema
 from .buffer import BufferSchema
 from .slice import SliceSchema
 from .log import LogSchema
@@ -360,23 +360,23 @@ class Resource:
     def list_data_by_set_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSchema]:
         return _data.list_data_by_set_number_after(self, set_id, after, number)
 
-    def read_dataset(self, set_id: UUID, timestamp: datetime) -> DatasetSchema:
-        return _data.read_dataset(self, set_id, timestamp)
+    def read_data_set(self, set_id: UUID, timestamp: datetime) -> DataSetSchema:
+        return _data.read_data_set(self, set_id, timestamp)
 
-    def list_dataset_by_time(self, set_id: UUID, timestamp: datetime) -> List[DatasetSchema]:
-        return _data.list_dataset_by_time(self, set_id, timestamp)
+    def list_data_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[DataSetSchema]:
+        return _data.list_data_set_by_time(self, set_id, timestamp)
 
-    def list_dataset_by_last_time(self, set_id: UUID, last: datetime) -> List[DatasetSchema]:
-        return _data.list_dataset_by_last_time(self, set_id, last)
+    def list_data_set_by_last_time(self, set_id: UUID, last: datetime) -> List[DataSetSchema]:
+        return _data.list_data_set_by_last_time(self, set_id, last)
 
-    def list_dataset_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DatasetSchema]:
-        return _data.list_dataset_by_range_time(self, set_id, begin, end)
+    def list_data_set_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DataSetSchema]:
+        return _data.list_data_set_by_range_time(self, set_id, begin, end)
 
-    def list_dataset_by_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DatasetSchema]:
-        return _data.list_dataset_by_number_before(self, set_id, before, number)
+    def list_data_set_by_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DataSetSchema]:
+        return _data.list_data_set_by_number_before(self, set_id, before, number)
 
-    def list_dataset_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DatasetSchema]:
-        return _data.list_dataset_by_number_after(self, set_id, after, number)
+    def list_data_set_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSetSchema]:
+        return _data.list_data_set_by_number_after(self, set_id, after, number)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
@@ -393,8 +393,14 @@ class Resource:
     def list_buffer_first(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_first(self, number, device_id, model_id, status)
 
+    def list_buffer_first_offset(self, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_first_offset(self, number, offset, device_id, model_id, status)
+
     def list_buffer_last(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_last(self, number, device_id, model_id, status)
+
+    def list_buffer_last_offset(self, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_last_offset(self, number, offset, device_id, model_id, status)
 
     def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: Union[str, int]) -> int:
         return _buffer.create_buffer(self, device_id, model_id, timestamp, data, status)

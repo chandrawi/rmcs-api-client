@@ -182,12 +182,12 @@ export {
     list_data_by_set_range_time,
     list_data_by_set_number_before,
     list_data_by_set_number_after,
-    read_dataset,
-    list_dataset_by_time,
-    list_dataset_by_last_time,
-    list_dataset_by_range_time,
-    list_dataset_by_number_before,
-    list_dataset_by_number_after
+    read_data_set,
+    list_data_set_by_time,
+    list_data_set_by_last_time,
+    list_data_set_by_range_time,
+    list_data_set_by_number_before,
+    list_data_set_by_number_after
 } from './resource/data.js';
 export {
     read_buffer,
@@ -195,7 +195,9 @@ export {
     read_buffer_first,
     read_buffer_last,
     list_buffer_first,
+    list_buffer_first_offset,
     list_buffer_last,
+    list_buffer_last_offset,
     create_buffer,
     update_buffer,
     delete_buffer

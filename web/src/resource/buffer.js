@@ -53,6 +53,7 @@ function get_buffer_id(r) {
  * @property {?Uuid} model_id
  * @property {?number|string} status
  * @property {number} number
+ * @property {number} offset
  */
 
 /**
@@ -267,6 +268,30 @@ export async function list_buffer_first(server, request) {
 }
 
 /**
+ * Read first of data buffers with offset
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number, offset
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+export async function list_buffer_first_offset(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSelector = new pb_buffer.BuffersSelector();
+    if (request.device_id) {
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSelector.setNumber(request.number);
+    buffersSelector.setOffset(request.offset);
+    return client.listBufferFirstOffset(buffersSelector, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read last of data buffers
  * @param {ServerConfig} server server configuration: address, token
  * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
@@ -286,6 +311,30 @@ export async function list_buffer_last(server, request) {
     }
     buffersSelector.setNumber(request.number);
     return client.listBufferLast(buffersSelector, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read last of data buffers with offset
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number, offset
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+export async function list_buffer_last_offset(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSelector = new pb_buffer.BuffersSelector();
+    if (request.device_id) {
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSelector.setNumber(request.number);
+    buffersSelector.setOffset(request.offset);
+    return client.listBufferLastOffset(buffersSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 

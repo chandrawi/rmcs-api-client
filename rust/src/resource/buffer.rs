@@ -89,9 +89,29 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: usize, device
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: status.map(|i| i as i32),
-        number: number as u32
+        number: number as u32,
+        offset: 0
     });
     let response = client.list_buffer_first(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_buffer_first_offset(resource: &Resource, number: usize, offset: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: offset as u32
+    });
+    let response = client.list_buffer_first_offset(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -107,9 +127,29 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: usize, device_
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: status.map(|i| i as i32),
-        number: number as u32
+        number: number as u32,
+        offset: 0
     });
     let response = client.list_buffer_last(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_buffer_last_offset(resource: &Resource, number: usize, offset: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: offset as u32
+    });
+    let response = client.list_buffer_last_offset(request)
         .await?
         .into_inner();
     Ok(response.results)
