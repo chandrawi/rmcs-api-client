@@ -16,7 +16,7 @@ use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 use rmcs_resource_db::schema::set::{SetSchema, SetTemplateSchema};
-use rmcs_resource_db::schema::data::DataSchema;
+use rmcs_resource_db::schema::data::{DataSchema, DatasetSchema};
 use rmcs_resource_db::schema::buffer::{BufferSchema, BufferStatus};
 use rmcs_resource_db::schema::slice::SliceSchema;
 use rmcs_resource_db::schema::log::{LogSchema, LogStatus};
@@ -841,7 +841,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_before(&self, device_id: Uuid, model_id: Uuid, before: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_before(&self, device_id: Uuid, model_id: Uuid, before: DateTime<Utc>, number: usize)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_before(&self, device_id, model_id, before, number)
@@ -849,10 +849,98 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_number_after(&self, device_id: Uuid, model_id: Uuid, after: DateTime<Utc>, number: u32)
+    pub async fn list_data_by_number_after(&self, device_id: Uuid, model_id: Uuid, after: DateTime<Utc>, number: usize)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_number_after(&self, device_id, model_id, after, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_set_time(&self, set_id, timestamp)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_set_last_time(&self, set_id, last)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_set_range_time(&self, set_id, begin, end)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_set_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_set_number_before(&self, set_id, before, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_set_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_set_number_after(&self, set_id, after, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn read_dataset(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<DatasetSchema, Status>
+    {
+        data::read_dataset(&self, set_id, timestamp)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_dataset_by_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<Vec<DatasetSchema>, Status>
+    {
+        data::list_dataset_by_time(&self, set_id, timestamp)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_dataset_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+        -> Result<Vec<DatasetSchema>, Status>
+    {
+        data::list_dataset_by_last_time(&self, set_id, last)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_dataset_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DatasetSchema>, Status>
+    {
+        data::list_dataset_by_range_time(&self, set_id, begin, end)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_dataset_by_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize)
+        -> Result<Vec<DatasetSchema>, Status>
+    {
+        data::list_dataset_by_number_before(&self, set_id, before, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_dataset_by_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize)
+        -> Result<Vec<DatasetSchema>, Status>
+    {
+        data::list_dataset_by_number_after(&self, set_id, after, number)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -903,7 +991,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_buffer_first(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+    pub async fn list_buffer_first(&self, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_first(&self, number, device_id, model_id, status.map(|s| s.into()))
@@ -911,7 +999,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_last(&self, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+    pub async fn list_buffer_last(&self, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_last(&self, number, device_id, model_id, status.map(|s| s.into()))

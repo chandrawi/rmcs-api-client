@@ -79,7 +79,7 @@ pub(crate) async fn read_buffer_last(resource: &Resource, device_id: Option<Uuid
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+pub(crate) async fn list_buffer_first(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -89,7 +89,7 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_i
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: status.map(|i| i as i32),
-        number
+        number: number as u32
     });
     let response = client.list_buffer_first(request)
         .await?
@@ -97,7 +97,7 @@ pub(crate) async fn list_buffer_first(resource: &Resource, number: u32, device_i
     Ok(response.results)
 }
 
-pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+pub(crate) async fn list_buffer_last(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
     -> Result<Vec<BufferSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -107,7 +107,7 @@ pub(crate) async fn list_buffer_last(resource: &Resource, number: u32, device_id
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: status.map(|i| i as i32),
-        number
+        number: number as u32
     });
     let response = client.list_buffer_last(request)
         .await?

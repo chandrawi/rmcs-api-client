@@ -9,7 +9,7 @@ from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConf
 from .types import TypeSchema
 from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
 from .set import SetSchema, SetTemplateSchema
-from .data import DataSchema, DataModel
+from .data import DataSchema, DatasetSchema
 from .buffer import BufferSchema
 from .slice import SliceSchema
 from .log import LogSchema
@@ -344,6 +344,39 @@ class Resource:
 
     def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
         return _data.delete_data(self, device_id, model_id, timestamp)
+
+    def list_data_by_set_time(self, set_id: UUID, timestamp: datetime) -> List[DataSchema]:
+        return _data.list_data_by_set_time(self, set_id, timestamp)
+
+    def list_data_by_set_last_time(self, set_id: UUID, last: datetime) -> List[DataSchema]:
+        return _data.list_data_by_set_last_time(self, set_id, last)
+
+    def list_data_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DataSchema]:
+        return _data.list_data_by_set_range_time(self, set_id, begin, end)
+
+    def list_data_by_set_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DataSchema]:
+        return _data.list_data_by_set_number_before(self, set_id, before, number)
+
+    def list_data_by_set_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSchema]:
+        return _data.list_data_by_set_number_after(self, set_id, after, number)
+
+    def read_dataset(self, set_id: UUID, timestamp: datetime) -> DatasetSchema:
+        return _data.read_dataset(self, set_id, timestamp)
+
+    def list_dataset_by_time(self, set_id: UUID, timestamp: datetime) -> List[DatasetSchema]:
+        return _data.list_dataset_by_time(self, set_id, timestamp)
+
+    def list_dataset_by_last_time(self, set_id: UUID, last: datetime) -> List[DatasetSchema]:
+        return _data.list_dataset_by_last_time(self, set_id, last)
+
+    def list_dataset_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DatasetSchema]:
+        return _data.list_dataset_by_range_time(self, set_id, begin, end)
+
+    def list_dataset_by_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DatasetSchema]:
+        return _data.list_dataset_by_number_before(self, set_id, before, number)
+
+    def list_dataset_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DatasetSchema]:
+        return _data.list_dataset_by_number_after(self, set_id, after, number)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
