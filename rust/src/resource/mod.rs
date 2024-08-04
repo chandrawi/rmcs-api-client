@@ -18,7 +18,7 @@ use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, Group
 use rmcs_resource_db::schema::set::{SetSchema, SetTemplateSchema};
 use rmcs_resource_db::schema::data::{DataSchema, DataSetSchema};
 use rmcs_resource_db::schema::buffer::{BufferSchema, BufferStatus};
-use rmcs_resource_db::schema::slice::SliceSchema;
+use rmcs_resource_db::schema::slice::{SliceSchema, SliceSetSchema};
 use rmcs_resource_db::schema::log::{LogSchema, LogStatus};
 
 #[derive(Debug, Clone)]
@@ -1047,36 +1047,42 @@ impl Resource {
     pub async fn read_slice(&self, id: i32)
         -> Result<SliceSchema, Status>
     {
-        slice::read_slice(&self, id)
-        .await
+        slice::read_slice(&self, id).await
         .map(|s| s.into())
     }
 
-    pub async fn list_slice_by_name(&self, name: &str)
+    pub async fn list_slice_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<Vec<SliceSchema>, Status>
     {
-        slice::list_slice_by_name(&self, name).await
+        slice::list_slice_by_time(&self, device_id, model_id, timestamp).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_device(&self, device_id: Uuid)
+    pub async fn list_slice_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
         -> Result<Vec<SliceSchema>, Status>
     {
-        slice::list_slice_by_device(&self, device_id).await
+        slice::list_slice_by_range_time(&self, device_id, model_id, begin, end).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_model(&self, model_id: Uuid)
+    pub async fn list_slice_by_name_time(&self, name: &str, timestamp: DateTime<Utc>)
         -> Result<Vec<SliceSchema>, Status>
     {
-        slice::list_slice_by_model(&self, model_id).await
+        slice::list_slice_by_name_time(&self, name, timestamp).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_slice_by_device_model(&self, device_id: Uuid, model_id: Uuid)
+    pub async fn list_slice_by_name_range_time(&self, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
         -> Result<Vec<SliceSchema>, Status>
     {
-        slice::list_slice_by_device_model(&self, device_id, model_id).await
+        slice::list_slice_by_name_range_time(&self, name, begin, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_option(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, name: Option<&str>, begin_or_timestamp: Option<DateTime<Utc>>, end: Option<DateTime<Utc>>)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_option(&self, device_id, model_id, name, begin_or_timestamp, end).await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
@@ -1098,6 +1104,68 @@ impl Resource {
         -> Result<(), Status>
     {
         slice::delete_slice(&self, id).await
+    }
+
+    pub async fn read_slice_set(&self, id: i32)
+        -> Result<SliceSetSchema, Status>
+    {
+        slice::read_slice_set(&self, id).await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_slice_set_by_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<Vec<SliceSetSchema>, Status>
+    {
+        slice::list_slice_set_by_time(&self, set_id, timestamp).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_set_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<SliceSetSchema>, Status>
+    {
+        slice::list_slice_set_by_range_time(&self, set_id, begin, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_set_by_name_time(&self, name: &str, timestamp: DateTime<Utc>)
+        -> Result<Vec<SliceSetSchema>, Status>
+    {
+        slice::list_slice_set_by_name_time(&self, name, timestamp).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_set_by_name_range_time(&self, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<SliceSetSchema>, Status>
+    {
+        slice::list_slice_set_by_name_range_time(&self, name, begin, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_set_option(&self, set_id: Option<Uuid>, name: Option<&str>, begin_or_timestamp: Option<DateTime<Utc>>, end: Option<DateTime<Utc>>)
+        -> Result<Vec<SliceSetSchema>, Status>
+    {
+        slice::list_slice_set_option(&self, set_id, name, begin_or_timestamp, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_slice_set(&self, set_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, name: &str, description: Option<&str>)
+        -> Result<i32, Status>
+    {
+        slice::create_slice_set(&self, set_id, timestamp_begin, timestamp_end, name, description)
+        .await
+    }
+
+    pub async fn update_slice_set(&self, id: i32, timestamp_begin: Option<DateTime<Utc>>, timestamp_end: Option<DateTime<Utc>>, name: Option<&str>, description: Option<&str>)
+        -> Result<(), Status>
+    {
+        slice::update_slice_set(&self, id, timestamp_begin, timestamp_end, name, description)
+        .await
+    }
+
+    pub async fn delete_slice_set(&self, id: i32)
+        -> Result<(), Status>
+    {
+        slice::delete_slice_set(&self, id).await
     }
 
     pub async fn read_log(&self, timestamp: DateTime<Utc>, device_id: Uuid)

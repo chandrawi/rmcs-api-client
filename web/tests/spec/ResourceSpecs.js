@@ -392,7 +392,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read data slices", async function() {
-        const slices = await resource.list_slice_by_name(server, { name: "slice" });
+        const slices = await resource.list_slice_option(server, { name: "slice" });
         for (const slice of slices) {
             expect(slice.timestamp_begin).toEqual(timestamp);
             expect(slice.name).toEqual("Speed and compass slice");

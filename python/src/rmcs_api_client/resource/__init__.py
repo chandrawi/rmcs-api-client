@@ -11,7 +11,7 @@ from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
 from .set import SetSchema, SetTemplateSchema
 from .data import DataSchema, DataSetSchema
 from .buffer import BufferSchema
-from .slice import SliceSchema
+from .slice import SliceSchema, SliceSetSchema
 from .log import LogSchema
 
 class Resource:
@@ -414,17 +414,20 @@ class Resource:
     def read_slice(self, id: int) -> SliceSchema:
         return _slice.read_slice(self, id)
 
-    def list_slice_by_name(self, name: str) -> List[SliceSchema]:
-        return _slice.list_slice_by_name(self, name)
+    def list_slice_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_time(self, device_id, model_id, timestamp)
 
-    def list_slice_by_device(self, device_id: UUID) -> List[SliceSchema]:
-        return _slice.list_slice_by_device(self, device_id)
+    def list_slice_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_range_time(self, device_id, model_id, begin, end)
 
-    def list_slice_by_model(self, model_id: UUID) -> List[SliceSchema]:
-        return _slice.list_slice_by_model(self, model_id)
+    def list_slice_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_name_time(self, name, timestamp)
 
-    def list_slice_by_device_model(self, device_id: UUID, model_id: UUID) -> List[SliceSchema]:
-        return _slice.list_slice_by_device_model(self, device_id, model_id)
+    def list_slice_by_name_range_time(self, name: str, begin: datetime, end: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_name_range_time(self, name, begin, end)
+
+    def list_slice_option(self, device_id: Optional[UUID], model_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSchema]:
+        return _slice.list_slice_option(self, device_id, model_id, name, begin_or_timestamp, end)
 
     def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
         return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
@@ -434,6 +437,33 @@ class Resource:
 
     def delete_slice(self, id: int):
         return _slice.delete_slice(self, id)
+
+    def read_slice_set(self, id: int) -> SliceSetSchema:
+        return _slice.read_slice_set(self, id)
+
+    def list_slice_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_time(self, set_id, timestamp)
+
+    def list_slice_set_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_range_time(self, set_id, begin, end)
+
+    def list_slice_set_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_name_time(self, name, timestamp)
+
+    def list_slice_set_by_name_range_time(self, name: str, begin: datetime, end: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_name_range_time(self, name, begin, end)
+
+    def list_slice_set_option(self, set_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_option(self, set_id, name, begin_or_timestamp, end)
+
+    def create_slice_set(self, set_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
+        return _slice.create_slice_set(self, set_id, timestamp_begin, timestamp_end, name, description)
+
+    def update_slice_set(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
+        return _slice.update_slice_set(self, id, timestamp_begin, timestamp_end, name, description)
+
+    def delete_slice_set(self, id: int):
+        return _slice.delete_slice_set(self, id)
 
     def read_log(self, timestamp: datetime, device_id: UUID) -> LogSchema:
         return _log.read_log(self, timestamp, device_id)

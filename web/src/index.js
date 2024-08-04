@@ -204,13 +204,23 @@ export {
 } from './resource/buffer.js';
 export {
     read_slice,
-    list_slice_by_name,
-    list_slice_by_device,
-    list_slice_by_model,
-    list_slice_by_device_model,
+    list_slice_by_time,
+    list_slice_by_range_time,
+    list_slice_by_name_time,
+    list_slice_by_name_range_time,
+    list_slice_option,
     create_slice,
     update_slice,
-    delete_slice
+    delete_slice,
+    read_slice_set,
+    list_slice_set_by_time,
+    list_slice_set_by_range_time,
+    list_slice_set_by_name_time,
+    list_slice_set_by_name_range_time,
+    list_slice_set_option,
+    create_slice_set,
+    update_slice_set,
+    delete_slice_set
 } from './resource/slice.js';
 export {
     read_log,

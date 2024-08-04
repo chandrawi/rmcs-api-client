@@ -32,24 +32,40 @@ function get_slice_id(r) {
 }
 
 /**
- * @typedef {Object} SliceName
+ * @typedef {Object} SliceTime
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {Date} timestamp
+ */
+
+/**
+ * @typedef {Object} SliceRange
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {Date} begin
+ * @property {Date} end
+ */
+
+/**
+ * @typedef {Object} SliceNameTime
  * @property {string} name
+ * @property {Date} timestamp
  */
 
 /**
- * @typedef {Object} SliceDevice
- * @property {Uuid} device_id
+ * @typedef {Object} SliceNameRange
+ * @property {string} name
+ * @property {Date} begin
+ * @property {Date} end
  */
 
 /**
- * @typedef {Object} SliceModel
- * @property {Uuid} model_id
- */
-
-/**
- * @typedef {Object} SliceDeviceModel
- * @property {Uuid} device_id
- * @property {Uuid} model_id
+ * @typedef {Object} SliceOption
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?string} name
+ * @property {?Date} begin_or_timestamp
+ * @property {?Date} end
  */
 
 /**
@@ -96,6 +112,60 @@ function get_slice_schema_vec(r) {
  * @property {?string} description
  */
 
+/**
+ * @typedef {Object} SliceSetTime
+ * @property {Uuid} set_id
+ * @property {Date} timestamp
+ */
+
+/**
+ * @typedef {Object} SliceSetRange
+ * @property {Uuid} set_id
+ * @property {Date} begin
+ * @property {Date} end
+ */
+
+/**
+ * @typedef {Object} SliceSetOption
+ * @property {Uuid} set_id
+ * @property {?string} name
+ * @property {?Date} begin_or_timestamp
+ * @property {?Date} end
+ */
+
+/**
+ * @typedef {Object} SliceSetSchema
+ * @property {number} id
+ * @property {Uuid} set_id
+ * @property {Date} timestamp_begin
+ * @property {Date} timestamp_end
+ * @property {string} name
+ * @property {string} description
+ */
+
+/**
+ * @param {*} r 
+ * @returns {SliceSetSchema}
+ */
+function get_slice_set_schema(r) {
+    return {
+        id: r.id,
+        set_id: base64_to_uuid_hex(r.setId),
+        timestamp_begin: new Date(r.timestampBegin / 1000),
+        timestamp_end: new Date(r.timestampEnd / 1000),
+        name: r.name,
+        description: r.description
+    };
+}
+
+/**
+ * @param {*} r 
+ * @returns {SliceSetSchema[]}
+ */
+function get_slice_set_schema_vec(r) {
+    return r.map((v) => {return get_slice_set_schema(v)});
+}
+
 
 /**
  * Read a data slice by id
@@ -112,59 +182,92 @@ export async function read_slice(server, request) {
 }
 
 /**
- * Read data slices by name
+ * Read data slices by specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {SliceName} request data slice name: name
+ * @param {SliceTime} request data slice time: device_id, model_id, timestamp
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_name(server, request) {
+export async function list_slice_by_time(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
-    const sliceName = new pb_slice.SliceName();
-    sliceName.setName(request.name);
-    return client.listSliceByName(sliceName, metadata(server))
+    const sliceTime = new pb_slice.SliceTime();
+    sliceTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    sliceTime.setModelId(uuid_hex_to_base64(request.model_id));
+    sliceTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listSliceByTime(sliceTime, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
- * Read data slices by device
+ * Read data slices by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {SliceDevice} request data slice device: device_id
+ * @param {SliceRange} request data slice range: device_id, model_id, begin, end
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_device(server, request) {
+export async function list_slice_by_range_time(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
-    const sliceDevice = new pb_slice.SliceDevice();
-    sliceDevice.setDeviceId(uuid_hex_to_base64(request.device_id));
-    return client.listSliceByDevice(sliceDevice, metadata(server))
+    const sliceRange = new pb_slice.SliceRange();
+    sliceRange.setDeviceId(uuid_hex_to_base64(request.device_id));
+    sliceRange.setModelId(uuid_hex_to_base64(request.model_id));
+    sliceRange.setBegin(request.begin.valueOf() * 1000);
+    sliceRange.setEnd(request.end.valueOf() * 1000);
+    return client.listSliceByRangeTime(sliceRange, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
- * Read data slices by model
+ * Read data slices by name and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {SliceModel} request data slice model: model_id
+ * @param {SliceNameTime} request data slice name and time: name, timestamp
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_model(server, request) {
+export async function list_slice_by_name_time(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
-    const sliceModel = new pb_slice.SliceModel();
-    sliceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    return client.listSliceByModel(sliceModel, metadata(server))
+    const sliceNameTime = new pb_slice.SliceNameTime();
+    sliceNameTime.setName(request.name);
+    sliceNameTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listSliceByNameTime(sliceNameTime, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
- * Read data slices by device and model
+ * Read data slices by name and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {SliceDeviceModel} request data slice device and model: device_id, model_id
+ * @param {SliceNameRange} request data slice name and range: name, begin, end
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_device_model(server, request) {
+export async function list_slice_by_name_range_time(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
-    const sliceDeviceModel = new pb_slice.SliceDeviceModel();
-    sliceDeviceModel.setDeviceId(uuid_hex_to_base64(request.device_id));
-    sliceDeviceModel.setModelId(uuid_hex_to_base64(request.model_id));
-    return client.listSliceByDeviceModel(sliceDeviceModel, metadata(server))
+    const sliceNameRange = new pb_slice.SliceNameRange();
+    sliceNameRange.setName(request.name);
+    sliceNameRange.setBegin(request.begin.valueOf() * 1000);
+    sliceNameRange.setEnd(request.end.valueOf() * 1000);
+    return client.listSliceByNameRangeTime(sliceNameRange, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data slices by options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceOption} request data slice selection option: device_id, model_id, name, begin_or_timestamp, end
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_option(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceOption = new pb_slice.SliceOption();
+    if (request.device_id) {
+        sliceOption.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        sliceOption.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    sliceOption.setName(request.name);
+    if (request.begin instanceof Date) {
+        sliceOption.setBegin(request.timestamp_begin.valueOf() * 1000);
+    }
+    if (request.end instanceof Date) {
+        sliceOption.setEnd(request.timestamp_end.valueOf() * 1000);
+    }
+    return client.listSliceOption(sliceOption, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
@@ -220,5 +323,158 @@ export async function delete_slice(server, request) {
     const sliceId = new pb_slice.SliceId();
     sliceId.setId(request.id);
     return client.deleteSlice(sliceId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Read a data set slice by id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceId} request data set slice id: id
+ * @returns {Promise<SliceSetSchema>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function read_slice_set(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceId = new pb_slice.SliceId();
+    sliceId.setId(request.id);
+    return client.readSliceSet(sliceId, metadata(server))
+        .then(response => get_slice_set_schema(response.toObject().result));
+}
+
+/**
+ * Read data set slices by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceSetTime} request data set slice time: set_id, timestamp
+ * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_by_time(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceTime = new pb_slice.SliceSetTime();
+    sliceTime.setSetId(uuid_hex_to_base64(request.set_id));
+    sliceTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listSliceSetByTime(sliceTime, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data set slices by range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceSetRange} request data set slice range: set_id, begin, end
+ * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_by_range_time(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceRange = new pb_slice.SliceSetRange();
+    sliceRange.setSetId(uuid_hex_to_base64(request.set_id));
+    sliceRange.setBegin(request.begin.valueOf() * 1000);
+    sliceRange.setEnd(request.end.valueOf() * 1000);
+    return client.listSliceSetByRangeTime(sliceRange, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data set slices by name and specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceNameTime} request data set slice name and time: name, timestamp
+ * @returns {Promise<SliceSetSchema[]>} data slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_by_name_time(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceNameTime = new pb_slice.SliceNameTime();
+    sliceNameTime.setName(request.name);
+    sliceNameTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listSliceSetByNameTime(sliceNameTime, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data set slices by name and range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceNameRange} request data set slice name and range: name, begin, end
+ * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_by_name_range_time(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceNameRange = new pb_slice.SliceNameRange();
+    sliceNameRange.setName(request.name);
+    sliceNameRange.setBegin(request.begin.valueOf() * 1000);
+    sliceNameRange.setEnd(request.end.valueOf() * 1000);
+    return client.listSliceSetByNameRangeTime(sliceNameRange, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data set slices by options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceSetOption} request data set slice selection option: set_id, name, begin_or_timestamp, end
+ * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_option(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceOption = new pb_slice.SliceSetOption();
+    if (request.set_id) {
+        sliceOption.setSetId(uuid_hex_to_base64(request.set_id));
+    }
+    sliceOption.setName(request.name);
+    if (request.begin instanceof Date) {
+        sliceOption.setBegin(request.timestamp_begin.valueOf() * 1000);
+    }
+    if (request.end instanceof Date) {
+        sliceOption.setEnd(request.timestamp_end.valueOf() * 1000);
+    }
+    return client.listSliceSetOption(sliceOption, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Create a data set slice
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceSetSchema} request data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
+ * @returns {Promise<SliceId>} data set slice id: id
+ */
+export async function create_slice_set(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceSchema = new pb_slice.SliceSetSchema();
+    sliceSchema.setSetId(uuid_hex_to_base64(request.set_id));
+    sliceSchema.setTimestampBegin(request.timestamp_begin.valueOf() * 1000);
+    sliceSchema.setTimestampEnd(request.timestamp_end.valueOf() * 1000);
+    sliceSchema.setName(request.name);
+    sliceSchema.setDescription(request.description);
+    return client.createSliceSet(sliceSchema, metadata(server))
+        .then(response => get_slice_id(response.toObject()));
+}
+
+/**
+ * Update a data set slice
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceUpdate} request data set slice update: id, timestamp_begin, timestamp_end, name, description
+ * @returns {Promise<{}>} update response
+ */
+export async function update_slice_set(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceUpdate = new pb_slice.SliceUpdate();
+    sliceUpdate.setId(request.id);
+    if (request.timestamp_begin instanceof Date) {
+        sliceUpdate.setTimestampBegin(request.timestamp_begin.valueOf() * 1000);
+    }
+    if (request.timestamp_end instanceof Date) {
+        sliceUpdate.setTimestampEnd(request.timestamp_end.valueOf() * 1000);
+    }
+    sliceUpdate.setName(request.name);
+    sliceUpdate.setDescription(request.description);
+    return client.updateSliceSet(sliceUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a data set slice
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceId} request data set slice id: id
+ * @returns {Promise<{}>} delete response
+ */
+export async function delete_slice_set(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceId = new pb_slice.SliceId();
+    sliceId.setId(request.id);
+    return client.deleteSliceSet(sliceId, metadata(server))
         .then(response => response.toObject());
 }

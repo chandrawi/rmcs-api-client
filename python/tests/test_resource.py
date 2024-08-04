@@ -194,8 +194,8 @@ def test_resource():
 
     # create data slice
     slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, "Speed and compass slice", None)
-    # read data
-    slices = resource.list_slice_by_name("slice")
+    # read data slice
+    slices = resource.list_slice_option(None, None, "slice", None, None)
     slice_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, slices)
     slice = list(slice_filter)[0]
     assert slice.timestamp_begin == timestamp
