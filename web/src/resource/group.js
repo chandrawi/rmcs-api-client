@@ -47,9 +47,9 @@ function get_group_id(r) {
  */
 
 /**
- * @typedef {Object} GroupNameCategory
- * @property {string} name
- * @property {string} category
+ * @typedef {Object} GroupOption
+ * @property {?string} name
+ * @property {?string} category
  */
 
 /**
@@ -229,17 +229,17 @@ export async function list_group_model_by_category(server, request) {
 }
 
 /**
- * Read groups of model by name and category
+ * Read groups of model with select option
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group model name and category: name, category
+ * @param {GroupOption} request group model option: name, category
  * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
  */
-export async function list_group_model_by_name_category(server, request) {
+export async function list_group_model_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupModelByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupModelOption(groupOption, metadata(server))
         .then(response => get_group_model_schema_vec(response.toObject().resultsList));
 }
 
@@ -378,17 +378,17 @@ export async function list_group_device_by_category(server, request) {
 }
 
 /**
- * Read groups of device by name and category
+ * Read groups of device with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group device name and category: name, category
+ * @param {GroupOption} request group device option: name, category
  * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
  */
-export async function list_group_device_by_name_category(server, request) {
+export async function list_group_device_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupDeviceByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupDeviceOption(groupOption, metadata(server))
         .then(response => get_group_device_schema_vec(response.toObject().resultsList));
 }
 
@@ -527,17 +527,17 @@ export async function list_group_gateway_by_category(server, request) {
 }
 
 /**
- * Read groups of gateway by name and category
+ * Read groups of gateway with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group gateway name and category: name, category
+ * @param {GroupOption} request group gateway option: name, category
  * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
  */
-export async function list_group_gateway_by_name_category(server, request) {
+export async function list_group_gateway_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupGatewayByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupGatewayOption(groupOption, metadata(server))
         .then(response => get_group_gateway_schema_vec(response.toObject().resultsList));
 }
 

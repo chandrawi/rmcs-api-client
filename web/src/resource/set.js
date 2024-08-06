@@ -34,6 +34,12 @@ import {
  */
 
 /**
+ * @typedef {Object} SetOption
+ * @property {?Uuid} template_id
+ * @property {?string} name
+ */
+
+/**
  * @param {*} r 
  * @returns {SetId}
  */
@@ -152,6 +158,11 @@ function get_set_template_id(r) {
 * @typedef {Object} SetTemplateName
 * @property {string} name
 */
+
+/**
+ * @typedef {Object} SetTemplateOption
+ * @property {?string} name
+ */
 
 /**
  * @typedef {Object} SetTemplateSchema
@@ -278,6 +289,23 @@ export async function list_set_by_name(server, request) {
     const setName = new pb_set.SetName();
     setName.setName(request.name);
     return client.listSetByName(setName, metadata(server))
+        .then(response => get_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read sets with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetOption} request set option: template_id, name
+ * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
+ */
+export async function list_set_by_option(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setOption = new pb_set.SetOption();
+    if (request.template_id) {
+        setOption.setTemplateId(uuid_hex_to_base64(request.template_id));
+    }
+    setOption.setName(request.name);
+    return client.listSetOption(setOption, metadata(server))
         .then(response => get_set_schema_vec(response.toObject().resultsList));
 }
 
@@ -419,6 +447,20 @@ export async function list_set_template_by_name(server, request) {
     const templateName = new pb_set.SetTemplateName();
     templateName.setName(request.name);
     return client.listSetTemplateByName(templateName, metadata(server))
+        .then(response => get_set_template_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read set templates with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateOption} request set template option: name
+ * @returns {Promise<SetTemplateSchema[]>} set schema: id, template_id, name, description, members
+ */
+export async function list_set_template_by_option(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setOption = new pb_set.SetTemplateOption();
+    setOption.setName(request.name);
+    return client.listSetTemplateOption(setOption, metadata(server))
         .then(response => get_set_template_schema_vec(response.toObject().resultsList));
 }
 

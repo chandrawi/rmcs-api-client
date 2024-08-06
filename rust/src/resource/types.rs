@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_api::device::device_service_client::DeviceServiceClient;
 use rmcs_resource_api::device::{
-    TypeSchema, TypeId, TypeIds, TypeName, TypeUpdate, TypeModel
+    TypeSchema, TypeId, TypeIds, TypeName, TypeOption, TypeUpdate, TypeModel
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -49,6 +49,21 @@ pub(crate) async fn list_type_by_name(resource: &Resource, name: &str)
         name: name.to_owned()
     });
     let response = client.list_type_by_name(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_type_option(resource: &Resource, name: Option<&str>)
+    -> Result<Vec<TypeSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DeviceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TypeOption {
+        name: name.map(|s| s.to_owned())
+    });
+    let response = client.list_type_option(request)
         .await?
         .into_inner();
     Ok(response.results)

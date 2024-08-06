@@ -57,6 +57,15 @@ def list_model_by_ids(resource, ids: list[UUID]):
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls
 
+def list_model_by_type(resource, type_id: UUID):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.TypeId(id=type_id)
+        response = stub.ListModelByType(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(ModelSchema.from_response(result))
+        return ls
+
 def list_model_by_name(resource, name: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
@@ -75,20 +84,17 @@ def list_model_by_category(resource, category: str):
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls
 
-def list_model_by_name_category(resource, name: str, category: str):
+def list_model_option(resource, type_id: Optional[UUID], name: Optional[str], category: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
-        request = model_pb2.ModelNameCategory(name=name, category=category)
-        response = stub.ListModelByCategory(request=request, metadata=resource.metadata)
-        ls = []
-        for result in response.results: ls.append(ModelSchema.from_response(result))
-        return ls
-
-def list_model_by_type(resource, type_id: UUID):
-    with grpc.insecure_channel(resource.address) as channel:
-        stub = model_pb2_grpc.ModelServiceStub(channel)
-        request = model_pb2.TypeId(id=type_id)
-        response = stub.ListModelByType(request=request, metadata=resource.metadata)
+        type_bytes = None
+        if type_id != None: type_bytes = type_id.bytes
+        request = model_pb2.ModelOption(
+            type_id=type_bytes,
+            name=name,
+            category=category
+        )
+        response = stub.ListModelOption(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(ModelSchema.from_response(result))
         return ls

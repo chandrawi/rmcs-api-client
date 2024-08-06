@@ -32,6 +32,11 @@ import {
  */
 
 /**
+ * @typedef {Object} TypeOption
+ * @property {?string} name
+ */
+
+/**
  * @param {*} r 
  * @returns {TypeId}
  */
@@ -123,6 +128,20 @@ export async function list_type_by_name(server, request) {
     const typeName = new pb_device.TypeName();
     typeName.setName(request.name);
     return client.listTypeByName(typeName, metadata(server))
+        .then(response => get_type_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read device types with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TypeOption} request type select option: name
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ */
+export async function list_type_option(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const typeOption = new pb_device.TypeOption();
+    typeOption.setName(request.name);
+    return client.listTypeOption(typeOption, metadata(server))
         .then(response => get_type_schema_vec(response.toObject().resultsList));
 }
 

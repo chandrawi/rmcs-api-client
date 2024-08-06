@@ -83,7 +83,7 @@ def test_resource():
     devices = resource.list_device_by_gateway(gateway_id)
     device_ids = []
     for device in devices: device_ids.append(device.id)
-    assert device_id1 in device_ids # device_id1 > device_id2, so device1 in second (last) order
+    assert device_id1 in device_ids
     assert device1.serial_number == "TEST01"
     assert device1.name == "Speedometer Compass 1"
     # read type
@@ -105,7 +105,7 @@ def test_resource():
     groups = resource.list_group_device_by_name("sensor")
     group_device_filter = filter(lambda x: device_id1 in x.devices, groups)
     group_device = list(group_device_filter)[0]
-    assert group_device.devices == [device_id1, device_id2]
+    assert group_device.devices == [device_id2, device_id1] # device_id1 > device_id2, so device1 in second (last) order
     assert group_device.name == "sensor"
     assert group_device.category == "APPLICATION"
 

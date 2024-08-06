@@ -2,8 +2,9 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_api::set::set_service_client::SetServiceClient;
 use rmcs_resource_api::set::{
-    SetSchema, SetId, SetIds, SetName, SetUpdate, SetMemberRequest, SetMemberSwap,
-    SetTemplateSchema, SetTemplateId, SetTemplateIds, SetTemplateName, SetTemplateUpdate, SetTemplateMemberRequest, SetTemplateMemberSwap
+    SetSchema, SetId, SetIds, SetName, SetOption, SetUpdate, SetMemberRequest, SetMemberSwap,
+    SetTemplateSchema, SetTemplateId, SetTemplateIds, SetTemplateName, SetTemplateOption, SetTemplateUpdate, 
+    SetTemplateMemberRequest, SetTemplateMemberSwap
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -65,6 +66,22 @@ pub(crate) async fn list_set_by_name(resource: &Resource, name: &str)
         name: name.to_owned()
     });
     let response = client.list_set_by_name(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_set_option(resource: &Resource, template_id: Option<Uuid>, name: Option<&str>)
+    -> Result<Vec<SetSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SetOption {
+        template_id: template_id.map(|id| id.as_bytes().to_vec()),
+        name: name.map(|s| s.to_owned())
+    });
+    let response = client.list_set_option(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -212,6 +229,21 @@ pub(crate) async fn list_set_template_by_name(resource: &Resource, name: &str)
         name: name.to_owned()
     });
     let response = client.list_set_template_by_name(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_set_template_option(resource: &Resource, name: Option<&str>)
+    -> Result<Vec<SetTemplateSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SetTemplateOption {
+        name: name.map(|s| s.to_owned())
+    });
+    let response = client.list_set_template_option(request)
         .await?
         .into_inner();
     Ok(response.results)

@@ -62,15 +62,10 @@ function get_device_id(r) {
  */
 
 /**
- * @typedef {Object} DeviceGatewayType
- * @property {Uuid} gateway_id
- * @property {Uuid} type_id
- */
-
-/**
- * @typedef {Object} DeviceGatewayName
- * @property {Uuid} gateway_id
- * @property {string} name
+ * @typedef {Object} DeviceOption
+ * @property {?Uuid} gateway_id
+ * @property {?Uuid} type_id
+ * @property {?string} name
  */
 
 /**
@@ -151,6 +146,12 @@ function get_gateway_id(r) {
 /**
  * @typedef {Object} GatewayName
  * @property {string} name
+ */
+
+/**
+ * @typedef {Object} GatewayOption
+ * @property {?Uuid} type_id
+ * @property {?string} name
  */
 
 /**
@@ -375,32 +376,22 @@ export async function list_device_by_name(server, request) {
 }
 
 /**
- * Read devices by gateway and type
+ * Read devices with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {DeviceGatewayType} request gateway and type: gateway_id, type_id
+ * @param {DeviceOption} request device select option: gateway_id, type_id, name
  * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-export async function list_device_by_gateway_type(server, request) {
+export async function list_device_option(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
-    const gatewayType = new pb_device.DeviceGatewayType();
-    gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
-    gatewayType.setId(uuid_hex_to_base64(request.type_id));
-    return client.listDeviceByGatewayType(gatewayType, metadata(server))
-        .then(response => get_device_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read devices by gateway and name
- * @param {ServerConfig} server server configuration: address, token
- * @param {DeviceGatewayName} request gateway and name: gateway_id, name
- * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
- */
-export async function list_device_by_gateway_name(server, request) {
-    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
-    const gatewayName = new pb_device.DeviceGatewayName();
-    gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
-    gatewayName.setId(request.name);
-    return client.listDeviceByGatewayName(gatewayName, metadata(server))
+    const deviceOption = new pb_device.DeviceOption();
+    if (request.gateway_id) {
+        deviceOption.setGatewayId(uuid_hex_to_base64(request.gateway_id));
+    }
+    if (request.type_id) {
+        deviceOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    deviceOption.setName(request.name);
+    return client.listDeviceOption(deviceOption, metadata(server))
         .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
@@ -528,6 +519,23 @@ export async function list_gateway_by_name(server, request) {
     gatewayName.setName(request.name);
     return client.listGatewayByName(gatewayName, metadata(server))
         .then(response => get_gateway_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read gateways with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GatewayOption} request gateway select option: type_id, name
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
+ */
+export async function list_gateway_option(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const gatewayOption = new pb_device.GatewayOption();
+    if (request.type_id) {
+        gatewayOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    gatewayOption.setName(request.name);
+    return client.listGatewayOption(gatewayOption, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**

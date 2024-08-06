@@ -1810,9 +1810,10 @@ function get_model_id(r) {
  */
 
 /**
- * @typedef {Object} ModelNameCategory
- * @property {string} name
- * @property {string} category
+ * @typedef {Object} ModelOption
+ * @property {?Uuid} type_id
+ * @property {?string} name
+ * @property {?string} category
  */
 
 /**
@@ -1976,17 +1977,20 @@ async function list_model_by_category(server, request) {
 }
 
 /**
- * Read models by name and category
+ * Read models with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {ModelNameCategory} request model name and category: name, category
+ * @param {ModelOption} request model select option: type_id, name, category
  * @returns {Promise<ModelSchema[]>} model schema: id, category, name, description, data_type, configs
  */
-async function list_model_by_name_category(server, request) {
+async function list_model_option(server, request) {
     const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
-    const modelNameCategory = new pb_model.ModelNameCategory();
-    modelNameCategory.setName(request.name);
-    modelNameCategory.setCategory(request.category);
-    return client.listModelByNameCategory(modelNameCategory, metadata(server))
+    const modelOption = new pb_model.ModelOption();
+    if (request.type_id) {
+        modelOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    modelOption.setName(request.name);
+    modelOption.setCategory(request.category);
+    return client.listModelOption(modelOption, metadata(server))
         .then(response => get_model_schema_vec(response.toObject().resultsList));
 }
 
@@ -2166,6 +2170,11 @@ async function delete_model_config(server, request) {
  */
 
 /**
+ * @typedef {Object} TypeOption
+ * @property {?string} name
+ */
+
+/**
  * @param {*} r 
  * @returns {TypeId}
  */
@@ -2257,6 +2266,20 @@ async function list_type_by_name(server, request) {
     const typeName = new pb_device.TypeName();
     typeName.setName(request.name);
     return client.listTypeByName(typeName, metadata(server))
+        .then(response => get_type_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read device types with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TypeOption} request type select option: name
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ */
+async function list_type_option(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const typeOption = new pb_device.TypeOption();
+    typeOption.setName(request.name);
+    return client.listTypeOption(typeOption, metadata(server))
         .then(response => get_type_schema_vec(response.toObject().resultsList));
 }
 
@@ -2390,15 +2413,10 @@ function get_device_id(r) {
  */
 
 /**
- * @typedef {Object} DeviceGatewayType
- * @property {Uuid} gateway_id
- * @property {Uuid} type_id
- */
-
-/**
- * @typedef {Object} DeviceGatewayName
- * @property {Uuid} gateway_id
- * @property {string} name
+ * @typedef {Object} DeviceOption
+ * @property {?Uuid} gateway_id
+ * @property {?Uuid} type_id
+ * @property {?string} name
  */
 
 /**
@@ -2479,6 +2497,12 @@ function get_gateway_id(r) {
 /**
  * @typedef {Object} GatewayName
  * @property {string} name
+ */
+
+/**
+ * @typedef {Object} GatewayOption
+ * @property {?Uuid} type_id
+ * @property {?string} name
  */
 
 /**
@@ -2703,32 +2727,22 @@ async function list_device_by_name(server, request) {
 }
 
 /**
- * Read devices by gateway and type
+ * Read devices with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {DeviceGatewayType} request gateway and type: gateway_id, type_id
+ * @param {DeviceOption} request device select option: gateway_id, type_id, name
  * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
  */
-async function list_device_by_gateway_type(server, request) {
+async function list_device_option(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
-    const gatewayType = new pb_device.DeviceGatewayType();
-    gatewayType.setId(uuid_hex_to_base64(request.gateway_id));
-    gatewayType.setId(uuid_hex_to_base64(request.type_id));
-    return client.listDeviceByGatewayType(gatewayType, metadata(server))
-        .then(response => get_device_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read devices by gateway and name
- * @param {ServerConfig} server server configuration: address, token
- * @param {DeviceGatewayName} request gateway and name: gateway_id, name
- * @returns {Promise<DeviceSchema[]>} device schema: id, gateway_id, serial_number, name, description, device_type, configs
- */
-async function list_device_by_gateway_name(server, request) {
-    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
-    const gatewayName = new pb_device.DeviceGatewayName();
-    gatewayName.setId(uuid_hex_to_base64(request.gateway_id));
-    gatewayName.setId(request.name);
-    return client.listDeviceByGatewayName(gatewayName, metadata(server))
+    const deviceOption = new pb_device.DeviceOption();
+    if (request.gateway_id) {
+        deviceOption.setGatewayId(uuid_hex_to_base64(request.gateway_id));
+    }
+    if (request.type_id) {
+        deviceOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    deviceOption.setName(request.name);
+    return client.listDeviceOption(deviceOption, metadata(server))
         .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
@@ -2856,6 +2870,23 @@ async function list_gateway_by_name(server, request) {
     gatewayName.setName(request.name);
     return client.listGatewayByName(gatewayName, metadata(server))
         .then(response => get_gateway_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read gateways with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {GatewayOption} request gateway select option: type_id, name
+ * @returns {Promise<GatewaySchema[]>} gateway schema: id, serial_number, name, description, gateway_type, configs
+ */
+async function list_gateway_option(server, request) {
+    const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
+    const gatewayOption = new pb_device.GatewayOption();
+    if (request.type_id) {
+        gatewayOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    gatewayOption.setName(request.name);
+    return client.listGatewayOption(gatewayOption, metadata(server))
+        .then(response => get_device_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -3111,9 +3142,9 @@ function get_group_id(r) {
  */
 
 /**
- * @typedef {Object} GroupNameCategory
- * @property {string} name
- * @property {string} category
+ * @typedef {Object} GroupOption
+ * @property {?string} name
+ * @property {?string} category
  */
 
 /**
@@ -3293,17 +3324,17 @@ async function list_group_model_by_category(server, request) {
 }
 
 /**
- * Read groups of model by name and category
+ * Read groups of model with select option
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group model name and category: name, category
+ * @param {GroupOption} request group model option: name, category
  * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
  */
-async function list_group_model_by_name_category(server, request) {
+async function list_group_model_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupModelByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupModelOption(groupOption, metadata(server))
         .then(response => get_group_model_schema_vec(response.toObject().resultsList));
 }
 
@@ -3442,17 +3473,17 @@ async function list_group_device_by_category(server, request) {
 }
 
 /**
- * Read groups of device by name and category
+ * Read groups of device with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group device name and category: name, category
+ * @param {GroupOption} request group device option: name, category
  * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
  */
-async function list_group_device_by_name_category(server, request) {
+async function list_group_device_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupDeviceByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupDeviceOption(groupOption, metadata(server))
         .then(response => get_group_device_schema_vec(response.toObject().resultsList));
 }
 
@@ -3591,17 +3622,17 @@ async function list_group_gateway_by_category(server, request) {
 }
 
 /**
- * Read groups of gateway by name and category
+ * Read groups of gateway with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {GroupNameCategory} request group gateway name and category: name, category
+ * @param {GroupOption} request group gateway option: name, category
  * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
  */
-async function list_group_gateway_by_name_category(server, request) {
+async function list_group_gateway_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
-    const groupNameCategory = new pb_group.GroupNameCategory();
-    groupNameCategory.setName(request.name);
-    groupNameCategory.setCategory(request.category);
-    return client.listGroupGatewayByNameCategory(groupNameCategory, metadata(server))
+    const groupOption = new pb_group.GroupOption();
+    groupOption.setName(request.name);
+    groupOption.setCategory(request.category);
+    return client.listGroupGatewayOption(groupOption, metadata(server))
         .then(response => get_group_gateway_schema_vec(response.toObject().resultsList));
 }
 
@@ -3706,6 +3737,12 @@ async function remove_group_gateway_member(server, request) {
 /**
  * @typedef {Object} SetName
  * @property {string} name
+ */
+
+/**
+ * @typedef {Object} SetOption
+ * @property {?Uuid} template_id
+ * @property {?string} name
  */
 
 /**
@@ -3829,6 +3866,11 @@ function get_set_template_id(r) {
 */
 
 /**
+ * @typedef {Object} SetTemplateOption
+ * @property {?string} name
+ */
+
+/**
  * @typedef {Object} SetTemplateSchema
  * @property {Uuid} id
  * @property {string} name
@@ -3934,6 +3976,23 @@ async function list_set_by_name(server, request) {
     const setName = new pb_set.SetName();
     setName.setName(request.name);
     return client.listSetByName(setName, metadata(server))
+        .then(response => get_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read sets with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetOption} request set option: template_id, name
+ * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
+ */
+async function list_set_by_option(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setOption = new pb_set.SetOption();
+    if (request.template_id) {
+        setOption.setTemplateId(uuid_hex_to_base64(request.template_id));
+    }
+    setOption.setName(request.name);
+    return client.listSetOption(setOption, metadata(server))
         .then(response => get_set_schema_vec(response.toObject().resultsList));
 }
 
@@ -4075,6 +4134,20 @@ async function list_set_template_by_name(server, request) {
     const templateName = new pb_set.SetTemplateName();
     templateName.setName(request.name);
     return client.listSetTemplateByName(templateName, metadata(server))
+        .then(response => get_set_template_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read set templates with select options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SetTemplateOption} request set template option: name
+ * @returns {Promise<SetTemplateSchema[]>} set schema: id, template_id, name, description, members
+ */
+async function list_set_template_by_option(server, request) {
+    const client = new pb_set.SetServicePromiseClient(server.address, null, null);
+    const setOption = new pb_set.SetTemplateOption();
+    setOption.setName(request.name);
+    return client.listSetTemplateOption(setOption, metadata(server))
         .then(response => get_set_template_schema_vec(response.toObject().resultsList));
 }
 
@@ -5781,42 +5854,44 @@ var index = /*#__PURE__*/Object.freeze({
     list_data_set_by_range_time: list_data_set_by_range_time,
     list_data_set_by_time: list_data_set_by_time,
     list_device_by_gateway: list_device_by_gateway,
-    list_device_by_gateway_name: list_device_by_gateway_name,
-    list_device_by_gateway_type: list_device_by_gateway_type,
     list_device_by_ids: list_device_by_ids,
     list_device_by_name: list_device_by_name,
     list_device_by_type: list_device_by_type,
     list_device_config_by_device: list_device_config_by_device,
+    list_device_option: list_device_option,
     list_gateway_by_ids: list_gateway_by_ids,
     list_gateway_by_name: list_gateway_by_name,
     list_gateway_by_type: list_gateway_by_type,
     list_gateway_config_by_gateway: list_gateway_config_by_gateway,
+    list_gateway_option: list_gateway_option,
     list_group_device_by_category: list_group_device_by_category,
     list_group_device_by_ids: list_group_device_by_ids,
     list_group_device_by_name: list_group_device_by_name,
-    list_group_device_by_name_category: list_group_device_by_name_category,
+    list_group_device_option: list_group_device_option,
     list_group_gateway_by_category: list_group_gateway_by_category,
     list_group_gateway_by_ids: list_group_gateway_by_ids,
     list_group_gateway_by_name: list_group_gateway_by_name,
-    list_group_gateway_by_name_category: list_group_gateway_by_name_category,
+    list_group_gateway_option: list_group_gateway_option,
     list_group_model_by_category: list_group_model_by_category,
     list_group_model_by_ids: list_group_model_by_ids,
     list_group_model_by_name: list_group_model_by_name,
-    list_group_model_by_name_category: list_group_model_by_name_category,
+    list_group_model_option: list_group_model_option,
     list_log_by_last_time: list_log_by_last_time,
     list_log_by_range_time: list_log_by_range_time,
     list_log_by_time: list_log_by_time,
     list_model_by_category: list_model_by_category,
     list_model_by_ids: list_model_by_ids,
     list_model_by_name: list_model_by_name,
-    list_model_by_name_category: list_model_by_name_category,
     list_model_by_type: list_model_by_type,
     list_model_config_by_model: list_model_config_by_model,
+    list_model_option: list_model_option,
     list_set_by_ids: list_set_by_ids,
     list_set_by_name: list_set_by_name,
+    list_set_by_option: list_set_by_option,
     list_set_by_template: list_set_by_template,
     list_set_template_by_ids: list_set_template_by_ids,
     list_set_template_by_name: list_set_template_by_name,
+    list_set_template_by_option: list_set_template_by_option,
     list_slice_by_name_range_time: list_slice_by_name_range_time,
     list_slice_by_name_time: list_slice_by_name_time,
     list_slice_by_range_time: list_slice_by_range_time,
@@ -5829,6 +5904,7 @@ var index = /*#__PURE__*/Object.freeze({
     list_slice_set_option: list_slice_set_option,
     list_type_by_ids: list_type_by_ids,
     list_type_by_name: list_type_by_name,
+    list_type_option: list_type_option,
     read_buffer: read_buffer,
     read_buffer_by_time: read_buffer_by_time,
     read_buffer_first: read_buffer_first,
@@ -5878,4 +5954,4 @@ var index = /*#__PURE__*/Object.freeze({
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_first_offset, list_buffer_last, list_buffer_last_offset, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_by_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_set_by_time, list_device_by_gateway, list_device_by_gateway_name, list_device_by_gateway_type, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_by_name_category, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_by_name_category, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_by_name_category, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_name_category, list_model_by_type, list_model_config_by_model, list_procedure_by_api, list_role_by_api, list_role_by_user, list_set_by_ids, list_set_by_name, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_data_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };
+export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_auth_token, list_buffer_first, list_buffer_first_offset, list_buffer_last, list_buffer_last_offset, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_by_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_set_by_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_role_by_api, list_role_by_user, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_role, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_data_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };

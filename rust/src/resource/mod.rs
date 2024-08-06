@@ -73,6 +73,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_model_by_type(&self, type_id: Uuid)
+        -> Result<Vec<ModelSchema>, Status>
+    {
+        model::list_model_by_type(&self, type_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_model_by_name(&self, name: &str)
         -> Result<Vec<ModelSchema>, Status>
     {
@@ -89,18 +97,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_model_by_name_category(&self, name: &str, category: &str)
+    pub async fn list_model_option(&self, type_id: Option<Uuid>, name: Option<&str>, category: Option<&str>)
         -> Result<Vec<ModelSchema>, Status>
     {
-        model::list_model_by_name_category(&self, name, category)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_model_by_type(&self, type_id: Uuid)
-        -> Result<Vec<ModelSchema>, Status>
-    {
-        model::list_model_by_type(&self, type_id)
+        model::list_model_option(&self, type_id, name, category)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -211,18 +211,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_device_by_gateway_type(&self, gateway_id: Uuid, type_id: Uuid)
+    pub async fn list_device_option(&self, gateway_id: Option<Uuid>, type_id: Option<Uuid>, name: Option<&str>)
         -> Result<Vec<DeviceSchema>, Status>
     {
-        device::list_device_by_gateway_type(&self, gateway_id, type_id)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_device_by_gateway_name(&self, gateway_id: Uuid, name: &str)
-        -> Result<Vec<DeviceSchema>, Status>
-    {
-        device::list_device_by_gateway_name(&self, gateway_id, name)
+        device::list_device_option(&self, gateway_id, type_id, name)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -284,6 +276,14 @@ impl Resource {
         -> Result<Vec<GatewaySchema>, Status>
     {
         device::list_gateway_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_gateway_option(&self, type_id: Option<Uuid>, name: Option<&str>)
+        -> Result<Vec<GatewaySchema>, Status>
+    {
+        device::list_gateway_option(&self, type_id, name)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -407,6 +407,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_type_option(&self, name: Option<&str>)
+        -> Result<Vec<TypeSchema>, Status>
+    {
+        types::list_type_option(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn create_type(&self, id: Uuid, name: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
@@ -474,10 +482,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_group_model_by_name_category(&self, name: &str, category: &str)
+    pub async fn list_group_model_option(&self, name: Option<&str>, category: Option<&str>)
         -> Result<Vec<GroupModelSchema>, Status>
     {
-        group::list_group_model_by_name_category(&self, name, category)
+        group::list_group_model_option(&self, name, category)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -549,10 +557,10 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_group_device_by_name_category(&self, name: &str, category: &str)
+    pub async fn list_group_device_option(&self, name: Option<&str>, category: Option<&str>)
         -> Result<Vec<GroupDeviceSchema>, Status>
     {
-        group::list_group_device_by_name_category(&self, name, category)
+        group::list_group_device_option(&self, name, category)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -626,10 +634,10 @@ impl Resource {
         })
     }
 
-    pub async fn list_group_gateway_by_name_category(&self, name: &str, category: &str)
+    pub async fn list_group_gateway_option(&self, name: Option<&str>, category: Option<&str>)
         -> Result<Vec<GroupGatewaySchema>, Status>
     {
-        group::list_group_gateway_by_name_category(&self, name, category)
+        group::list_group_gateway_option(&self, name, category)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -701,6 +709,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_set_option(&self, template_id: Option<Uuid>, name: Option<&str>)
+        -> Result<Vec<SetSchema>, Status>
+    {
+        set::list_set_option(&self, template_id, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn create_set(&self, id: Uuid, template_id: Uuid, name: &str, description: Option<&str>)
         -> Result<Uuid, Status>
     {
@@ -763,6 +779,14 @@ impl Resource {
         -> Result<Vec<SetTemplateSchema>, Status>
     {
         set::list_set_template_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_set_template_option(&self, name: Option<&str>)
+        -> Result<Vec<SetTemplateSchema>, Status>
+    {
+        set::list_set_template_option(&self, name)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }

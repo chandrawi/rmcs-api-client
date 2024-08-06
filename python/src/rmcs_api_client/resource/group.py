@@ -80,11 +80,11 @@ def list_group_model_by_category(resource, category: str):
         for result in response.results: ls.append(GroupModelSchema.from_response(result))
         return ls
 
-def list_group_model_by_name_category(resource, name: str, category: str):
+def list_group_model_option(resource, name: Optional[str], category: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
-        request = group_pb2.GroupNameCategory(name=name, category=category)
-        response = stub.ListGroupModelByNameCategory(request=request, metadata=resource.metadata)
+        request = group_pb2.GroupOption(name=name, category=category)
+        response = stub.ListGroupModelOption(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GroupModelSchema.from_response(result))
         return ls
@@ -164,11 +164,11 @@ def list_group_device_by_category(resource, category: str):
         for result in response.results: ls.append(GroupDeviceSchema.from_response(result))
         return ls
 
-def list_group_device_by_name_category(resource, name: str, category: str):
+def list_group_device_option(resource, name: Optional[str], category: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
-        request = group_pb2.GroupNameCategory(name=name, category=category)
-        response = stub.ListGroupDeviceByNameCategory(request=request, metadata=resource.metadata)
+        request = group_pb2.GroupOption(name=name, category=category)
+        response = stub.ListGroupDeviceOption(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GroupDeviceSchema.from_response(result))
         return ls
@@ -248,11 +248,11 @@ def list_group_gateway_by_category(resource, category: str):
         for result in response.results: ls.append(GroupGatewaySchema.from_response(result))
         return ls
 
-def list_group_gateway_by_name_category(resource, name: str, category: str):
+def list_group_gateway_option(resource, name: Optional[str], category: Optional[str]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = group_pb2_grpc.GroupServiceStub(channel)
-        request = group_pb2.GroupNameCategory(name=name, category=category)
-        response = stub.ListGroupGatewayByNameCategory(request=request, metadata=resource.metadata)
+        request = group_pb2.GroupOption(name=name, category=category)
+        response = stub.ListGroupGatewayOption(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(GroupGatewaySchema.from_response(result))
         return ls

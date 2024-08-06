@@ -27,17 +27,17 @@ class Resource:
     def list_model_by_ids(self, ids: list[UUID]) -> List[ModelSchema]:
         return _model.list_model_by_ids(self, ids)
 
+    def list_model_by_type(self, type_id: UUID) -> List[ModelSchema]:
+        return _model.list_model_by_type(self, type_id)
+
     def list_model_by_name(self, name: str) -> List[ModelSchema]:
         return _model.list_model_by_name(self, name)
 
     def list_model_by_category(self, category: str) -> List[ModelSchema]:
         return _model.list_model_by_category(self, category)
 
-    def list_model_by_name_category(self, name: str, category: str) -> List[ModelSchema]:
-        return _model.list_model_by_name_category(self, name, category)
-
-    def list_model_by_type(self, type_id: UUID) -> List[ModelSchema]:
-        return _model.list_model_by_type(self, type_id)
+    def list_model_option(self, type_id: Optional[UUID], name: Optional[str], category: Optional[str]) -> List[ModelSchema]:
+        return _model.list_model_option(self, type_id, name, category)
 
     def create_model(self, id: UUID, data_type: List[DataType], category: str, name: str, description: str) -> UUID:
         return _model.create_model(self, id, data_type, category, name, description)
@@ -81,11 +81,8 @@ class Resource:
     def list_device_by_name(self, name: str) -> List[DeviceSchema]:
         return _device.list_device_by_name(self, name)
 
-    def list_device_by_gateway_type(self, gateway_id: UUID, type_id: UUID) -> List[DeviceSchema]:
-        return _device.list_device_by_gateway_type(self, gateway_id, type_id)
-
-    def list_device_by_gateway_name(self, gateway_id: UUID, name: str) -> List[DeviceSchema]:
-        return _device.list_device_by_gateway_name(self, gateway_id, name)
+    def list_device_option(self, gateway_id: Optional[UUID], type_id: Optional[UUID], name: Optional[str]) -> List[DeviceSchema]:
+        return _device.list_device_option(self, gateway_id, type_id, name)
 
     def create_device(self, id: UUID, gateway_id: UUID, type_id: UUID, serial_number: str, name: str, description: str) -> UUID:
         return _device.create_device(self, id, gateway_id, type_id, serial_number, name, description)
@@ -110,6 +107,9 @@ class Resource:
 
     def list_gateway_by_name(self, name: str) -> List[GatewaySchema]:
         return _device.list_gateway_by_name(self, name)
+
+    def list_gateway_option(self, type_id: Optional[UUID], name: Optional[str]) -> List[GatewaySchema]:
+        return _device.list_gateway_option(self, name)
 
     def create_gateway(self, id: UUID, type_id: UUID, serial_number: str, name: str, description: str) -> UUID:
         return _device.create_gateway(self, id, type_id, serial_number, name, description)
@@ -159,6 +159,9 @@ class Resource:
     def list_type_by_name(self, name: str) -> List[TypeSchema]:
         return _types.list_type_by_name(self, name)
 
+    def list_type_option(self, name: Optional[str]) -> List[TypeSchema]:
+        return _types.list_type_option(self, name)
+
     def create_type(self, id: UUID, name: str, description: str) -> UUID:
         return _types.create_type(self, id, name, description)
 
@@ -186,8 +189,8 @@ class Resource:
     def list_group_model_by_category(self, category: str) -> List[GroupModelSchema]:
         return _group.list_group_model_by_category(self, category)
 
-    def list_group_model_by_name_category(self, name: str, category: str) -> List[GroupModelSchema]:
-        return _group.list_group_model_by_name_category(self, name, category)
+    def list_group_model_option(self, name: Optional[str], category: Optional[str]) -> List[GroupModelSchema]:
+        return _group.list_group_model_option(self, name, category)
 
     def create_group_model(self, id: UUID, name: str, category: str, description: str) -> UUID:
         return _group.create_group_model(self, id, name, category, description)
@@ -216,8 +219,8 @@ class Resource:
     def list_group_device_by_category(self, category: str) -> List[GroupDeviceSchema]:
         return _group.list_group_device_by_category(self, category)
 
-    def list_group_device_by_name_category(self, name: str, category: str) -> List[GroupDeviceSchema]:
-        return _group.list_group_device_by_name_category(self, name, category)
+    def list_group_device_option(self, name: Optional[str], category: Optional[str]) -> List[GroupDeviceSchema]:
+        return _group.list_group_device_option(self, name, category)
 
     def create_group_device(self, id: UUID, name: str, category: str, description: str) -> UUID:
         return _group.create_group_device(self, id, name, category, description)
@@ -246,8 +249,8 @@ class Resource:
     def list_group_gateway_by_category(self, category: str) -> List[GroupGatewaySchema]:
         return _group.list_group_gateway_by_category(self, category)
 
-    def list_group_gateway_by_name_category(self, name: str, category: str) -> List[GroupGatewaySchema]:
-        return _group.list_group_gateway_by_name_category(self, name, category)
+    def list_group_gateway_option(self, name: Optional[str], category: Optional[str]) -> List[GroupGatewaySchema]:
+        return _group.list_group_gateway_option(self, name, category)
 
     def create_group_gateway(self, id: UUID, name: str, category: str, description: str) -> UUID:
         return _group.create_group_gateway(self, id, name, category, description)
@@ -276,6 +279,9 @@ class Resource:
     def list_set_by_name(self, name: str) -> List[SetSchema]:
         return _set.list_set_by_name(self, name)
 
+    def list_set_option(self, template_id: Optional[UUID], name: Optional[UUID]) -> List[SetSchema]:
+        return _set.list_set_option(self, template_id, name)
+
     def create_set(self, id: UUID, template_id: UUID, name: str, description: str) -> UUID:
         return _set.create_set(self, id, template_id, name, description)
 
@@ -302,6 +308,9 @@ class Resource:
 
     def list_set_template_by_name(self, name: str) -> List[SetTemplateSchema]:
         return _set.list_set_template_by_name(self, name)
+
+    def list_set_template_option(self, name: Optional[str]) -> List[SetTemplateSchema]:
+        return _set.list_set_template_option(self, name)
 
     def create_set_template(self, id: UUID, name: str, description: str) -> UUID:
         return _set.create_set_template(self, id, name, description)

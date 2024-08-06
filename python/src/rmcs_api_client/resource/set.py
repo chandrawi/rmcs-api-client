@@ -83,6 +83,20 @@ def list_set_by_name(resource, name: str):
         for result in response.results: ls.append(SetSchema.from_response(result))
         return ls
 
+def list_set_option(resource, template_id: Optional[UUID], name: Optional[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = set_pb2_grpc.SetServiceStub(channel)
+        template_bytes = None
+        if template_id != None: template_bytes = template_id.bytes
+        request = set_pb2.SetOption(
+            template_id=template_bytes,
+            name=name
+        )
+        response = stub.ListSetOption(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(SetSchema.from_response(result))
+        return ls
+
 def create_set(resource, id: UUID, template_id: UUID, name: str, description: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
@@ -170,6 +184,17 @@ def list_set_template_by_name(resource, name: str):
         response = stub.ListSetTemplateByName(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SetTemplateSchema.from_response(result))
+        return ls
+
+def list_set_template_option(resource, name: Optional[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = set_pb2_grpc.SetServiceStub(channel)
+        request = set_pb2.SetOption(
+            name=name
+        )
+        response = stub.ListSetTemplateOption(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(SetSchema.from_response(result))
         return ls
 
 def create_set_template(resource, id: UUID, name: str, description: str):

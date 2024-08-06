@@ -48,9 +48,10 @@ function get_model_id(r) {
  */
 
 /**
- * @typedef {Object} ModelNameCategory
- * @property {string} name
- * @property {string} category
+ * @typedef {Object} ModelOption
+ * @property {?Uuid} type_id
+ * @property {?string} name
+ * @property {?string} category
  */
 
 /**
@@ -214,17 +215,20 @@ export async function list_model_by_category(server, request) {
 }
 
 /**
- * Read models by name and category
+ * Read models with select options
  * @param {ServerConfig} server server configuration: address, token
- * @param {ModelNameCategory} request model name and category: name, category
+ * @param {ModelOption} request model select option: type_id, name, category
  * @returns {Promise<ModelSchema[]>} model schema: id, category, name, description, data_type, configs
  */
-export async function list_model_by_name_category(server, request) {
+export async function list_model_option(server, request) {
     const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
-    const modelNameCategory = new pb_model.ModelNameCategory();
-    modelNameCategory.setName(request.name);
-    modelNameCategory.setCategory(request.category);
-    return client.listModelByNameCategory(modelNameCategory, metadata(server))
+    const modelOption = new pb_model.ModelOption();
+    if (request.type_id) {
+        modelOption.setTypeId(uuid_hex_to_base64(request.type_id));
+    }
+    modelOption.setName(request.name);
+    modelOption.setCategory(request.category);
+    return client.listModelOption(modelOption, metadata(server))
         .then(response => get_model_schema_vec(response.toObject().resultsList));
 }
 

@@ -4,7 +4,7 @@ use rmcs_resource_db::schema::value::{DataType, ConfigValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
-    ModelSchema, ModelId, ModelIds, ModelName, ModelCategory, ModelNameCategory, TypeId, ModelUpdate, 
+    ModelSchema, ModelId, ModelIds, ModelName, ModelCategory, ModelOption, TypeId, ModelUpdate, 
     ConfigSchema, ConfigId, ConfigUpdate
 };
 use crate::resource::Resource;
@@ -43,6 +43,21 @@ pub(crate) async fn list_model_by_ids(resource: &Resource, ids: &[Uuid])
     Ok(response.results)
 }
 
+pub(crate) async fn list_model_by_type(resource: &Resource, type_id: Uuid)
+    -> Result<Vec<ModelSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TypeId {
+        id: type_id.as_bytes().to_vec()
+    });
+    let response = client.list_model_by_type(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
 pub(crate) async fn list_model_by_name(resource: &Resource, name: &str)
     -> Result<Vec<ModelSchema>, Status>
 {
@@ -73,32 +88,18 @@ pub(crate) async fn list_model_by_category(resource: &Resource, category: &str)
     Ok(response.results)
 }
 
-pub(crate) async fn list_model_by_name_category(resource: &Resource, name: &str, category: &str)
+pub(crate) async fn list_model_option(resource: &Resource, type_id: Option<Uuid>, name: Option<&str>, category: Option<&str>)
     -> Result<Vec<ModelSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(ModelNameCategory {
-        name: name.to_owned(),
-        category: category.to_owned()
+    let request = Request::new(ModelOption {
+        type_id: type_id.map(|id| id.as_bytes().to_vec()),
+        name: name.map(|s| s.to_owned()),
+        category: category.map(|s| s.to_owned())
     });
-    let response = client.list_model_by_name_category(request)
-        .await?
-        .into_inner();
-    Ok(response.results)
-}
-
-pub(crate) async fn list_model_by_type(resource: &Resource, type_id: Uuid)
-    -> Result<Vec<ModelSchema>, Status>
-{
-    let interceptor = TokenInterceptor(resource.access_token.clone());
-    let mut client = 
-        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(TypeId {
-        id: type_id.as_bytes().to_vec()
-    });
-    let response = client.list_model_by_type(request)
+    let response = client.list_model_option(request)
         .await?
         .into_inner();
     Ok(response.results)

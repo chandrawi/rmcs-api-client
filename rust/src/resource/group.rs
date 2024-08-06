@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_api::group::group_service_client::GroupServiceClient;
 use rmcs_resource_api::group::{
-    GroupModelSchema, GroupDeviceSchema, GroupId, GroupIds, GroupName, GroupNameCategory, GroupCategory, GroupUpdate,
+    GroupModelSchema, GroupDeviceSchema, GroupId, GroupIds, GroupName, GroupOption, GroupCategory, GroupUpdate,
     GroupModel, GroupDevice
 };
 use crate::resource::Resource;
@@ -70,17 +70,17 @@ pub(crate) async fn list_group_model_by_category(resource: &Resource, category: 
     Ok(response.results)
 }
 
-pub(crate) async fn list_group_model_by_name_category(resource: &Resource, name: &str, category: &str)
+pub(crate) async fn list_group_model_option(resource: &Resource, name: Option<&str>, category: Option<&str>)
     -> Result<Vec<GroupModelSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(GroupNameCategory {
-        name: name.to_owned(),
-        category: category.to_owned()
+    let request = Request::new(GroupOption {
+        name: name.map(|s| s.to_owned()),
+        category: category.map(|s| s.to_owned())
     });
-    let response = client.list_group_model_by_name_category(request)
+    let response = client.list_group_model_option(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -226,17 +226,17 @@ pub(crate) async fn list_group_device_by_category(resource: &Resource, category:
     Ok(response.results)
 }
 
-pub(crate) async fn list_group_device_by_name_category(resource: &Resource, name: &str, category: &str)
+pub(crate) async fn list_group_device_option(resource: &Resource, name: Option<&str>, category: Option<&str>)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(GroupNameCategory {
-        name: name.to_owned(),
-        category: category.to_owned()
+    let request = Request::new(GroupOption {
+        name: name.map(|s| s.to_owned()),
+        category: category.map(|s| s.to_owned())
     });
-    let response = client.list_group_device_by_name_category(request)
+    let response = client.list_group_device_option(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -382,17 +382,17 @@ pub(crate) async fn list_group_gateway_by_category(resource: &Resource, category
     Ok(response.results)
 }
 
-pub(crate) async fn list_group_gateway_by_name_category(resource: &Resource, name: &str, category: &str)
+pub(crate) async fn list_group_gateway_option(resource: &Resource, name: Option<&str>, category: Option<&str>)
     -> Result<Vec<GroupDeviceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         GroupServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(GroupNameCategory {
-        name: name.to_owned(),
-        category: category.to_owned()
+    let request = Request::new(GroupOption {
+        name: name.map(|s| s.to_owned()),
+        category: category.map(|s| s.to_owned())
     });
-    let response = client.list_group_gateway_by_name_category(request)
+    let response = client.list_group_gateway_option(request)
         .await?
         .into_inner();
     Ok(response.results)
