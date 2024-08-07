@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_auth_api::role::role_service_client::RoleServiceClient;
 use rmcs_auth_api::role::{
-    RoleSchema, RoleId, RoleName, ApiId, UserId, RoleUpdate, RoleAccess
+    ApiId, RoleAccess, RoleId, RoleName, RoleOption, RoleSchema, RoleUpdate, UserId
 };
 use crate::auth::Auth;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -65,6 +65,39 @@ pub(crate) async fn list_role_by_user(auth: &Auth, user_id: Uuid)
         user_id: user_id.as_bytes().to_vec()
     });
     let response = client.list_role_by_user(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_role_by_name(auth: &Auth, name: &str)
+    -> Result<Vec<RoleSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        RoleServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(RoleName {
+        api_id: Uuid::nil().as_bytes().to_vec(),
+        name: name.to_owned()
+    });
+    let response = client.list_role_by_name(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_role_option(auth: &Auth, api_id: Option<Uuid>, user_id: Option<Uuid>, name: Option<&str>)
+    -> Result<Vec<RoleSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        RoleServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(RoleOption {
+        api_id: api_id.map(|id| id.as_bytes().to_vec()),
+        user_id: user_id.map(|id| id.as_bytes().to_vec()),
+        name: name.map(|s| s.to_owned())
+    });
+    let response = client.list_role_option(request)
         .await?
         .into_inner();
     Ok(response.results)

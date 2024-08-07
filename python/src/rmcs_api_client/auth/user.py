@@ -48,11 +48,46 @@ def read_user_by_name(auth, name: str):
         response = stub.ReadUserByName(request=request, metadata=auth.metadata)
         return UserSchema.from_response(response.result)
 
+def list_user_by_api(auth, api_id: UUID):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = user_pb2_grpc.UserServiceStub(channel)
+        request = user_pb2.ApiId(id=api_id.bytes)
+        response = stub.ListUserByApi(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(UserSchema.from_response(result))
+        return ls
+
 def list_user_by_role(auth, role_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
         request = user_pb2.RoleId(id=role_id.bytes)
         response = stub.ListUserByRole(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(UserSchema.from_response(result))
+        return ls
+
+def list_user_by_name(auth, name: str):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = user_pb2_grpc.UserServiceStub(channel)
+        request = user_pb2.UserName(name=name)
+        response = stub.ListUserByName(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(UserSchema.from_response(result))
+        return ls
+
+def list_user_option(auth, api_id: Optional[UUID], role_id: Optional[UUID], name: Optional[str]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = user_pb2_grpc.UserServiceStub(channel)
+        api_bytes = None
+        if api_id != None: api_bytes = api_id.bytes
+        role_bytes = None
+        if role_id != None: role_bytes = role_id.bytes
+        request = user_pb2.UserOption(
+            api_id=api_bytes,
+            role_id=role_bytes,
+            name=name
+        )
+        response = stub.ListUserOption(request=request, metadata=auth.metadata)
         ls = []
         for result in response.results: ls.append(UserSchema.from_response(result))
         return ls

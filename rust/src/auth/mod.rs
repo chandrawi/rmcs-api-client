@@ -79,10 +79,26 @@ impl Auth {
         .map(|s| s.into())
     }
 
+    pub async fn list_api_by_name(&self, name: &str)
+        -> Result<Vec<ApiSchema>, Status>
+    {
+        api::list_api_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_api_by_category(&self, category: &str)
         -> Result<Vec<ApiSchema>, Status>
     {
         api::list_api_by_category(&self, category)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_api_option(&self, name: Option<&str>, category: Option<&str>)
+        -> Result<Vec<ApiSchema>, Status>
+    {
+        api::list_api_option(&self, name, category)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -128,6 +144,22 @@ impl Auth {
         -> Result<Vec<ProcedureSchema>, Status>
     {
         api::list_procedure_by_api(&self, api_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_procedure_by_name(&self, name: &str)
+        -> Result<Vec<ProcedureSchema>, Status>
+    {
+        api::list_procedure_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_procedure_option(&self, api_id: Option<Uuid>, name: Option<&str>)
+        -> Result<Vec<ProcedureSchema>, Status>
+    {
+        api::list_procedure_option(&self, api_id, name)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -185,6 +217,22 @@ impl Auth {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_role_by_name(&self, name: &str)
+        -> Result<Vec<RoleSchema>, Status>
+    {
+        role::list_role_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_role_option(&self, api_id: Option<Uuid>, user_id: Option<Uuid>, name: Option<&str>)
+        -> Result<Vec<RoleSchema>, Status>
+    {
+        role::list_role_option(&self, api_id, user_id, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn create_role(&self, id: Uuid, api_id: Uuid, name: &str, multi: bool, ip_lock: bool, access_duration: i32, refresh_duration: i32)
         -> Result<Uuid, Status>
     {
@@ -236,10 +284,34 @@ impl Auth {
         .map(|s| s.into())
     }
 
+    pub async fn list_user_by_api(&self, api_id: Uuid)
+        -> Result<Vec<UserSchema>, Status>
+    {
+        user::list_user_by_api(&self, api_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_user_by_role(&self, role_id: Uuid)
         -> Result<Vec<UserSchema>, Status>
     {
         user::list_user_by_role(&self, role_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_user_by_name(&self, name: &str)
+        -> Result<Vec<UserSchema>, Status>
+    {
+        user::list_user_by_name(&self, name)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_user_option(&self, api_id: Option<Uuid>, role_id: Option<Uuid>, name: Option<&str>)
+        -> Result<Vec<UserSchema>, Status>
+    {
+        user::list_user_option(&self, api_id, role_id, name)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }

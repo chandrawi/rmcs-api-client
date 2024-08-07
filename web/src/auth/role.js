@@ -48,6 +48,13 @@ function get_role_id(r) {
  */
 
 /**
+ * @typedef {Object} RoleOption
+ * @property {?Uuid} api_id
+ * @property {?Uuid} user_id
+ * @property {?string} name
+ */
+
+/**
  * @typedef {Object} RoleSchema
  * @property {Uuid} id
  * @property {Uuid} api_id
@@ -157,6 +164,40 @@ export async function list_role_by_user(server, request) {
     const userId = new pb_role.UserId();
     userId.setUserId(uuid_hex_to_base64(request.id));
     return client.listRoleByUser(userId, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read roles by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleName} request role name: name
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
+ */
+export async function list_role_by_name(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
+    const roleName = new pb_role.RoleName();
+    roleName.setName(request.name);
+    return client.listRoleByName(roleName, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read roles with options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleOption} request role option: api_id, user_id, name
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
+ */
+export async function list_role_option(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
+    const roleOption = new pb_role.RoleOption();
+    if (request.api_id) {
+        roleOption.setApiId(uuid_hex_to_base64(request.api_id))
+    }
+    if (request.user_id) {
+        roleOption.setUserId(uuid_hex_to_base64(request.user_id))
+    }
+    roleOption.setName(request.name);
+    return client.listRoleOption(roleOption, metadata(server))
         .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 

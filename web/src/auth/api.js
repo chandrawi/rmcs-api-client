@@ -42,6 +42,12 @@ function getApiId(r) {
  */
 
 /**
+ * @typedef {Object} ApiOption
+ * @property {?string} name
+ * @property {?string} category
+ */
+
+/**
  * @typedef {Object} ApiSchema
  * @property {Uuid} id
  * @property {string} name
@@ -108,6 +114,12 @@ function get_procedure_id(r) {
  * @typedef {Object} ProcedureName
  * @property {Uuid} api_id
  * @property {string} name
+ */
+
+/**
+ * @typedef {Object} ProcedureOption
+ * @property {?Uuid} api_id
+ * @property {?string} name
  */
 
 /**
@@ -178,6 +190,20 @@ export async function read_api_by_name(server, request) {
 }
 
 /**
+ * Read apis by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ApiName} request api name: name
+ * @returns {Promise<ApiSchema[]>} api schema: id, name, address, category, description, password, access_key, procedures
+ */
+export async function list_api_by_name(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const apiName = new pb_api.ApiName();
+    apiName.setName(request.name);
+    return client.listApiByName(apiName, metadata(server))
+        .then(response => get_api_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read apis by category
  * @param {ServerConfig} server server configuration: address, token
  * @param {ApiCategory} request api category: category
@@ -188,6 +214,21 @@ export async function list_api_by_category(server, request) {
     const apiCategory = new pb_api.ApiCategory();
     apiCategory.setCategory(request.category);
     return client.listApiByCategory(apiCategory, metadata(server))
+        .then(response => get_api_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read apis with options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ApiOption} request api option: name, category
+ * @returns {Promise<ApiSchema[]>} api schema: id, name, address, category, description, password, access_key, procedures
+ */
+export async function list_api_option(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const apiOption = new pb_api.ApiOption();
+    apiOption.setName(request.name);
+    apiOption.setCategory(request.category);
+    return client.listApiOption(apiOption, metadata(server))
         .then(response => get_api_schema_vec(response.toObject().resultsList));
 }
 
@@ -285,6 +326,37 @@ export async function list_procedure_by_api(server, request) {
     const apiId = new pb_api.ApiId();
     apiId.setId(uuid_hex_to_base64(request.id));
     return client.listProcedureByApi(apiId, metadata(server))
+        .then(response => get_procedure_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read procedures by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProcedureName} request procedure name: name
+ * @returns {Promise<ProcedureSchema[]>} procedure schema: id, api_id, name, description, roles
+ */
+export async function list_procedure_by_name(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const procedureName = new pb_api.ProcedureName();
+    procedureName.setName(request.name);
+    return client.listProcedureByName(procedureName, metadata(server))
+        .then(response => get_procedure_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read procedures with options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProcedureOption} request procedure option: api_id, name
+ * @returns {Promise<ProcedureSchema[]>} procedure schema: id, api_id, name, description, roles
+ */
+export async function list_procedure_option(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const procedureOption = new pb_api.ProcedureOption();
+    if (request.api_id) {
+        procedureOption.setApiId(uuid_hex_to_base64(request.api_id))
+    }
+    procedureOption.setName(request.name);
+    return client.listProcedureOption(procedureOption, metadata(server))
         .then(response => get_procedure_schema_vec(response.toObject().resultsList));
 }
 

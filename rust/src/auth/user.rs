@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_auth_api::user::user_service_client::UserServiceClient;
 use rmcs_auth_api::user::{
-    UserSchema, UserId, UserName, RoleId, UserUpdate, UserRole
+    UserSchema, UserId, UserName, ApiId, RoleId, UserOption, UserUpdate, UserRole
 };
 use crate::auth::Auth;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -39,6 +39,21 @@ pub(crate) async fn read_user_by_name(auth: &Auth, name: &str)
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
 }
 
+pub(crate) async fn list_user_by_api(auth: &Auth, api_id: Uuid)
+    -> Result<Vec<UserSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(ApiId {
+        id: api_id.as_bytes().to_vec()
+    });
+    let response = client.list_user_by_api(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
 pub(crate) async fn list_user_by_role(auth: &Auth, role_id: Uuid)
     -> Result<Vec<UserSchema>, Status>
 {
@@ -49,6 +64,38 @@ pub(crate) async fn list_user_by_role(auth: &Auth, role_id: Uuid)
         id: role_id.as_bytes().to_vec()
     });
     let response = client.list_user_by_role(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_user_by_name(auth: &Auth, name: &str)
+    -> Result<Vec<UserSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(UserName {
+        name: name.to_owned()
+    });
+    let response = client.list_user_by_name(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_user_option(auth: &Auth, api_id: Option<Uuid>, role_id: Option<Uuid>, name: Option<&str>)
+    -> Result<Vec<UserSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(UserOption {
+        api_id: api_id.map(|id| id.as_bytes().to_vec()),
+        role_id: role_id.map(|id| id.as_bytes().to_vec()),
+        name: name.map(|s| s.to_owned())
+    });
+    let response = client.list_user_option(request)
         .await?
         .into_inner();
     Ok(response.results)

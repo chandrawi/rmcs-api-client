@@ -55,6 +55,32 @@ def list_role_by_user(auth, user_id: UUID):
         for result in response.results: ls.append(RoleSchema.from_response(result))
         return ls
 
+def list_role_by_name(auth, name: str):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = role_pb2_grpc.RoleServiceStub(channel)
+        request = role_pb2.RoleName(name=name)
+        response = stub.ListRoleByName(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(RoleSchema.from_response(result))
+        return ls
+
+def list_role_option(auth, api_id: Optional[UUID], user_id: Optional[UUID], name: Optional[str]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = role_pb2_grpc.RoleServiceStub(channel)
+        api_bytes = None
+        if api_id != None: api_bytes = api_id.bytes
+        user_bytes = None
+        if user_id != None: user_bytes = user_id.bytes
+        request = role_pb2.RoleOption(
+            api_id=api_bytes,
+            user_id=user_bytes,
+            name=name
+        )
+        response = stub.ListRoleOption(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(RoleSchema.from_response(result))
+        return ls
+
 def create_role(auth, id: UUID, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)

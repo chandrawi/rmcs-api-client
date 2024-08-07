@@ -17,6 +17,11 @@ import {
  */
 
 /**
+ * @typedef {Object} ApiId
+ * @property {Uuid} id
+ */
+
+/**
  * @typedef {Object} UserId
  * @property {Uuid} id
  */
@@ -39,6 +44,13 @@ function get_user_id(r) {
 /**
  * @typedef {Object} RoleId
  * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} UserOption
+ * @property {?Uuid} api_id
+ * @property {?Uuid} role_id
+ * @property {?name} name
  */
 
 /**
@@ -146,6 +158,20 @@ export async function read_user_by_name(server, request) {
 }
 
 /**
+ * Read users by api uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ApiId} request api uuid: id
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
+ */
+export async function list_user_by_api(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
+    const apiId = new pb_user.ApiId();
+    apiId.setId(uuid_hex_to_base64(request.id));
+    return client.listUserByApi(apiId, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read users by role uuid
  * @param {ServerConfig} server server configuration: address, token
  * @param {RoleId} request role uuid: id
@@ -156,6 +182,40 @@ export async function list_user_by_role(server, request) {
     const roleId = new pb_user.RoleId();
     roleId.setId(uuid_hex_to_base64(request.id));
     return client.listUserByRole(roleId, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read users by name
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserName} request user name: name
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
+ */
+export async function list_user_by_name(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
+    const userName = new pb_user.UserName();
+    userName.setName(request.name);
+    return client.listUserByName(userName, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read users with options
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserOption} request user option: api_id, role_id, name
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
+ */
+export async function list_user_option(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
+    const userOption = new pb_user.UserOption();
+    if (request.api_id) {
+        userOption.setApiId(uuid_hex_to_base64(request.api_id))
+    }
+    if (request.role_id) {
+        userOption.setApiId(uuid_hex_to_base64(request.role_id))
+    }
+    userOption.setName(request.name);
+    return client.listUserOption(userOption, metadata(server))
         .then(response => get_user_schema_vec(response.toObject().resultsList));
 }
 
