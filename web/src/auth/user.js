@@ -27,6 +27,11 @@ import {
  */
 
 /**
+ * @typedef {Object} UserIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {UserId}
  */
@@ -155,6 +160,20 @@ export async function read_user_by_name(server, request) {
     userName.setName(request.name);
     return client.readUserByName(userName, metadata(server))
         .then(response => get_user_schema(response.toObject().result));
+}
+
+/**
+ * Read users by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserIds} request user uuid list: ids
+ * @returns {Promise<UserSchema[]>} user schema: id, name, email, phone, password, roles
+ */
+export async function list_user_by_ids(server, request) {
+    const client = new pb_user.UserServicePromiseClient(server.address, null, null);
+    const userIds = new pb_user.UserIds();
+    userIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listUserByIds(userIds, metadata(server))
+        .then(response => get_user_schema_vec(response.toObject().resultsList));
 }
 
 /**

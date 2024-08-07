@@ -6,6 +6,7 @@ export * as utility from './utility.js';
 export {
     read_api,
     read_api_by_name,
+    list_api_by_ids,
     list_api_by_name,
     list_api_by_category,
     list_api_option,
@@ -14,6 +15,7 @@ export {
     delete_api,
     read_procedure,
     read_procedure_by_name,
+    list_procedure_by_ids,
     list_procedure_by_api,
     list_procedure_by_name,
     list_procedure_option,
@@ -24,6 +26,7 @@ export {
 export {
     read_role,
     read_role_by_name,
+    list_role_by_ids,
     list_role_by_api,
     list_role_by_user,
     list_role_by_name,
@@ -37,6 +40,7 @@ export {
 export {
     read_user,
     read_user_by_name,
+    list_user_by_ids,
     list_user_by_api,
     list_user_by_role,
     list_user_by_name,

@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_auth_api::role::role_service_client::RoleServiceClient;
 use rmcs_auth_api::role::{
-    ApiId, RoleAccess, RoleId, RoleName, RoleOption, RoleSchema, RoleUpdate, UserId
+    RoleId, RoleIds, RoleName, ApiId, UserId, RoleOption, RoleSchema, RoleUpdate, RoleAccess
 };
 use crate::auth::Auth;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -38,6 +38,21 @@ pub(crate) async fn read_role_by_name(auth: &Auth, api_id: Uuid, name: &str)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(ROLE_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_role_by_ids(auth: &Auth, ids: &[Uuid])
+    -> Result<Vec<RoleSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        RoleServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(RoleIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_role_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_role_by_api(auth: &Auth, api_id: Uuid)

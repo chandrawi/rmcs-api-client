@@ -22,6 +22,11 @@ import {
  */
 
 /**
+ * @typedef {Object} RoleIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {RoleId}
  */
@@ -137,6 +142,20 @@ export async function read_role_by_name(server, request) {
     roleName.setName(request.name);
     return client.readRoleByName(roleName, metadata(server))
         .then(response => get_role_schema(response.toObject().result));
+}
+
+/**
+ * Read roles by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleIds} request role uuid list: ids
+ * @returns {Promise<RoleSchema[]>} role schema: id, api_id, name, multi, ip_lock, access_duration, refresh_duration, access_key, procedures
+ */
+export async function list_role_by_ids(server, request) {
+    const client = new pb_role.RoleServicePromiseClient(server.address, null, null);
+    const roleIds = new pb_role.RoleIds();
+    roleIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listRoleByIds(roleIds, metadata(server))
+        .then(response => get_role_schema_vec(response.toObject().resultsList));
 }
 
 /**

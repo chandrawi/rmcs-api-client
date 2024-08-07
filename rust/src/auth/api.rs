@@ -2,7 +2,8 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_auth_api::api::api_service_client::ApiServiceClient;
 use rmcs_auth_api::api::{
-    ApiCategory, ApiId, ApiName, ApiOption, ApiSchema, ApiUpdate, ProcedureId, ProcedureName, ProcedureOption, ProcedureSchema, ProcedureUpdate
+    ApiId, ApiIds, ApiName, ApiCategory, ApiOption, ApiSchema, ApiUpdate, 
+    ProcedureId, ProcedureIds, ProcedureName, ProcedureOption, ProcedureSchema, ProcedureUpdate
 };
 use crate::auth::Auth;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -36,6 +37,21 @@ pub(crate) async fn read_api_by_name(auth: &Auth, name: &str)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(API_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_api_by_ids(auth: &Auth, ids: &[Uuid])
+    -> Result<Vec<ApiSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(ApiIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_api_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_api_by_name(auth: &Auth, name: &str)
@@ -169,6 +185,21 @@ pub(crate) async fn read_procedure_by_name(auth: &Auth, api_id: Uuid, name: &str
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(PROC_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_procedure_by_ids(auth: &Auth, ids: &[Uuid])
+    -> Result<Vec<ProcedureSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        ApiServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(ProcedureIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_procedure_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_procedure_by_api(auth: &Auth, api_id: Uuid)

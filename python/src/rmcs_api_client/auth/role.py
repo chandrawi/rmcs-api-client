@@ -37,6 +37,15 @@ def read_role_by_name(auth, api_id: UUID, name: str):
         response = stub.ReadRoleByName(request=request, metadata=auth.metadata)
         return RoleSchema.from_response(response.result)
 
+def list_role_by_ids(auth, ids: List[UUID]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = role_pb2_grpc.RoleServiceStub(channel)
+        request = role_pb2.RoleIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListRoleByIds(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(RoleSchema.from_response(result))
+        return ls
+
 def list_role_by_api(auth, api_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = role_pb2_grpc.RoleServiceStub(channel)

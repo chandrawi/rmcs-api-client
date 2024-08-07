@@ -2,7 +2,7 @@ use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_auth_api::user::user_service_client::UserServiceClient;
 use rmcs_auth_api::user::{
-    UserSchema, UserId, UserName, ApiId, RoleId, UserOption, UserUpdate, UserRole
+    UserId, UserIds, UserName, ApiId, RoleId, UserOption, UserSchema, UserUpdate, UserRole
 };
 use crate::auth::Auth;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -37,6 +37,21 @@ pub(crate) async fn read_user_by_name(auth: &Auth, name: &str)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(USER_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_user_by_ids(auth: &Auth, ids: &[Uuid])
+    -> Result<Vec<UserSchema>, Status>
+{
+    let interceptor = TokenInterceptor(auth.auth_token.clone());
+    let mut client = 
+        UserServiceClient::with_interceptor(auth.channel.to_owned(), interceptor);
+    let request = Request::new(UserIds {
+        ids: ids.into_iter().map(|&id| id.as_bytes().to_vec()).collect()
+    });
+    let response = client.list_user_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_user_by_api(auth: &Auth, api_id: Uuid)

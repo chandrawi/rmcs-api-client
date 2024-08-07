@@ -22,6 +22,11 @@ import {
  */
 
 /**
+ * @typedef {Object} ApiIds
+ * @property {Uuid[]} ids
+ */
+
+/**
  * @param {*} r 
  * @returns {ApiId}
  */
@@ -98,6 +103,11 @@ function get_api_schema_vec(r) {
 /**
  * @typedef {Object} ProcedureId
  * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} ProcedureIds
+ * @property {Uuid[]} ids
  */
 
 /**
@@ -187,6 +197,20 @@ export async function read_api_by_name(server, request) {
     apiName.setName(request.name);
     return client.readApiByName(apiName, metadata(server))
         .then(response => get_api_schema(response.toObject().result));
+}
+
+/**
+ * Read apis by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ApiIds} request api uuid list: ids
+ * @returns {Promise<ApiSchema[]>} api schema: id, name, address, category, description, password, access_key, procedures
+ */
+export async function list_api_by_ids(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const apiIds = new pb_api.ApiIds();
+    apiIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listApiByIds(apiIds, metadata(server))
+        .then(response => get_api_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -313,6 +337,20 @@ export async function read_procedure_by_name(server, request) {
     procedureName.setName(request.name);
     return client.readProcedureByName(procedureName, metadata(server))
         .then(response => get_procedure_schema(response.toObject().result));
+}
+
+/**
+ * Read procedures by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProcedureIds} request procedure uuid list: ids
+ * @returns {Promise<ProcedureSchema[]>} procedure schema: id, api_id, name, description, roles
+ */
+export async function list_procedure_by_ids(server, request) {
+    const client = new pb_api.ApiServicePromiseClient(server.address, null, null);
+    const procedureIds = new pb_api.ProcedureIds();
+    procedureIds.setIdsList(request.ids.map((id) => uuid_hex_to_base64(id)));
+    return client.listProcedureByIds(procedureIds, metadata(server))
+        .then(response => get_procedure_schema_vec(response.toObject().resultsList));
 }
 
 /**

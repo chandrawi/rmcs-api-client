@@ -50,6 +50,15 @@ def read_api_by_name(auth, name: str):
         response = stub.ReadApiByName(request=request, metadata=auth.metadata)
         return ApiSchema.from_response(response.result)
 
+def list_api_by_ids(auth, ids: List[UUID]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = api_pb2_grpc.ApiServiceStub(channel)
+        request = api_pb2.ApiIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListApiByIds(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(ApiSchema.from_response(result))
+        return ls
+
 def list_api_by_name(auth, name: str):
     with grpc.insecure_channel(auth.address) as channel:
         stub = api_pb2_grpc.ApiServiceStub(channel)
@@ -125,6 +134,15 @@ def read_procedure_by_name(auth, api_id: UUID, name: str):
         request = api_pb2.ProcedureName(api_id=api_id.bytes, name=name)
         response = stub.ReadProcedureByName(request=request, metadata=auth.metadata)
         return ProcedureSchema.from_response(response.result)
+
+def list_procedure_by_ids(auth, ids: List[UUID]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = api_pb2_grpc.ApiServiceStub(channel)
+        request = api_pb2.ProcedureIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListProcedureByIds(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(ProcedureSchema.from_response(result))
+        return ls
 
 def list_procedure_by_api(auth, api_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:

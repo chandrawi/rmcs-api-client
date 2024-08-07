@@ -31,13 +31,16 @@ class Auth:
     def read_api_by_name(self, name: str) -> ApiSchema:
         return api.read_api_by_name(self, name)
 
-    def list_api_by_name(self, name: str):
+    def list_api_by_ids(self, ids: list[UUID]) -> List[ApiSchema]:
+        api.list_api_by_ids(self, ids)
+
+    def list_api_by_name(self, name: str) -> List[ApiSchema]:
         api.list_api_by_name(self, name)
 
     def list_api_by_category(self, category: str) -> List[ApiSchema]:
         return api.list_api_by_category(self, category)
 
-    def list_api_option(self, name: Optional[str], category: Optional[str]):
+    def list_api_option(self, name: Optional[str], category: Optional[str]) -> List[ApiSchema]:
         api.list_api_option(self, name, category)
 
     def create_api(self, id: UUID, name: str, address: str, category: str, description: str, password: str, access_key: bytes) -> UUID:
@@ -55,14 +58,17 @@ class Auth:
     def read_procedure_by_name(self, api_id: UUID, name: str) -> ProcedureSchema:
         return api.read_procedure_by_name(self, api_id, name)
 
+    def list_procedure_by_ids(self, ids: list[UUID]) -> List[ProcedureSchema]:
+        api.list_procedure_by_ids(self, ids)
+
     def list_procedure_by_api(self, api_id: UUID) -> List[ProcedureSchema]:
         return api.list_procedure_by_api(self, api_id)
 
-    def list_procedure_by_name(self, name: str):
-        api.select_procedure(self, name)
+    def list_procedure_by_name(self, name: str) -> List[ProcedureSchema]:
+        api.list_procedure_by_name(self, name)
 
-    def list_procedure_option(self, api_id: Optional[UUID], name: Optional[str]):
-        api.select_procedure(self, None, api_id, None, name)
+    def list_procedure_option(self, api_id: Optional[UUID], name: Optional[str]) -> List[ProcedureSchema]:
+        api.list_procedure_option(self, None, api_id, None, name)
 
     def create_procedure(self, id: UUID, api_id: UUID, name: str, description: str) -> UUID:
         return api.create_procedure(self, id, api_id, name, description)
@@ -82,14 +88,17 @@ class Auth:
     def list_role_by_api(self, api_id: UUID) -> List[RoleSchema]:
         return role.list_role_by_api(self, api_id)
     
-    def list_role_by_user(self, user_id: UUID):
+    def list_role_by_user(self, user_id: UUID) -> List[RoleSchema]:
         return role.list_role_by_user(self, user_id)
 
-    def list_role_by_name(self, name: str):
-        role.select_role(self, name)
+    def list_role_by_ids(self, ids: List[UUID]) -> List[RoleSchema]:
+        role.list_role_by_ids(self, ids)
 
-    def list_role_option(self, api_id: Optional[UUID], user_id: Optional[UUID], name: Optional[str]):
-        role.select_role(self, api_id, user_id, name)
+    def list_role_by_name(self, name: str) -> List[RoleSchema]:
+        role.list_role_by_name(self, name)
+
+    def list_role_option(self, api_id: Optional[UUID], user_id: Optional[UUID], name: Optional[str]) -> List[RoleSchema]:
+        role.list_role_option(self, api_id, user_id, name)
 
     def create_role(self, id: UUID, api_id: UUID, name: str, multi: bool, ip_lock: bool, access_duration: int, refresh_duration: int) -> UUID:
         return role.create_role(self, id, api_id, name, multi, ip_lock, access_duration, refresh_duration)
@@ -112,17 +121,20 @@ class Auth:
     def read_user_by_name(self, name: str) -> UserSchema:
         return user.read_user_by_name(self, name)
 
-    def list_user_by_api(self, api_id: UUID):
-        user.select_user(self, api_id)
+    def list_user_by_ids(self, ids: List[UUID]) -> List[UserSchema]:
+        user.list_user_by_ids(self, ids)
+
+    def list_user_by_api(self, api_id: UUID) -> List[UserSchema]:
+        user.list_user_by_api(self, api_id)
 
     def list_user_by_role(self, role_id: UUID) -> List[UserSchema]:
         return user.list_user_by_role(self, role_id)
 
-    def list_user_by_name(self, name: str):
-        user.select_user(self, name)
+    def list_user_by_name(self, name: str) -> List[UserSchema]:
+        user.list_user_by_name(self, name)
 
-    def list_user_option(self, api_id: Optional[UUID], role_id: Optional[UUID], name: Optional[str]):
-        user.select_user(self, None, api_id, role_id, None, name)
+    def list_user_option(self, api_id: Optional[UUID], role_id: Optional[UUID], name: Optional[str]) -> List[UserSchema]:
+        user.list_user_by_name(self, None, api_id, role_id, None, name)
 
     def create_user(self, id: UUID, name: str, email: str, phone: str, password: str) -> UUID:
         return user.create_user(self, id, name, email, phone, password)

@@ -79,6 +79,14 @@ impl Auth {
         .map(|s| s.into())
     }
 
+    pub async fn list_api_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<ApiSchema>, Status>
+    {
+        api::list_api_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_api_by_name(&self, name: &str)
         -> Result<Vec<ApiSchema>, Status>
     {
@@ -140,6 +148,14 @@ impl Auth {
         .map(|s| s.into())
     }
 
+    pub async fn list_procedure_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<ProcedureSchema>, Status>
+    {
+        api::list_procedure_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_procedure_by_api(&self, api_id: Uuid)
         -> Result<Vec<ProcedureSchema>, Status>
     {
@@ -199,6 +215,14 @@ impl Auth {
         role::read_role_by_name(&self, api_id, name)
         .await
         .map(|s| s.into())
+    }
+
+    pub async fn list_role_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<RoleSchema>, Status>
+    {
+        role::list_role_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_role_by_api(&self, api_id: Uuid)
@@ -282,6 +306,14 @@ impl Auth {
         user::read_user_by_name(&self, name)
         .await
         .map(|s| s.into())
+    }
+
+    pub async fn list_user_by_ids(&self, ids: &[Uuid])
+        -> Result<Vec<UserSchema>, Status>
+    {
+        user::list_user_by_ids(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
     pub async fn list_user_by_api(&self, api_id: Uuid)

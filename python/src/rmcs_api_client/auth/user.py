@@ -48,6 +48,15 @@ def read_user_by_name(auth, name: str):
         response = stub.ReadUserByName(request=request, metadata=auth.metadata)
         return UserSchema.from_response(response.result)
 
+def list_user_by_ids(auth, ids: List[UUID]):
+    with grpc.insecure_channel(auth.address) as channel:
+        stub = user_pb2_grpc.UserServiceStub(channel)
+        request = user_pb2.UserIds(ids=list(map(lambda x: x.bytes, ids)))
+        response = stub.ListUserByIds(request=request, metadata=auth.metadata)
+        ls = []
+        for result in response.results: ls.append(UserSchema.from_response(result))
+        return ls
+
 def list_user_by_api(auth, api_id: UUID):
     with grpc.insecure_channel(auth.address) as channel:
         stub = user_pb2_grpc.UserServiceStub(channel)
