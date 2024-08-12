@@ -1754,17 +1754,9 @@ const DataType = {
     F32: 12,
     F64: 13,
     BOOL: 15,
-    CHAR: 16
-};
-
-/**
- * @enum {number}
- */
-const ConfigType = {
-    NULLC: 0,
-    INT: 1,
-    FLOAT: 2,
-    STR: 3
+    CHAR: 16,
+    STRING: 17,
+    BYTES: 18
 };
 
 /**
@@ -1791,8 +1783,10 @@ function set_data_type(type) {
             case "U128": return DataType.U128;
             case "F32": return DataType.F32;
             case "F64": return DataType.F64;
-            case "CHAR": return DataType.CHAR;
             case "BOOL": return DataType.BOOL;
+            case "CHAR": return DataType.CHAR;
+            case "STRING": return DataType.STRING;
+            case "BYTES": return DataType.BYTES;
         }
     }
     return DataType.NULLD;
@@ -1816,8 +1810,10 @@ function get_data_type(type) {
         case DataType.U128: return "U128";
         case DataType.F32: return "F32";
         case DataType.F64: return "F64";
-        case DataType.CHAR: return "CHAR";
         case DataType.BOOL: return "BOOL";
+        case DataType.CHAR: return "CHAR";
+        case DataType.STRING: return "STRING";
+        case DataType.BYTES: return "BYTES";
     }
     return "NULL";
 }
@@ -1848,69 +1844,90 @@ function array_buffer_to_base64(buffer) {
 /**
  * @param {string} base64 
  * @param {number[]} types 
- * @returns {(number|bigint|string|boolean|null)[]}
+ * @returns {(number|bigint|string|Uint8Array|boolean|null)[]}
  */
 function get_data_value(base64, types) {
-    const view = new DataView(base64_to_array_buffer(base64));
+    const buffer = base64_to_array_buffer(base64);
+    const array = new Uint8Array(buffer);
+    const view = new DataView(buffer);
     let values = [];
     let offset = 0;
+    let length = 0;
     for (const type of types) {
         switch (type) {
             case DataType.I8: 
-                values.push(view.getInt8(offset));
+                if (offset + 1 <= view.byteLength) values.push(view.getInt8(offset));
                 offset += 1;
                 break;
             case DataType.I16: 
-                values.push(view.getInt16(offset));
+                if (offset + 2 <= view.byteLength) values.push(view.getInt16(offset));
                 offset += 2;
                 break;
             case DataType.I32: 
-                values.push(view.getInt32(offset));
+                if (offset + 4 <= view.byteLength) values.push(view.getInt32(offset));
                 offset += 4;
                 break;
             case DataType.I64: 
-                values.push(view.getBigInt64(offset));
+                if (offset + 8 <= view.byteLength) values.push(view.getBigInt64(offset));
                 offset += 8;
                 break;
             case DataType.I128: 
-                values.push(view.getBigInt64(offset));
+                if (offset + 16 <= view.byteLength) values.push(view.getBigInt64(offset));
                 offset += 16;
                 break;
             case DataType.U8: 
-                values.push(view.getUint8(offset));
+                if (offset + 1 <= view.byteLength) values.push(view.getUint8(offset));
                 offset += 1;
                 break;
             case DataType.U16: 
-                values.push(view.getUint16(offset));
+                if (offset + 2 <= view.byteLength) values.push(view.getUint16(offset));
                 offset += 2;
                 break;
             case DataType.U32: 
-                values.push(view.getUint32(offset));
+                if (offset + 4 <= view.byteLength) values.push(view.getUint32(offset));
                 offset += 4;
                 break;
             case DataType.U64: 
-                values.push(view.getBigUint64(offset));
+                if (offset + 8 <= view.byteLength) values.push(view.getBigUint64(offset));
                 offset += 8;
                 break;
             case DataType.U128: 
-                values.push(view.getBigUint64(offset));
+                if (offset + 16 <= view.byteLength) values.push(view.getBigUint64(offset));
                 offset += 16;
                 break;
             case DataType.F32: 
-                values.push(view.getFloat32(offset));
+                if (offset + 4 <= view.byteLength) values.push(view.getFloat32(offset));
                 offset += 4;
                 break;
             case DataType.F64: 
-                values.push(view.getFloat64(offset));
+                if (offset + 8 <= view.byteLength) values.push(view.getFloat64(offset));
                 offset += 8;
                 break;
             case DataType.CHAR: 
-                values.push(String.fromCharCode(view.getUint8(offset)));
+                if (offset + 1 <= view.byteLength) values.push(String.fromCharCode(view.getUint8(offset)));
                 offset += 1;
                 break;
             case DataType.BOOL: 
-                values.push(Boolean(view.getUint8(offset)));
+                if (offset + 1 <= view.byteLength) values.push(Boolean(view.getUint8(offset)));
                 offset += 1;
+                break;
+            case DataType.STRING:
+                length = 0;
+                if (offset + 1 <= array.byteLength) length = array[offset];
+                if (offset + length + 1 <= array.byteLength) {
+                    const arrayString = array.slice(offset + 1, offset + length + 1);
+                    values.push(new TextDecoder("utf-8").decode(arrayString));
+                }
+                offset += length + 1;
+                break;
+            case DataType.BYTES:
+                length = 0;
+                if (offset + 1 <= array.byteLength) length = array[offset];
+                if (offset + length + 1 <= array.byteLength) {
+                    const arrayBytes = array.slice(offset + 1, offset + length + 1);
+                    values.push(new Uint8Array(arrayBytes));
+                }
+                offset += length + 1;
                 break;
             default:
                 values.push(null);
@@ -1920,7 +1937,7 @@ function get_data_value(base64, types) {
 }
 
 /**
- * @param {(number|bigint|string|boolean)[]} values
+ * @param {(number|bigint|string|Uint8Array|boolean)[]} values
  */
 function set_data_value(values) {
     if (values === undefined) {
@@ -1956,8 +1973,24 @@ function set_data_value(values) {
             base64 += array_buffer_to_base64(view.buffer);
         }
         else if (typeof value == "string") {
-            type = DataType.CHAR;
-            base64 += btoa(value);
+            if (value.length == 1) {
+                type = DataType.CHAR;
+                base64 += btoa(value);
+            }
+            else {
+                type = DataType.STRING;
+                let array = new Uint8Array(value.length + 1);
+                array.set(new Uint8Array([value.length]));
+                array.set(new TextEncoder("utf-8").encode(value), 1);
+                base64 += array_buffer_to_base64(array.buffer);
+            }
+        }
+        else if (value instanceof Uint8Array) {
+            type = DataType.BYTES;
+            let array = new Uint8Array(value.length + 1);
+            array.set(new Uint8Array([value.length]));
+            array.set(value, 1);
+            base64 += array_buffer_to_base64(array.buffer);
         }
         else if (typeof value == "boolean") {
             type = DataType.BOOL;
@@ -1968,66 +2001,6 @@ function set_data_value(values) {
     return {
         bytes: base64,
         types: types
-    };
-}
-
-/**
- * @param {string} base64 
- * @param {ConfigType} type 
- * @returns {(number|string|null)[]}
- */
-function get_config_value(base64, type) {
-    const view = new DataView(base64_to_array_buffer(base64));
-    if (type == ConfigType.STR) {
-        const text = atob(base64);
-        const length = text.length;
-        const bytes = new Uint8Array(length);
-        for (let i = 0; i < length; i++) {
-            bytes[i] = text.charCodeAt(i);
-        }
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes);
-    }
-    else if (type == ConfigType.INT) {
-        return view.getInt32(4);
-    }
-    else if (type == ConfigType.FLOAT) {
-        return view.getFloat64(0);
-    }
-    return null;
-}
-
-/**
- * @param {?number|string} value 
- */
-function set_config_value(value) {
-    if (value === undefined) {
-        return {
-            bytes: undefined,
-            type: undefined
-        };
-    }
-    let base64 = "";
-    let type = ConfigType.NULLC;
-    if (typeof value == "number") {
-        const buffer = new ArrayBuffer(8);
-        const view = new DataView(buffer);
-        if (Number.isInteger(value)) {
-            view.setInt32(4, value);
-            type = ConfigType.INT;
-        } else {
-            view.setFloat64(0, value);
-            type = ConfigType.FLOAT;
-        }
-        base64 = array_buffer_to_base64(view.buffer);
-    }
-    else if (typeof value == "string") {
-        type = ConfigType.STR;
-        base64 = btoa(value);
-    }
-    return {
-        bytes: base64,
-        type: type
     };
 }
 
@@ -2146,7 +2119,7 @@ function get_model_config_id(r) {
  * @property {Uuid} model_id
  * @property {number} index
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -2160,7 +2133,7 @@ function get_model_config_schema(r) {
         model_id: base64_to_uuid_hex(r.modelId),
         index: r.index,
         name: r.name,
-        value: get_config_value(r.configBytes, r.configType),
+        value: get_data_value(r.configBytes, [r.configType])[0],
         category: r.category
     };
 }
@@ -2365,9 +2338,9 @@ async function create_model_config(server, request) {
     configSchema.setModelId(uuid_hex_to_base64(request.model_id));
     configSchema.setIndex(request.index);
     configSchema.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configSchema.setConfigBytes(value.bytes);
-    configSchema.setConfigType(value.type);
+    configSchema.setConfigType(value.types[0]);
     configSchema.setCategory(request.category);
     return client.createModelConfig(configSchema, metadata(server))
         .then(response => get_model_config_id(response.toObject()));
@@ -2384,9 +2357,9 @@ async function update_model_config(server, request) {
     const configUpdate = new pb_model.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configUpdate.setConfigBytes(value.bytes);
-    configUpdate.setConfigType(value.type);
+    configUpdate.setConfigType(value.types[0]);
     configUpdate.setCategory(request.category);
     return client.updateModelConfig(configUpdate, metadata(server))
         .then(response => response.toObject());
@@ -2860,7 +2833,7 @@ function get_device_config_schema(r) {
         id: r.id,
         device_id: base64_to_uuid_hex(r.deviceId),
         name: r.name,
-        value: get_config_value(r.configBytes, r.configType),
+        value: get_data_value(r.configBytes,[ r.configType])[0],
         category: r.category
     };
 }
@@ -2882,7 +2855,7 @@ function get_gateway_config_schema(r) {
         id: r.id,
         gateway_id: base64_to_uuid_hex(r.deviceId),
         name: r.name,
-        value: get_config_value(r.configBytes, r.configType),
+        value: get_data_value(r.configBytes, [r.configType])[0],
         category: r.category
     };
 }
@@ -3242,9 +3215,9 @@ async function create_device_config(server, request) {
     const configSchema = new pb_device.ConfigSchema();
     configSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     configSchema.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configSchema.setConfigBytes(value.bytes);
-    configSchema.setConfigType(value.type);
+    configSchema.setConfigType(value.types[0]);
     configSchema.setCategory(request.category);
     return client.createDeviceConfig(configSchema, metadata(server))
         .then(response => get_config_id(response.toObject()));
@@ -3261,9 +3234,9 @@ async function update_device_config(server, request) {
     const configUpdate = new pb_device.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configUpdate.setConfigBytes(value.bytes);
-    configUpdate.setConfigType(value.type);
+    configUpdate.setConfigType(value.types[0]);
     configUpdate.setCategory(request.category);
     return client.updateDeviceConfig(configUpdate, metadata(server))
         .then(response => response.toObject());
@@ -3322,9 +3295,9 @@ async function create_gateway_config(server, request) {
     const configSchema = new pb_device.ConfigSchema();
     configSchema.setDeviceId(uuid_hex_to_base64(request.gateway_id));
     configSchema.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configSchema.setConfigBytes(value.bytes);
-    configSchema.setConfigType(value.type);
+    configSchema.setConfigType(value.types[0]);
     configSchema.setCategory(request.category);
     return client.createGatewayConfig(configSchema, metadata(server))
         .then(response => get_config_id(response.toObject()));
@@ -3341,9 +3314,9 @@ async function update_gateway_config(server, request) {
     const configUpdate = new pb_device.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configUpdate.setConfigBytes(value.bytes);
-    configUpdate.setConfigType(value.type);
+    configUpdate.setConfigType(value.types[0]);
     configUpdate.setCategory(request.category);
     return client.updateGatewayConfig(configUpdate, metadata(server))
         .then(response => response.toObject());
@@ -4566,7 +4539,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} model_id
  * @property {Uuid} device_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  */
 
 /**
@@ -4620,7 +4593,7 @@ function get_data_schema_vec(r) {
  * @typedef {Object} DatasetSchema
  * @property {Uuid} set_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  */
 
 /**
@@ -5072,7 +5045,7 @@ function get_buffer_id(r) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  * @property {number|string} status
  */
 
@@ -5938,7 +5911,7 @@ async function delete_slice_set(server, request) {
  * @property {Date} timestamp
  * @property {Uuid} device_id
  * @property {number|string} status
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  */
 
 /**
@@ -5950,7 +5923,7 @@ function get_log_schema(r) {
         timestamp: new Date(r.timestamp / 1000),
         device_id: base64_to_uuid_hex(r.deviceId),
         status: get_log_status(r.status),
-        value: get_config_value(r.logBytes, r.logType)
+        value: get_data_value(r.logBytes, [r.logType])[0]
     };
 }
 
@@ -6113,9 +6086,9 @@ async function create_log(server, request) {
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     logSchema.setStatus(set_log_status(request.status));
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     logSchema.setLogBytes(value.bytes);
-    logSchema.setLogType(value.type);
+    logSchema.setLogType(value.types[0]);
     return client.createLog(logSchema, metadata(server))
         .then(response => response.toObject());
 }
@@ -6134,9 +6107,9 @@ async function update_log(server, request) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logUpdate.setStatus(set_log_status(request.status));
     }
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     logUpdate.setLogBytes(value.bytes);
-    logUpdate.setLogType(value.type);
+    logUpdate.setLogType(value.types[0]);
     return client.updateLog(logUpdate, metadata(server))
         .then(response => response.toObject());
 }

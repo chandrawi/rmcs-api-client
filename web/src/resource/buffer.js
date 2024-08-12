@@ -74,7 +74,7 @@ function get_buffer_id(r) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  * @property {number|string} status
  */
 

@@ -1,6 +1,6 @@
 use tonic::{Request, Status};
 use uuid::Uuid;
-use rmcs_resource_db::schema::value::ConfigValue;
+use rmcs_resource_db::schema::value::DataValue;
 use rmcs_resource_api::common;
 use rmcs_resource_api::device::device_service_client::DeviceServiceClient;
 use rmcs_resource_api::device::{
@@ -358,7 +358,7 @@ pub(crate) async fn list_device_config_by_device(resource: &Resource, device_id:
     Ok(response.results)
 }
 
-pub(crate) async fn create_device_config(resource: &Resource, device_id: Uuid, name: &str, value: ConfigValue, category: &str)
+pub(crate) async fn create_device_config(resource: &Resource, device_id: Uuid, name: &str, value: DataValue, category: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -369,7 +369,7 @@ pub(crate) async fn create_device_config(resource: &Resource, device_id: Uuid, n
         device_id: device_id.as_bytes().to_vec(),
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::ConfigType>::into(value.get_type()).into(),
+        config_type: Into::<common::DataType>::into(value.get_type()).into(),
         category: category.to_owned()
     });
     let response = client.create_device_config(request)
@@ -378,7 +378,7 @@ pub(crate) async fn create_device_config(resource: &Resource, device_id: Uuid, n
     Ok(response.id)
 }
 
-pub(crate) async fn update_device_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_device_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -388,7 +388,7 @@ pub(crate) async fn update_device_config(resource: &Resource, id: i32, name: Opt
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::ConfigType>::into(s.get_type()).into()),
+        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_device_config(request)
@@ -440,7 +440,7 @@ pub(crate) async fn list_gateway_config_by_gateway(resource: &Resource, gateway_
     Ok(response.results)
 }
 
-pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: Uuid, name: &str, value: ConfigValue, category: &str)
+pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: Uuid, name: &str, value: DataValue, category: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -451,7 +451,7 @@ pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: Uuid,
         device_id: gateway_id.as_bytes().to_vec(),
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::ConfigType>::into(value.get_type()).into(),
+        config_type: Into::<common::DataType>::into(value.get_type()).into(),
         category: category.to_owned()
     });
     let response = client.create_gateway_config(request)
@@ -460,7 +460,7 @@ pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: Uuid,
     Ok(response.id)
 }
 
-pub(crate) async fn update_gateway_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_gateway_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -470,7 +470,7 @@ pub(crate) async fn update_gateway_config(resource: &Resource, id: i32, name: Op
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::ConfigType>::into(s.get_type()).into()),
+        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_gateway_config(request)

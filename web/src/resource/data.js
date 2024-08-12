@@ -66,7 +66,7 @@ import {
  * @property {Uuid} model_id
  * @property {Uuid} device_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  */
 
 /**
@@ -120,7 +120,7 @@ function get_data_schema_vec(r) {
  * @typedef {Object} DatasetSchema
  * @property {Uuid} set_id
  * @property {Date} timestamp
- * @property {(number|bigint|string|boolean)[]} data
+ * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  */
 
 /**

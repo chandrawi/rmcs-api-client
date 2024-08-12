@@ -11,7 +11,7 @@ pub mod log;
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use rmcs_resource_db::schema::value::{DataType, DataValue, ConfigValue};
+use rmcs_resource_db::schema::value::{DataType, DataValue};
 use rmcs_resource_db::schema::model::{ModelSchema, ModelConfigSchema};
 use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, GatewaySchema, GatewayConfigSchema, TypeSchema};
 use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
@@ -142,14 +142,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_model_config(&self, model_id: Uuid, index: i32, name: &str, value: ConfigValue, category: &str)
+    pub async fn create_model_config(&self, model_id: Uuid, index: i32, name: &str, value: DataValue, category: &str)
         -> Result<i32, Status>
     {
         model::create_model_config(&self, model_id, index, name, value, category)
         .await
     }
 
-    pub async fn update_model_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_model_config(&self, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         model::update_model_config(&self, id, name, value, category)
@@ -325,14 +325,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_device_config(&self, device_id: Uuid, name: &str, value: ConfigValue, category: &str)
+    pub async fn create_device_config(&self, device_id: Uuid, name: &str, value: DataValue, category: &str)
         -> Result<i32, Status>
     {
         device::create_device_config(&self, device_id, name, value, category)
         .await
     }
 
-    pub async fn update_device_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_device_config(&self, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         device::update_device_config(&self, id, name, value, category)
@@ -362,14 +362,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_gateway_config(&self, gateway_id: Uuid, name: &str, value: ConfigValue, category: &str)
+    pub async fn create_gateway_config(&self, gateway_id: Uuid, name: &str, value: DataValue, category: &str)
         -> Result<i32, Status>
     {
         device::create_gateway_config(&self, gateway_id, name, value, category)
         .await
     }
 
-    pub async fn update_gateway_config(&self, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+    pub async fn update_gateway_config(&self, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
         -> Result<(), Status>
     {
         device::update_gateway_config(&self, id, name, value, category)
@@ -1252,14 +1252,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: LogStatus, value: ConfigValue)
+    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: LogStatus, value: DataValue)
         -> Result<(), Status>
     {
         log::create_log(&self, timestamp, device_id, status.into(), value)
         .await
     }
 
-    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<LogStatus>, value: Option<ConfigValue>)
+    pub async fn update_log(&self, timestamp: DateTime<Utc>, device_id: Uuid, status: Option<LogStatus>, value: Option<DataValue>)
         -> Result<(), Status>
     {
         log::update_log(&self, timestamp, device_id, status.map(|s| s.into()), value)

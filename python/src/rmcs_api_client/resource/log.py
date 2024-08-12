@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 import grpc
-from .common import ConfigType, pack_config, unpack_config
+from .common import DataType, pack_data, unpack_data
 
 
 def status_to_int(status: Union[int, str]) -> Union[int, None]:
@@ -55,7 +55,7 @@ class LogSchema:
     def from_response(r):
         timestamp = datetime.fromtimestamp(r.timestamp/1000000.0)
         status = int_to_status(r.status)
-        value = unpack_config(r.log_bytes, ConfigType(r.log_type))
+        value = unpack_data(r.log_bytes, DataType(r.log_type))
         return LogSchema(timestamp, UUID(bytes=r.device_id), status, value)
 
 
@@ -128,8 +128,8 @@ def create_log(resource, timestamp: datetime, device_id: UUID, status: Union[str
             timestamp=int(timestamp.timestamp()*1000000),
             device_id=device_id.bytes,
             status=status_to_int(status),
-            log_bytes=pack_config(value),
-            log_type=ConfigType.from_value(value).value
+            log_bytes=pack_data(value),
+            log_type=DataType.from_value(value).value
         )
         stub.CreateLog(request=request, metadata=resource.metadata)
 
@@ -142,8 +142,8 @@ def update_log(resource, timestamp: datetime, device_id: UUID, status: Optional[
             timestamp=int(timestamp.timestamp()*1000000),
             device_id=device_id.bytes,
             status=stat,
-            log_bytes=pack_config(value),
-            log_type=ConfigType.from_value(value).value
+            log_bytes=pack_data(value),
+            log_type=DataType.from_value(value).value
         )
         stub.UpdateLog(request=request, metadata=resource.metadata)
 

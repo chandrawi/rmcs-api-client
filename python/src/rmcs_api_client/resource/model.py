@@ -3,7 +3,7 @@ from typing import Optional, Union, List
 from dataclasses import dataclass
 from uuid import UUID
 import grpc
-from .common import ConfigType, DataType, pack_config, unpack_config
+from .common import DataType, pack_data, unpack_data
 
 
 @dataclass
@@ -16,7 +16,7 @@ class ModelConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
+        value = unpack_data(r.config_bytes, DataType(r.config_type))
         return ModelConfigSchema(r.id, UUID(bytes=r.model_id), r.index, r.name, value, r.category)
 
 
@@ -161,8 +161,8 @@ def create_model_config(resource, model_id: UUID, index: int, name: str, value: 
             model_id=model_id.bytes,
             index=index,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         response = stub.CreateModelConfig(request=request, metadata=resource.metadata)
@@ -174,8 +174,8 @@ def update_model_config(resource, id: int, name: Optional[str]=None, value: Unio
         request = model_pb2.ConfigUpdate(
             id=id,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         stub.UpdateModelConfig(request=request, metadata=resource.metadata)

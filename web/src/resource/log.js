@@ -1,4 +1,4 @@
-import { get_config_value, set_config_value } from './common.js';
+import { get_data_value, set_data_value } from './common.js';
 import { pb_log } from 'rmcs-resource-api';
 import {
     metadata,
@@ -43,7 +43,7 @@ import {
  * @property {Date} timestamp
  * @property {Uuid} device_id
  * @property {number|string} status
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  */
 
 /**
@@ -55,7 +55,7 @@ function get_log_schema(r) {
         timestamp: new Date(r.timestamp / 1000),
         device_id: base64_to_uuid_hex(r.deviceId),
         status: get_log_status(r.status),
-        value: get_config_value(r.logBytes, r.logType)
+        value: get_data_value(r.logBytes, [r.logType])[0]
     };
 }
 
@@ -218,9 +218,9 @@ export async function create_log(server, request) {
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     logSchema.setStatus(set_log_status(request.status));
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     logSchema.setLogBytes(value.bytes);
-    logSchema.setLogType(value.type);
+    logSchema.setLogType(value.types[0]);
     return client.createLog(logSchema, metadata(server))
         .then(response => response.toObject());
 }
@@ -239,9 +239,9 @@ export async function update_log(server, request) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logUpdate.setStatus(set_log_status(request.status));
     }
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     logUpdate.setLogBytes(value.bytes);
-    logUpdate.setLogType(value.type);
+    logUpdate.setLogType(value.types[0]);
     return client.updateLog(logUpdate, metadata(server))
         .then(response => response.toObject());
 }

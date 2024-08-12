@@ -1,4 +1,4 @@
-import { get_config_value, set_config_value, get_data_type, set_data_type } from './common.js';
+import { get_data_value, set_data_value, get_data_type, set_data_type } from './common.js';
 import { pb_model } from 'rmcs-resource-api';
 import {
     metadata,
@@ -122,7 +122,7 @@ function get_model_config_id(r) {
  * @property {Uuid} model_id
  * @property {number} index
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -136,7 +136,7 @@ function get_model_config_schema(r) {
         model_id: base64_to_uuid_hex(r.modelId),
         index: r.index,
         name: r.name,
-        value: get_config_value(r.configBytes, r.configType),
+        value: get_data_value(r.configBytes, [r.configType])[0],
         category: r.category
     };
 }
@@ -341,9 +341,9 @@ export async function create_model_config(server, request) {
     configSchema.setModelId(uuid_hex_to_base64(request.model_id));
     configSchema.setIndex(request.index);
     configSchema.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configSchema.setConfigBytes(value.bytes);
-    configSchema.setConfigType(value.type);
+    configSchema.setConfigType(value.types[0]);
     configSchema.setCategory(request.category);
     return client.createModelConfig(configSchema, metadata(server))
         .then(response => get_model_config_id(response.toObject()));
@@ -360,9 +360,9 @@ export async function update_model_config(server, request) {
     const configUpdate = new pb_model.ConfigUpdate();
     configUpdate.setId(request.id);
     configUpdate.setName(request.name);
-    const value = set_config_value(request.value);
+    const value = set_data_value([request.value]);
     configUpdate.setConfigBytes(value.bytes);
-    configUpdate.setConfigType(value.type);
+    configUpdate.setConfigType(value.types[0]);
     configUpdate.setCategory(request.category);
     return client.updateModelConfig(configUpdate, metadata(server))
         .then(response => response.toObject());

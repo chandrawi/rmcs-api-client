@@ -3,7 +3,7 @@ from typing import Optional, Union, List
 from dataclasses import dataclass
 from uuid import UUID
 import grpc
-from .common import ConfigType, pack_config, unpack_config
+from .common import DataType, pack_data, unpack_data
 from .types import TypeSchema
 
 
@@ -16,7 +16,7 @@ class DeviceConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
+        value = unpack_data(r.config_bytes, DataType(r.config_type))
         return DeviceConfigSchema(r.id, UUID(bytes=r.device_id), r.name, value, r.category)
 
 
@@ -29,7 +29,7 @@ class GatewayConfigSchema:
     category: str
 
     def from_response(r):
-        value = unpack_config(r.config_bytes, ConfigType(r.config_type))
+        value = unpack_data(r.config_bytes, DataType(r.config_type))
         return GatewayConfigSchema(r.id, UUID(bytes=r.gateway_id), r.name, value, r.category)
 
 
@@ -282,8 +282,8 @@ def create_device_config(resource, device_id: UUID, name: str, value: Union[int,
         request = device_pb2.ConfigSchema(
             device_id=device_id.bytes,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         response = stub.CreateDeviceConfig(request=request, metadata=resource.metadata)
@@ -295,8 +295,8 @@ def update_device_config(resource, id: int, name: Optional[str]=None, value: Uni
         request = device_pb2.ConfigUpdate(
             id=id,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         stub.UpdateDeviceConfig(request=request, metadata=resource.metadata)
@@ -329,8 +329,8 @@ def create_gateway_config(resource, gateway_id: UUID, name: str, value: Union[in
         request = device_pb2.ConfigSchema(
             device_id=gateway_id.bytes,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         response = stub.CreateGatewayConfig(request=request, metadata=resource.metadata)
@@ -342,8 +342,8 @@ def update_gateway_config(resource, id: int, name: Optional[str]=None, value: Un
         request = device_pb2.ConfigUpdate(
             id=id,
             name=name,
-            config_bytes=pack_config(value),
-            config_type=ConfigType.from_value(value).value,
+            config_bytes=pack_data(value),
+            config_type=DataType.from_value(value).value,
             category=category
         )
         stub.UpdateGatewayConfig(request=request, metadata=resource.metadata)

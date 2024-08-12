@@ -1,6 +1,6 @@
 use tonic::{Request, Status};
 use uuid::Uuid;
-use rmcs_resource_db::schema::value::{DataType, ConfigValue};
+use rmcs_resource_db::schema::value::{DataType, DataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
@@ -192,7 +192,7 @@ pub(crate) async fn list_model_config_by_model(resource: &Resource, model_id: Uu
     Ok(response.results)
 }
 
-pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, index: i32, name: &str, value: ConfigValue, category: &str)
+pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, index: i32, name: &str, value: DataValue, category: &str)
     -> Result<i32, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -204,7 +204,7 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, ind
         index,
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::ConfigType>::into(value.get_type()).into(),
+        config_type: Into::<common::DataType>::into(value.get_type()).into(),
         category: category.to_owned(),
     });
     let response = client.create_model_config(request)
@@ -213,7 +213,7 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, ind
     Ok(response.id)
 }
 
-pub(crate) async fn update_model_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<ConfigValue>, category: Option<&str>)
+pub(crate) async fn update_model_config(resource: &Resource, id: i32, name: Option<&str>, value: Option<DataValue>, category: Option<&str>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -223,7 +223,7 @@ pub(crate) async fn update_model_config(resource: &Resource, id: i32, name: Opti
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::ConfigType>::into(s.get_type()).into()),
+        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_model_config(request)
