@@ -245,3 +245,18 @@ def delete_buffer(resource, id: int):
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         request = buffer_pb2.BufferId(id=id)
         stub.DeleteBuffer(request=request, metadata=resource.metadata)
+
+def count_buffer(resource, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        device_bytes = None
+        if device_id != None: device_bytes = device_id.bytes
+        model_bytes = None
+        if model_id != None: model_bytes = model_id.bytes
+        request = buffer_pb2.BufferCount(
+            device_id=device_bytes,
+            model_id=model_bytes,
+            status=status_to_int(status)
+        )
+        response = stub.CountBuffer(request=request, metadata=resource.metadata)
+        return response.count

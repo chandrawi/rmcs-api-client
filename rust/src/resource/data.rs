@@ -5,7 +5,8 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::data::data_service_client::DataServiceClient;
 use rmcs_resource_api::data::{
-    DataSchema, DataId, DataTime, DataRange, DataNumber, DataSetSchema, DataSetId, DataSetTime, DataSetRange, DataSetNumber
+    DataSchema, DataId, DataTime, DataRange, DataNumber, DataCount,
+    DataSetSchema, DataSetId, DataSetTime, DataSetRange, DataSetNumber
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -151,6 +152,63 @@ pub(crate) async fn delete_data(resource: &Resource, device_id: Uuid, model_id: 
     client.delete_data(request)
         .await?;
     Ok(())
+}
+
+pub(crate) async fn count_data(resource: &Resource, device_id: Uuid, model_id: Uuid)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataCount {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: None,
+        begin: None,
+        end: None
+    });
+    let response = client.count_data(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
+}
+
+pub(crate) async fn count_data_by_last_time(resource: &Resource, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataCount {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: Some(last.timestamp_micros()),
+        begin: None,
+        end: None
+    });
+    let response = client.count_data_by_last_time(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
+}
+
+pub(crate) async fn count_data_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataCount {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: None,
+        begin: Some(begin.timestamp_micros()),
+        end: Some(end.timestamp_micros())
+    });
+    let response = client.count_data_by_range_time(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
 }
 
 pub(crate) async fn list_data_by_set_time(resource: &Resource, set_id: Uuid, timestamp: DateTime<Utc>)

@@ -120,6 +120,9 @@ export {
     list_data_by_number_after,
     create_data,
     delete_data,
+    count_data,
+    count_data_by_last_time,
+    count_data_by_range_time,
     list_data_by_set_time,
     list_data_by_set_last_time,
     list_data_by_set_range_time,
@@ -143,7 +146,8 @@ export {
     list_buffer_last_offset,
     create_buffer,
     update_buffer,
-    delete_buffer
+    delete_buffer,
+    count_buffer
 } from './buffer.js';
 export {
     read_slice,

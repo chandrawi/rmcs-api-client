@@ -881,6 +881,41 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
+        -> Result<(), Status>
+    {
+        data::create_data(&self, device_id, model_id, timestamp, data)
+        .await
+    }
+
+    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<(), Status>
+    {
+        data::delete_data(&self, device_id, model_id, timestamp)
+        .await
+    }
+
+    pub async fn count_data(&self, device_id: Uuid, model_id: Uuid)
+        -> Result<usize, Status>
+    {
+        data::count_data(&self, device_id, model_id)
+        .await
+    }
+
+    pub async fn count_data_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_last_time(&self, device_id, model_id, last)
+        .await
+    }
+
+    pub async fn count_data_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_range_time(&self, device_id, model_id, begin, end)
+        .await
+    }
+
     pub async fn list_data_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
@@ -969,20 +1004,6 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
-        -> Result<(), Status>
-    {
-        data::create_data(&self, device_id, model_id, timestamp, data)
-        .await
-    }
-
-    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<(), Status>
-    {
-        data::delete_data(&self, device_id, model_id, timestamp)
-        .await
-    }
-
     pub async fn read_buffer(&self, id: i32)
         -> Result<BufferSchema, Status>
     {
@@ -1065,6 +1086,13 @@ impl Resource {
         -> Result<(), Status>
     {
         buffer::delete_buffer(&self, id)
+        .await
+    }
+
+    pub async fn count_buffer(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer(&self, device_id, model_id, status.map(|s| s.into()))
         .await
     }
 

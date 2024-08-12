@@ -48,6 +48,20 @@ import {
  */
 
 /**
+ * @typedef {Object} DataCount
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {?Date} timestamp
+ * @property {?Date} begin
+ * @property {?Date} end
+ */
+
+/**
+ * @typedef {Object} DataCountResult
+ * @property {number} count
+ */
+
+/**
  * @typedef {Object} DataSchema
  * @property {Uuid} model_id
  * @property {Uuid} device_id
@@ -263,6 +277,60 @@ export async function delete_data(server, request) {
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
     return client.deleteData(dataId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Count data
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataCount} request data count: device_id, model_id
+ * @returns {Promise<DataCountResult>} data count: count
+ */
+export async function count_data(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataCount = new pb_data.DataCount();
+    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
+    return client.countData(dataCount, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Count data by last time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataCount} request data count: device_id, model_id, timestamp
+ * @returns {Promise<DataCountResult>} data count: count
+ */
+export async function count_data_by_last_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataCount = new pb_data.DataCount();
+    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
+    if (request.timestamp) {
+        dataCount.setTimestamp(request.timestamp.valueOf() * 1000);
+    }
+    return client.countDataByLastTime(dataCount, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Count data by range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataCount} request data count: device_id, model_id, begin, end
+ * @returns {Promise<DataCountResult>} data count: count
+ */
+export async function count_data_by_range_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataCount = new pb_data.DataCount();
+    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
+    if (request.begin) {
+        dataCount.setTimestamp(request.begin.valueOf() * 1000);
+    }
+    if (request.end) {
+        dataCount.setTimestamp(request.end.valueOf() * 1000);
+    }
+    return client.countDataByRangeTime(dataCount, metadata(server))
         .then(response => response.toObject());
 }
 

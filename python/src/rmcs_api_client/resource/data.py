@@ -139,6 +139,39 @@ def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
         )
         stub.DeleteData(request=request, metadata=resource.metadata)
 
+def count_data(resource, device_id: UUID, model_id: UUID):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataCount(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes
+        )
+        response = stub.CountData(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_last_time(resource, device_id: UUID, model_id: UUID, last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataCount(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.CountDataByLastTime(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_range_time(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataCount(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.CountDataByRangeTime(request=request, metadata=resource.metadata)
+        return response.count
+
 def list_data_by_set_time(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)

@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
-    BufferSchema, BufferId, BufferTime, BufferSelector, BuffersSelector, BufferUpdate
+    BufferSchema, BufferId, BufferTime, BufferSelector, BuffersSelector, BufferUpdate, BufferCount
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -209,4 +209,21 @@ pub(crate) async fn delete_buffer(resource: &Resource, id: i32)
     client.delete_buffer(request)
         .await?;
     Ok(())
+}
+
+pub(crate) async fn count_buffer(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferCount {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.count_buffer(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
 }

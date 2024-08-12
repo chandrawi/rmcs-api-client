@@ -57,6 +57,18 @@ function get_buffer_id(r) {
  */
 
 /**
+ * @typedef {Object} BufferCount
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?number|string} status
+ */
+
+/**
+ * @typedef {Object} BufferCountResult
+ * @property {number} count
+ */
+
+/**
  * @typedef {Object} BufferSchema
  * @property {number} id
  * @property {Uuid} device_id
@@ -394,5 +406,27 @@ export async function delete_buffer(server, request) {
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     return client.deleteBuffer(bufferId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Count data buffers
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferCount} request data buffer count: device_id, model_id, status
+ * @returns {Promise<BufferCountResult>} data buffer count: count
+ */
+export async function count_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferCount = new pb_buffer.BufferCount();
+    if (request.device_id) {
+        bufferCount.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        bufferCount.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferCount.setStatus(set_buffer_status(request.status));
+    }
+    return client.countBuffer(bufferCount, metadata(server))
         .then(response => response.toObject());
 }

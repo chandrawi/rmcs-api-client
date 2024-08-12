@@ -354,6 +354,15 @@ class Resource:
     def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
         return _data.delete_data(self, device_id, model_id, timestamp)
 
+    def count_data(self, device_id: UUID, model_id: UUID) -> int:
+        return _data.count_data(self, device_id, model_id)
+
+    def count_data_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> int:
+        return _data.count_data(self, device_id, model_id, last)
+
+    def count_data_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> int:
+        return _data.count_data(self, model_id, device_id, begin, end)
+
     def list_data_by_set_time(self, set_id: UUID, timestamp: datetime) -> List[DataSchema]:
         return _data.list_data_by_set_time(self, set_id, timestamp)
 
@@ -419,6 +428,9 @@ class Resource:
 
     def delete_buffer(self, id: int):
         return _buffer.delete_buffer(self, id)
+
+    def count_buffer(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> int:
+        return _buffer.count_buffer(self, device_id, model_id, status)
 
     def read_slice(self, id: int) -> SliceSchema:
         return _slice.read_slice(self, id)
