@@ -1,4 +1,4 @@
-import { get_data_value, set_data_value } from './common.js';
+import { get_data_values, set_data_values } from './common.js';
 import { pb_data } from 'rmcs-resource-api';
 import {
     metadata,
@@ -78,7 +78,7 @@ function get_data_schema(r) {
         device_id: base64_to_uuid_hex(r.deviceId),
         model_id: base64_to_uuid_hex(r.modelId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_value(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList)
     };
 }
 
@@ -131,7 +131,7 @@ function get_data_set_schema(r) {
     return {
         set_id: base64_to_uuid_hex(r.set_id),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_value(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList)
     };
 }
 
@@ -255,7 +255,7 @@ export async function create_data(server, request) {
     dataSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataSchema.setModelId(uuid_hex_to_base64(request.model_id));
     dataSchema.setTimestamp(request.timestamp.valueOf() * 1000);
-    const value = set_data_value(request.data);
+    const value = set_data_values(request.data);
     dataSchema.setDataBytes(value.bytes);
     for (const type of value.types) {
         dataSchema.addDataType(type);

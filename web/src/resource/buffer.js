@@ -1,4 +1,4 @@
-import { get_data_value, set_data_value } from './common.js';
+import { get_data_values, set_data_values } from './common.js';
 import { pb_buffer } from 'rmcs-resource-api';
 import {
     metadata,
@@ -88,7 +88,7 @@ function get_buffer_schema(r) {
         device_id: base64_to_uuid_hex(r.deviceId),
         model_id: base64_to_uuid_hex(r.modelId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_value(r.dataBytes, r.dataTypeList),
+        data: get_data_values(r.dataBytes, r.dataTypeList),
         status: get_buffer_status(r.status)
     };
 }
@@ -362,7 +362,7 @@ export async function create_buffer(server, request) {
     bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferSchema.setModelId(uuid_hex_to_base64(request.model_id));
     bufferSchema.setTimestamp(request.timestamp.valueOf() * 1000);
-    const value = set_data_value(request.data);
+    const value = set_data_values(request.data);
     bufferSchema.setDataBytes(value.bytes);
     for (const type of value.types) {
         bufferSchema.addDataType(type);
@@ -384,7 +384,7 @@ export async function update_buffer(server, request) {
     bufferUpdate.setId(request.id);
     const ty = typeof request.data;
     if (ty == "number" || ty == "string" || ty == "bigint" || ty == "boolean") {
-        const value = set_data_value(request.data);
+        const value = set_data_values(request.data);
         bufferUpdate.setDataBytes(value.bytes);
         for (const type of value.types) {
             bufferUpdate.addDataType(type);

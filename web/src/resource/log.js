@@ -55,7 +55,7 @@ function get_log_schema(r) {
         timestamp: new Date(r.timestamp / 1000),
         device_id: base64_to_uuid_hex(r.deviceId),
         status: get_log_status(r.status),
-        value: get_data_value(r.logBytes, [r.logType])[0]
+        value: get_data_value(r.logBytes, r.logType)
     };
 }
 
@@ -218,9 +218,9 @@ export async function create_log(server, request) {
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
     logSchema.setStatus(set_log_status(request.status));
-    const value = set_data_value([request.value]);
+    const value = set_data_value(request.value);
     logSchema.setLogBytes(value.bytes);
-    logSchema.setLogType(value.types[0]);
+    logSchema.setLogType(value.type);
     return client.createLog(logSchema, metadata(server))
         .then(response => response.toObject());
 }
@@ -239,9 +239,9 @@ export async function update_log(server, request) {
     if (typeof request.status == "number" || typeof request.status == "string") {
         logUpdate.setStatus(set_log_status(request.status));
     }
-    const value = set_data_value([request.value]);
+    const value = set_data_value(request.value);
     logUpdate.setLogBytes(value.bytes);
-    logUpdate.setLogType(value.types[0]);
+    logUpdate.setLogType(value.type);
     return client.updateLog(logUpdate, metadata(server))
         .then(response => response.toObject());
 }

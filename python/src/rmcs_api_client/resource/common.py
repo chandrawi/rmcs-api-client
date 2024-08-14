@@ -39,10 +39,9 @@ def pack_data(value: Union[int, float, str, bytes, bool, None]) -> bytes:
     elif type(value) == float:
         return pack('>d', value)
     elif type(value) == str:
-        if len(value) == 1: return bytes(value, 'utf-8') 
-        else: return bytes((len(value),)) + bytes(value, 'utf-8')
+        return bytes(value, 'utf-8')
     elif type(value) == bytes:
-        return bytes((len(value),)) + value
+        return value
     elif type(value) == bool:
         if value: return b'\x01'
         else: return b'\x00'
@@ -52,7 +51,10 @@ def pack_data(value: Union[int, float, str, bytes, bool, None]) -> bytes:
 def pack_data_array(values: List[Union[int, float, str, bool, None]]) -> bytes:
     binary = bytes()
     for value in values:
-        binary = binary + pack_data(value)
+        binary_value = pack_data(value)
+        if type(value) == bytes or (type(value) == str and len(value) != 1):
+            binary = binary + bytes((len(binary_value) % 256,)) # insert length at first element
+        binary = binary + binary_value
     return binary
 
 def pack_data_model(value: Union[int, float, str, bool, None], type: DataType):
@@ -82,16 +84,19 @@ def pack_data_model(value: Union[int, float, str, bool, None], type: DataType):
     elif type == DataType.CHAR:
         return bytes(value, 'utf-8')
     elif type == DataType.STRING:
-        return bytes((len(value),)) + bytes(value, 'utf-8')
+        return bytes(value, 'utf-8')
     elif type == DataType.BYTES:
-        return bytes((len(value),)) + value
+        return bytes(value)
     else:
         return bytes()
 
 def pack_data_array_model(values: List[Union[int, float, str, bool, None]], types: List[DataType]) -> bytes:
     binary = bytes()
     for i, type in enumerate(types):
-        binary = binary + pack_data_model(values[i], type)
+        binary_value = pack_data_model(values[i], type)
+        if type == DataType.STRING or type == DataType.BYTES:
+            binary = binary + bytes((len(binary_value) % 256,)) # insert length at first element
+        binary = binary + binary_value
     return binary
 
 def unpack_data(binary: bytes, type: DataType) -> Union[int, float, str, bool, None]:
@@ -125,9 +130,9 @@ def unpack_data(binary: bytes, type: DataType) -> Union[int, float, str, bool, N
     elif type == DataType.CHAR:
         return str(binary, 'utf-8')
     elif type == DataType.STRING:
-        return str(binary[1:], 'utf-8')
+        return str(binary, 'utf-8')
     elif type == DataType.BYTES:
-        return binary[1:]
+        return binary
     else:
         return None
 
@@ -147,7 +152,9 @@ def unpack_data_array(binary: bytes, types: List[DataType]) -> List[Union[int, f
         elif ty == DataType.I128 or ty == DataType.U128:
             size = 16
         elif ty == DataType.STRING or ty == DataType.BYTES:
-            if index < len(binary): size = int(binary[index]) + 1
+            if index < len(binary): 
+                size = int(binary[index]) # first element is the length
+                index += 1 # skip first element
             else: size = 1
         if index + size > len(binary): break
         value = unpack_data(binary[index:index + size], ty)
