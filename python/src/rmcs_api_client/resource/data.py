@@ -115,6 +115,44 @@ def list_data_by_number_after(resource, device_id: UUID, model_id: UUID, after: 
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
 
+def read_data_timestamp(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataId(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000)
+        )
+        response = stub.ReadDataTimestamp(request=request, metadata=resource.metadata)
+        return datetime.fromtimestamp(response.timestamp/1000000.0)
+
+def list_data_timestamp_by_last_time(resource, device_id: UUID, model_id: UUID, last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataTime(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.ListDataTimestampByLastTime(request=request, metadata=resource.metadata)
+        ls = []
+        for timestamp in response.timestamps: ls.append(datetime.fromtimestamp(timestamp/1000000.0))
+        return ls
+
+def list_data_timestamp_by_range_time(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataRange(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.ListDataTimestampByRangeTime(request=request, metadata=resource.metadata)
+        ls = []
+        for timestamp in response.timestamps: ls.append(datetime.fromtimestamp(timestamp/1000000.0))
+        return ls
+
 def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
@@ -175,7 +213,7 @@ def count_data_by_range_time(resource, device_id: UUID, model_id: UUID, begin: d
 def list_data_by_set_time(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetTime(
+        request = data_pb2.DataSetTime(
             set_id=set_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000)
         )
@@ -187,7 +225,7 @@ def list_data_by_set_time(resource, set_id: UUID, timestamp: datetime):
 def list_data_by_set_last_time(resource, set_id: UUID, last: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetTime(
+        request = data_pb2.DataSetTime(
             set_id=set_id.bytes,
             timestamp=int(last.timestamp()*1000000)
         )
@@ -199,7 +237,7 @@ def list_data_by_set_last_time(resource, set_id: UUID, last: datetime):
 def list_data_by_set_range_time(resource, set_id: UUID, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetRange(
+        request = data_pb2.DataSetRange(
             set_id=set_id.bytes,
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
@@ -212,7 +250,7 @@ def list_data_by_set_range_time(resource, set_id: UUID, begin: datetime, end: da
 def list_data_by_set_number_before(resource, set_id: UUID, before: datetime, number: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetNumber(
+        request = data_pb2.DataSetNumber(
             set_id=set_id.bytes,
             timestamp=int(before.timestamp()*1000000),
             number=number
@@ -225,7 +263,7 @@ def list_data_by_set_number_before(resource, set_id: UUID, before: datetime, num
 def list_data_by_set_number_after(resource, set_id: UUID, after: datetime, number: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetNumber(
+        request = data_pb2.DataSetNumber(
             set_id=set_id.bytes,
             timestamp=int(after.timestamp()*1000000),
             number=number
@@ -238,21 +276,21 @@ def list_data_by_set_number_after(resource, set_id: UUID, after: datetime, numbe
 def read_data_set(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetId(
+        request = data_pb2.DataSetId(
             set_id=set_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000)
         )
-        response = stub.ReadDataset(request=request, metadata=resource.metadata)
+        response = stub.ReadDataSet(request=request, metadata=resource.metadata)
         return DataSetSchema.from_response(response.result)
 
 def list_data_set_by_time(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetTime(
+        request = data_pb2.DataSetTime(
             set_id=set_id.bytes,
             timestamp=int(timestamp.timestamp()*1000000)
         )
-        response = stub.ListDatasetByTime(request=request, metadata=resource.metadata)
+        response = stub.ListDataSetByTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSetSchema.from_response(result))
         return ls
@@ -260,11 +298,11 @@ def list_data_set_by_time(resource, set_id: UUID, timestamp: datetime):
 def list_data_set_by_last_time(resource, set_id: UUID, last: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetTime(
+        request = data_pb2.DataSetTime(
             set_id=set_id.bytes,
             timestamp=int(last.timestamp()*1000000)
         )
-        response = stub.ListDatasetByLastTime(request=request, metadata=resource.metadata)
+        response = stub.ListDataSetByLastTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSetSchema.from_response(result))
         return ls
@@ -272,12 +310,12 @@ def list_data_set_by_last_time(resource, set_id: UUID, last: datetime):
 def list_data_set_by_range_time(resource, set_id: UUID, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetRange(
+        request = data_pb2.DataSetRange(
             set_id=set_id.bytes,
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListDatasetByRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListDataSetByRangeTime(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSetSchema.from_response(result))
         return ls
@@ -285,12 +323,12 @@ def list_data_set_by_range_time(resource, set_id: UUID, begin: datetime, end: da
 def list_data_set_by_number_before(resource, set_id: UUID, before: datetime, number: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetNumber(
+        request = data_pb2.DataSetNumber(
             set_id=set_id.bytes,
             timestamp=int(before.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDatasetByNumberBefore(request=request, metadata=resource.metadata)
+        response = stub.ListDataSetByNumberBefore(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSetSchema.from_response(result))
         return ls
@@ -298,12 +336,47 @@ def list_data_set_by_number_before(resource, set_id: UUID, before: datetime, num
 def list_data_set_by_number_after(resource, set_id: UUID, after: datetime, number: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DatasetNumber(
+        request = data_pb2.DataSetNumber(
             set_id=set_id.bytes,
             timestamp=int(after.timestamp()*1000000),
             number=number
         )
-        response = stub.ListDatasetByNumberAfter(request=request, metadata=resource.metadata)
+        response = stub.ListDataSetByNumberAfter(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(DataSetSchema.from_response(result))
+        return ls
+
+def read_data_set_timestamp(resource, set_id: UUID, timestamp: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetId(
+            set_id=set_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000)
+        )
+        response = stub.ReadDataSetTimestamp(request=request, metadata=resource.metadata)
+        return datetime.fromtimestamp(response.timestamp/1000000.0)
+
+def list_data_set_timestamp_by_last_time(resource, set_id: UUID, last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetTime(
+            set_id=set_id.bytes,
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.ListDataSetTimestampByLastTime(request=request, metadata=resource.metadata)
+        ls = []
+        for timestamp in response.timestamps: ls.append(datetime.fromtimestamp(timestamp/1000000.0))
+        return ls
+
+def list_data_set_timestamp_by_range_time(resource, set_id: UUID, begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetRange(
+            set_id=set_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.ListDataSetTimestampByRangeTime(request=request, metadata=resource.metadata)
+        ls = []
+        for timestamp in response.timestamps: ls.append(datetime.fromtimestamp(timestamp/1000000.0))
         return ls

@@ -881,6 +881,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn read_data_timestamp(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        data::read_data_timestamp(&self, device_id, model_id, timestamp)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_timestamp_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_last_time(&self, device_id, model_id, last)
+        .await
+    }
+
+    pub async fn list_data_timestamp_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_range_time(&self, device_id, model_id, begin, end)
+        .await
+    }
+
     pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
         -> Result<(), Status>
     {
@@ -1002,6 +1024,28 @@ impl Resource {
         data::list_data_set_by_number_after(&self, set_id, after, number)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn read_data_set_timestamp(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        data::read_data_set_timestamp(&self, set_id, timestamp)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_set_timestamp_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_set_timestamp_by_last_time(&self, set_id, last)
+        .await
+    }
+
+    pub async fn list_data_set_timestamp_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_set_timestamp_by_range_time(&self, set_id, begin, end)
+        .await
     }
 
     pub async fn read_buffer(&self, id: i32)

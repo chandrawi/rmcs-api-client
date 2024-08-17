@@ -60,7 +60,7 @@ function get_set_id(r) {
  * @property {Uuid} template_id
  * @property {string} name
  * @property {string} description
- * @property {SetMember} members
+ * @property {SetMember[]} members
  */
 
 /**
@@ -70,10 +70,10 @@ function get_set_id(r) {
 export function get_set_schema(r) {
     return {
         id: base64_to_uuid_hex(r.id),
-        template_id: base64_to_uuid_hex(r.template_id),
+        template_id: base64_to_uuid_hex(r.templateId),
         name: r.name,
         description: r.description,
-        members: r.members.map((v) => {return get_set_member(v)})
+        members: r.membersList.map((v) => {return get_set_member(v)})
     };
 }
 
@@ -98,9 +98,9 @@ function get_set_schema_vec(r) {
  */
 export function get_set_member(r) {
     return {
-        device_id: base64_to_uuid_hex(r.device_id),
-        model_id: base64_to_uuid_hex(r.model_id),
-        data_index: base64_to_bytes(r.data_index)
+        device_id: base64_to_uuid_hex(r.deviceId),
+        model_id: base64_to_uuid_hex(r.modelId),
+        data_index: base64_to_bytes(r.dataIndex)
     };
 }
 
@@ -169,7 +169,7 @@ function get_set_template_id(r) {
  * @property {Uuid} id
  * @property {string} name
  * @property {string} description
- * @property {SetMember} members
+ * @property {SetTemplateMember[]} members
  */
 
 /**
@@ -181,7 +181,7 @@ export function get_set_template_schema(r) {
         id: base64_to_uuid_hex(r.id),
         name: r.name,
         description: r.description,
-        members: r.members.map((v) => {return get_set_member(v)})
+        members: r.membersList.map((v) => {return get_set_template_member(v)})
     };
 }
 
@@ -206,9 +206,9 @@ function get_set_template_schema_vec(r) {
  */
 export function get_set_template_member(r) {
     return {
-        type_id: base64_to_uuid_hex(r.type_id),
-        model_id: base64_to_uuid_hex(r.model_id),
-        data_index: base64_to_bytes(r.data_index)
+        type_id: base64_to_uuid_hex(r.typeId),
+        model_id: base64_to_uuid_hex(r.modelId),
+        data_index: base64_to_bytes(r.dataIndex)
     };
 }
 

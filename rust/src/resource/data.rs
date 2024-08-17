@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc, TimeZone};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
@@ -116,6 +116,58 @@ pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: Uu
         .await?
         .into_inner();
     Ok(response.results)
+}
+
+pub(crate) async fn read_data_timestamp(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
+    -> Result<DateTime<Utc>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataId {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: timestamp.timestamp_micros()
+    });
+    let response = client.read_data_timestamp(request)
+        .await?
+        .into_inner();
+    Ok(Utc.timestamp_nanos(response.timestamp * 1000))
+}
+
+pub(crate) async fn list_data_timestamp_by_last_time(resource: &Resource, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataTime {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: last.timestamp_micros()
+    });
+    let response = client.list_data_timestamp_by_last_time(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_data_timestamp_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataRange {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros()
+    });
+    let response = client.list_data_timestamp_by_range_time(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
 }
 
 pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
@@ -391,4 +443,53 @@ pub(crate) async fn list_data_set_by_number_after(resource: &Resource, set_id: U
         .await?
         .into_inner();
     Ok(response.results)
+}
+
+pub(crate) async fn read_data_set_timestamp(resource: &Resource, set_id: Uuid, timestamp: DateTime<Utc>)
+    -> Result<DateTime<Utc>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataSetId {
+        set_id: set_id.as_bytes().to_vec(),
+        timestamp: timestamp.timestamp_micros()
+    });
+    let response = client.read_data_set_timestamp(request)
+        .await?
+        .into_inner();
+    Ok(Utc.timestamp_nanos(response.timestamp * 1000))
+}
+
+pub(crate) async fn list_data_set_timestamp_by_last_time(resource: &Resource, set_id: Uuid, last: DateTime<Utc>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataSetTime {
+        set_id: set_id.as_bytes().to_vec(),
+        timestamp: last.timestamp_micros()
+    });
+    let response = client.list_data_set_timestamp_by_last_time(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_data_set_timestamp_by_range_time(resource: &Resource, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataSetRange {
+        set_id: set_id.as_bytes().to_vec(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros()
+    });
+    let response = client.list_data_set_timestamp_by_range_time(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
 }

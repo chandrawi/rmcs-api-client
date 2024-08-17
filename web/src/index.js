@@ -191,6 +191,9 @@ export {
     list_data_by_range_time,
     list_data_by_number_before,
     list_data_by_number_after,
+    read_data_timestamp,
+    list_data_timestamp_by_last_time,
+    list_data_timestamp_by_range_time,
     create_data,
     delete_data,
     count_data,
@@ -206,7 +209,10 @@ export {
     list_data_set_by_last_time,
     list_data_set_by_range_time,
     list_data_set_by_number_before,
-    list_data_set_by_number_after
+    list_data_set_by_number_after,
+    read_data_set_timestamp,
+    list_data_set_timestamp_by_last_time,
+    list_data_set_timestamp_by_range_time
 } from './resource/data.js';
 export {
     read_buffer,

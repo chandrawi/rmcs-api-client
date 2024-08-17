@@ -348,6 +348,15 @@ class Resource:
     def list_data_by_number_after(self, device_id: UUID, model_id: UUID, after: datetime, number: int) -> List[DataSchema]:
         return _data.list_data_by_number_after(self, device_id, model_id, after, number)
 
+    def read_data_timestamp(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> datetime:
+        return _data.read_data_timestamp(self, device_id, model_id, timestamp)
+
+    def list_data_timestamp_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_last_time(self, device_id, model_id, last)
+
+    def list_data_timestamp_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_range_time(self, device_id, model_id, begin, end)
+
     def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
         return _data.create_data(self, device_id, model_id, timestamp, data)
 
@@ -395,6 +404,15 @@ class Resource:
 
     def list_data_set_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSetSchema]:
         return _data.list_data_set_by_number_after(self, set_id, after, number)
+
+    def read_data_set_timestamp(self, set_id: UUID, timestamp: datetime) -> datetime:
+        return _data.read_data_set_timestamp(self, set_id, timestamp)
+
+    def list_data_set_timestamp_by_last_time(self, set_id: UUID, last: datetime) -> List[datetime]:
+        return _data.list_data_set_timestamp_by_last_time(self, set_id, last)
+
+    def list_data_set_timestamp_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
+        return _data.list_data_set_timestamp_by_range_time(self, set_id, begin, end)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
