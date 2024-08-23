@@ -109,7 +109,7 @@ class Resource:
         return _device.list_gateway_by_name(self, name)
 
     def list_gateway_option(self, type_id: Optional[UUID], name: Optional[str]) -> List[GatewaySchema]:
-        return _device.list_gateway_option(self, name)
+        return _device.list_gateway_option(self, type_id, name)
 
     def create_gateway(self, id: UUID, type_id: UUID, serial_number: str, name: str, description: str) -> UUID:
         return _device.create_gateway(self, id, type_id, serial_number, name, description)
@@ -333,9 +333,6 @@ class Resource:
     def read_data(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> DataSchema:
         return _data.read_data(self, device_id, model_id, timestamp)
 
-    def list_data_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[DataSchema]:
-        return _data.list_data_by_time(self, device_id, model_id, timestamp)
-
     def list_data_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> List[DataSchema]:
         return _data.list_data_by_last_time(self, device_id, model_id, last)
 
@@ -347,30 +344,6 @@ class Resource:
 
     def list_data_by_number_after(self, device_id: UUID, model_id: UUID, after: datetime, number: int) -> List[DataSchema]:
         return _data.list_data_by_number_after(self, device_id, model_id, after, number)
-
-    def read_data_timestamp(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> datetime:
-        return _data.read_data_timestamp(self, device_id, model_id, timestamp)
-
-    def list_data_timestamp_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> List[datetime]:
-        return _data.list_data_timestamp_by_last_time(self, device_id, model_id, last)
-
-    def list_data_timestamp_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
-        return _data.list_data_timestamp_by_range_time(self, device_id, model_id, begin, end)
-
-    def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
-        return _data.create_data(self, device_id, model_id, timestamp, data)
-
-    def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
-        return _data.delete_data(self, device_id, model_id, timestamp)
-
-    def count_data(self, device_id: UUID, model_id: UUID) -> int:
-        return _data.count_data(self, device_id, model_id)
-
-    def count_data_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> int:
-        return _data.count_data(self, device_id, model_id, last)
-
-    def count_data_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> int:
-        return _data.count_data(self, model_id, device_id, begin, end)
 
     def list_data_by_set_time(self, set_id: UUID, timestamp: datetime) -> List[DataSchema]:
         return _data.list_data_by_set_time(self, set_id, timestamp)
@@ -390,9 +363,6 @@ class Resource:
     def read_data_set(self, set_id: UUID, timestamp: datetime) -> DataSetSchema:
         return _data.read_data_set(self, set_id, timestamp)
 
-    def list_data_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[DataSetSchema]:
-        return _data.list_data_set_by_time(self, set_id, timestamp)
-
     def list_data_set_by_last_time(self, set_id: UUID, last: datetime) -> List[DataSetSchema]:
         return _data.list_data_set_by_last_time(self, set_id, last)
 
@@ -405,14 +375,38 @@ class Resource:
     def list_data_set_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSetSchema]:
         return _data.list_data_set_by_number_after(self, set_id, after, number)
 
-    def read_data_set_timestamp(self, set_id: UUID, timestamp: datetime) -> datetime:
-        return _data.read_data_set_timestamp(self, set_id, timestamp)
+    def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
+        return _data.create_data(self, device_id, model_id, timestamp, data)
 
-    def list_data_set_timestamp_by_last_time(self, set_id: UUID, last: datetime) -> List[datetime]:
-        return _data.list_data_set_timestamp_by_last_time(self, set_id, last)
+    def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
+        return _data.delete_data(self, device_id, model_id, timestamp)
 
-    def list_data_set_timestamp_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
-        return _data.list_data_set_timestamp_by_range_time(self, set_id, begin, end)
+    def read_data_timestamp(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> datetime:
+        return _data.read_data_timestamp(self, device_id, model_id, timestamp)
+
+    def list_data_timestamp_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_last_time(self, device_id, model_id, last)
+
+    def list_data_timestamp_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_range_time(self, device_id, model_id, begin, end)
+
+    def read_data_timestamp_by_set(self, set_id: UUID, timestamp: datetime) -> datetime:
+        return _data.read_data_timestamp_by_set(self, set_id, timestamp)
+
+    def list_data_timestamp_by_set_last_time(self, set_id: UUID, last: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_set_last_time(self, set_id, last)
+
+    def list_data_timestamp_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
+        return _data.list_data_timestamp_by_set_range_time(self, set_id, begin, end)
+
+    def count_data(self, device_id: UUID, model_id: UUID) -> int:
+        return _data.count_data(self, device_id, model_id)
+
+    def count_data_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime) -> int:
+        return _data.count_data(self, device_id, model_id, last)
+
+    def count_data_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> int:
+        return _data.count_data(self, model_id, device_id, begin, end)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)

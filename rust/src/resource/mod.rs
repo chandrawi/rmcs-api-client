@@ -841,14 +841,6 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_time(&self, device_id, model_id, timestamp)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
     pub async fn list_data_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
@@ -879,63 +871,6 @@ impl Resource {
         data::list_data_by_number_after(&self, device_id, model_id, after, number)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn read_data_timestamp(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<DateTime<Utc>, Status>
-    {
-        data::read_data_timestamp(&self, device_id, model_id, timestamp)
-        .await
-        .map(|s| s.into())
-    }
-
-    pub async fn list_data_timestamp_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        data::list_data_timestamp_by_last_time(&self, device_id, model_id, last)
-        .await
-    }
-
-    pub async fn list_data_timestamp_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        data::list_data_timestamp_by_range_time(&self, device_id, model_id, begin, end)
-        .await
-    }
-
-    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
-        -> Result<(), Status>
-    {
-        data::create_data(&self, device_id, model_id, timestamp, data)
-        .await
-    }
-
-    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<(), Status>
-    {
-        data::delete_data(&self, device_id, model_id, timestamp)
-        .await
-    }
-
-    pub async fn count_data(&self, device_id: Uuid, model_id: Uuid)
-        -> Result<usize, Status>
-    {
-        data::count_data(&self, device_id, model_id)
-        .await
-    }
-
-    pub async fn count_data_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
-        -> Result<usize, Status>
-    {
-        data::count_data_by_last_time(&self, device_id, model_id, last)
-        .await
-    }
-
-    pub async fn count_data_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<usize, Status>
-    {
-        data::count_data_by_range_time(&self, device_id, model_id, begin, end)
-        .await
     }
 
     pub async fn list_data_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
@@ -986,14 +921,6 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_set_by_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<Vec<DataSetSchema>, Status>
-    {
-        data::list_data_set_by_time(&self, set_id, timestamp)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
     pub async fn list_data_set_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
         -> Result<Vec<DataSetSchema>, Status>
     {
@@ -1026,25 +953,82 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn read_data_set_timestamp(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>)
+        -> Result<(), Status>
+    {
+        data::create_data(&self, device_id, model_id, timestamp, data)
+        .await
+    }
+
+    pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<(), Status>
+    {
+        data::delete_data(&self, device_id, model_id, timestamp)
+        .await
+    }
+
+    pub async fn read_data_timestamp(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<DateTime<Utc>, Status>
     {
-        data::read_data_set_timestamp(&self, set_id, timestamp)
+        data::read_data_timestamp(&self, device_id, model_id, timestamp)
         .await
         .map(|s| s.into())
     }
 
-    pub async fn list_data_set_timestamp_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+    pub async fn list_data_timestamp_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
-        data::list_data_set_timestamp_by_last_time(&self, set_id, last)
+        data::list_data_timestamp_by_last_time(&self, device_id, model_id, last)
         .await
     }
 
-    pub async fn list_data_set_timestamp_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_timestamp_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
-        data::list_data_set_timestamp_by_range_time(&self, set_id, begin, end)
+        data::list_data_timestamp_by_range_time(&self, device_id, model_id, begin, end)
+        .await
+    }
+
+    pub async fn read_data_timestamp_by_set(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        data::read_data_timestamp_by_set(&self, set_id, timestamp)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_timestamp_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_set_last_time(&self, set_id, last)
+        .await
+    }
+
+    pub async fn list_data_timestamp_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_set_range_time(&self, set_id, begin, end)
+        .await
+    }
+
+    pub async fn count_data(&self, device_id: Uuid, model_id: Uuid)
+        -> Result<usize, Status>
+    {
+        data::count_data(&self, device_id, model_id)
+        .await
+    }
+
+    pub async fn count_data_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_last_time(&self, device_id, model_id, last)
+        .await
+    }
+
+    pub async fn count_data_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_range_time(&self, device_id, model_id, begin, end)
         .await
     }
 
