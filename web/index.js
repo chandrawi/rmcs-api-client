@@ -5108,6 +5108,24 @@ function get_buffer_id(r) {
  */
 
 /**
+ * @typedef {Object} BufferRange
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {Date} begin
+ * @property {Date} end
+ * @property {?number|string} status
+ */
+
+/**
+ * @typedef {Object} BufferNumber
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {Date} timestamp
+ * @property {number} number
+ * @property {?number|string} status
+ */
+
+/**
  * @typedef {Object} BufferSelector
  * @property {?Uuid} device_id
  * @property {?Uuid} model_id
@@ -5277,6 +5295,85 @@ async function read_buffer_by_time(server, request) {
     bufferTime.setStatus(set_buffer_status(request.status));
     return client.readBufferByTime(bufferTime, metadata(server))
         .then(response => get_buffer_schema(response.toObject().result));
+}
+
+/**
+ * Read data buffers by last time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, status
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+async function list_buffer_by_last_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferTime = new pb_buffer.BufferTime();
+    bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferTime.setStatus(set_buffer_status(request.status));
+    }
+    return client.listBufferByLastTime(bufferTime, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data buffers by range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferRange} request data buffer range: device_id, model_id, begin, end, status
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+async function list_buffer_by_range_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferRange = new pb_buffer.BufferRange();
+    bufferRange.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferRange.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferRange.setBegin(request.begin.valueOf() * 1000);
+    bufferRange.setEnd(request.end.valueOf() * 1000);
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferRange.setStatus(set_buffer_status(request.status));
+    }
+    return client.listBufferByRangeTime(bufferRange, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data buffers by by specific time and number before
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, status
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+async function list_buffer_by_number_before(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferNumber = new pb_buffer.BufferNumber();
+    bufferNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferNumber.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferNumber.setNumber(request.number);
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferNumber.setStatus(set_buffer_status(request.status));
+    }
+    return client.listBufferByNumberBefore(bufferNumber, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data buffers by by specific time and number after
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, status
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ */
+async function list_buffer_by_number_after(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferNumber = new pb_buffer.BufferNumber();
+    bufferNumber.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferNumber.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferNumber.setNumber(request.number);
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferNumber.setStatus(set_buffer_status(request.status));
+    }
+    return client.listBufferByNumberAfter(bufferNumber, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -6271,6 +6368,10 @@ var index = /*#__PURE__*/Object.freeze({
     delete_slice: delete_slice,
     delete_slice_set: delete_slice_set,
     delete_type: delete_type,
+    list_buffer_by_last_time: list_buffer_by_last_time,
+    list_buffer_by_number_after: list_buffer_by_number_after,
+    list_buffer_by_number_before: list_buffer_by_number_before,
+    list_buffer_by_range_time: list_buffer_by_range_time,
     list_buffer_first: list_buffer_first,
     list_buffer_first_offset: list_buffer_first_offset,
     list_buffer_last: list_buffer_last,
@@ -6395,4 +6496,4 @@ var index = /*#__PURE__*/Object.freeze({
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_data, count_data_by_last_time, count_data_by_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_first, list_buffer_first_offset, list_buffer_last, list_buffer_last_offset, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };
+export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_data, count_data_by_last_time, count_data_by_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_first, list_buffer_first_offset, list_buffer_last, list_buffer_last_offset, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };

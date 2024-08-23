@@ -215,6 +215,10 @@ export {
 export {
     read_buffer,
     read_buffer_by_time,
+    list_buffer_by_last_time,
+    list_buffer_by_range_time,
+    list_buffer_by_number_before,
+    list_buffer_by_number_after,
     read_buffer_first,
     read_buffer_last,
     list_buffer_first,

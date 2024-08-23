@@ -100,6 +100,65 @@ def read_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: da
         response = stub.ReadBufferByTime(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
+def list_buffer_by_last_time(resource, device_id: UUID, model_id: UUID, last: datetime, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferTime(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(last.timestamp()*1000000),
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferByLastTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_range_time(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferRange(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000),
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferByRangeTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_number_before(resource, device_id: UUID, model_id: UUID, before: datetime, number: int, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferNumber(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(before.timestamp()*1000000),
+            number=number,
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferByNumberBefore(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_number_after(resource, device_id: UUID, model_id: UUID, after: datetime, number: int, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferNumber(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(after.timestamp()*1000000),
+            number=number,
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferByNumberAfter(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
 def read_buffer_first(resource, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)

@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
-    BufferSchema, BufferId, BufferTime, BufferSelector, BuffersSelector, BufferUpdate, BufferCount
+    BufferSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate, BufferCount
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -43,6 +43,81 @@ pub(crate) async fn read_buffer_by_time(resource: &Resource, device_id: Uuid, mo
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(BUFFER_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_buffer_by_last_time(resource: &Resource, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferTime {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: last.timestamp_micros(),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.list_buffer_by_last_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_buffer_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferRange {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros(),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.list_buffer_by_range_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_buffer_by_number_before(resource: &Resource, device_id: Uuid, model_id: Uuid, before: DateTime<Utc>, number: usize, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferNumber {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: before.timestamp_micros(),
+        number: number as u32,
+        status: status.map(|i| i as i32)
+    });
+    let response = client.list_buffer_by_number_before(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_buffer_by_number_after(resource: &Resource, device_id: Uuid, model_id: Uuid, after: DateTime<Utc>, number: usize, status: Option<i16>)
+    -> Result<Vec<BufferSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferNumber {
+        device_id: device_id.as_bytes().to_vec(),
+        model_id: model_id.as_bytes().to_vec(),
+        timestamp: after.timestamp_micros(),
+        number: number as u32,
+        status: status.map(|i| i as i32)
+    });
+    let response = client.list_buffer_by_number_after(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn read_buffer_first(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)

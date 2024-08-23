@@ -414,6 +414,18 @@ class Resource:
     def read_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, status: Optional[Union[str, int]]=None) -> BufferSchema:
         return _buffer.read_buffer_by_time(self, device_id, model_id, timestamp, status)
 
+    def list_buffer_by_last_time(self, device_id: UUID, model_id: UUID, last: datetime, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_last_time(self, device_id, model_id, last, status)
+
+    def list_buffer_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_range_time(self, device_id, model_id, begin, end, status)
+
+    def list_buffer_by_number_before(self, device_id: UUID, model_id: UUID, before: datetime, number: int, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_number_before(self, device_id, model_id, before, number, status)
+
+    def list_buffer_by_number_after(self, device_id: UUID, model_id: UUID, after: datetime, number: int, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_number_after(self, device_id, model_id, after, number, status)
+
     def read_buffer_first(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> BufferSchema:
         return _buffer.read_buffer_first(self, device_id, model_id, status)
 

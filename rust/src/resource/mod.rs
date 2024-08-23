@@ -1048,6 +1048,38 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_buffer_by_last_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_last_time(&self, device_id, model_id, last, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_range_time(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_range_time(&self, device_id, model_id, begin, end, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_number_before(&self, device_id: Uuid, model_id: Uuid, before: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_number_before(&self, device_id, model_id, before, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_number_after(&self, device_id: Uuid, model_id: Uuid, after: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_number_after(&self, device_id, model_id, after, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn read_buffer_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
         -> Result<BufferSchema, Status>
     {
