@@ -444,6 +444,33 @@ class Resource:
     def list_buffer_last_offset(self, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_last_offset(self, number, offset, device_id, model_id, status)
 
+    def list_buffer_by_set_time(self, set_id: UUID, timestamp: datetime, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_set_time(self, set_id, timestamp, status)
+
+    def list_buffer_by_set_last_time(self, set_id: UUID, last: datetime, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_set_last_time(self, set_id, last, status)
+
+    def list_buffer_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_set_range_time(self, set_id, begin, end, status)
+
+    def list_buffer_by_set_number_before(self, set_id: UUID, before: datetime, number: int, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_set_number_before(self, set_id, before, number, status)
+
+    def list_buffer_by_set_number_after(self, set_id: UUID, after: datetime, number: int, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_by_set_number_after(self, set_id, after, number, status)
+
+    def list_buffer_first_by_set(self, number: int, set_id: UUID, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_first_by_set(self, number, set_id, status)
+
+    def list_buffer_first_offset_by_set(self, number: int, offset: int, set_id: UUID, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_first_offset_by_set(self, number, offset, set_id, status)
+
+    def list_buffer_last_by_set(self, number: int, set_id: UUID, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_last_by_set(self, number, set_id, status)
+
+    def list_buffer_last_offset_by_set(self, number: int, offset: int, set_id: UUID, status: Optional[Union[str, int]]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_last_offset_by_set(self, number, offset, set_id, status)
+
     def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: Union[str, int]) -> int:
         return _buffer.create_buffer(self, device_id, model_id, timestamp, data, status)
 

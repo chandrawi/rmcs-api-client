@@ -1128,6 +1128,78 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_buffer_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_set_time(&self, set_id, timestamp, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_set_last_time(&self, set_id, last, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_set_range_time(&self, set_id, begin, end, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_set_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_set_number_before(&self, set_id, before, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_set_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_set_number_after(&self, set_id, after, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_first_by_set(&self, number: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_first_by_set(&self, number, set_id, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_first_offset_by_set(&self, number: usize, offset: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_first_offset_by_set(&self, number, offset, set_id, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_last_by_set(&self, number: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_last_by_set(&self, number, set_id, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_last_offset_by_set(&self, number: usize, offset: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_last_offset_by_set(&self, number, offset, set_id, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, status: BufferStatus)
         -> Result<i32, Status>
     {

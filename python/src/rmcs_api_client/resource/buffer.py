@@ -263,6 +263,128 @@ def list_buffer_last_offset(resource, number: int, offset: int, device_id: Optio
         for result in response.results: ls.append(BufferSchema.from_response(result))
         return ls
 
+def list_buffer_by_set_time(resource, set_id: UUID, timestamp: datetime, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetTime(
+            set_id=set_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000),
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferBySetTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_set_last_time(resource, set_id: UUID, last: datetime, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetTime(
+            set_id=set_id.bytes,
+            timestamp=int(last.timestamp()*1000000),
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferBySetLastTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_set_range_time(resource, set_id: UUID, begin: datetime, end: datetime, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetRange(
+            set_id=set_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000),
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferBySetRangeTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_set_number_before(resource, set_id: UUID, before: datetime, number: int, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetNumber(
+            set_id=set_id.bytes,
+            timestamp=int(before.timestamp()*1000000),
+            number=number,
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferBySetNumberBefore(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_by_set_number_after(resource, set_id: UUID, after: datetime, number: int, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetNumber(
+            set_id=set_id.bytes,
+            timestamp=int(after.timestamp()*1000000),
+            number=number,
+            status=status_to_int(status)
+        )
+        response = stub.ListBufferBySetNumberAfter(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_first_by_set(resource, number: int, set_id: UUID, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BuffersSetSelector(
+            set_id=set_id.bytes,
+            status=status_to_int(status),
+            number=number
+        )
+        response = stub.ListBufferFirstBySet(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_first_offset_by_set(resource, number: int, offset: int, set_id: UUID, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BuffersSetSelector(
+            set_id=set_id.bytes,
+            status=status_to_int(status),
+            number=number,
+            offset=offset
+        )
+        response = stub.ListBufferFirstOffsetBySet(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_last_by_set(resource, number: int, set_id: UUID, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BuffersSetSelector(
+            set_id=set_id.bytes,
+            status=status_to_int(status),
+            number=number
+        )
+        response = stub.ListBufferLastBySet(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
+def list_buffer_last_offset_by_set(resource, number: int, offset: int, set_id: UUID, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BuffersSetSelector(
+            set_id=set_id.bytes,
+            status=status_to_int(status),
+            number=number,
+            offset=offset
+        )
+        response = stub.ListBufferLastOffsetBySet(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
 def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: Union[str, int]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
