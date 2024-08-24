@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::data::data_service_client::DataServiceClient;
 use rmcs_resource_api::data::{
-    DataSchema, DataId, DataTime, DataRange, DataNumber, DataCount,
+    DataSchema, DataId, DataTime, DataRange, DataNumber, DataIdsTime, DataIdsRange, DataIdsNumber, DataCount,
     DataSetSchema, DataSetId, DataSetTime, DataSetRange, DataSetNumber
 };
 use crate::resource::Resource;
@@ -96,6 +96,94 @@ pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: Uu
         number: number as u32
     });
     let response = client.list_data_by_number_after(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_data_by_ids_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>)
+    -> Result<Vec<DataSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataIdsTime {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        timestamp: timestamp.timestamp_micros()
+    });
+    let response = client.list_data_by_ids_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_data_by_ids_last_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>)
+    -> Result<Vec<DataSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataIdsTime {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        timestamp: last.timestamp_micros()
+    });
+    let response = client.list_data_by_ids_last_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_data_by_ids_range_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>)
+    -> Result<Vec<DataSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataIdsRange {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros()
+    });
+    let response = client.list_data_by_ids_range_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_data_by_ids_number_before(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize)
+    -> Result<Vec<DataSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataIdsNumber {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        timestamp: before.timestamp_micros(),
+        number: number as u32
+    });
+    let response = client.list_data_by_ids_number_before(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_data_by_ids_number_after(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize)
+    -> Result<Vec<DataSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(DataIdsNumber {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        timestamp: after.timestamp_micros(),
+        number: number as u32
+    });
+    let response = client.list_data_by_ids_number_after(request)
         .await?
         .into_inner();
     Ok(response.results)

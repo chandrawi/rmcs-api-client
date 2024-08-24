@@ -102,6 +102,74 @@ def list_data_by_number_after(resource, device_id: UUID, model_id: UUID, after: 
         for result in response.results: ls.append(DataSchema.from_response(result))
         return ls
 
+def list_data_by_ids_time(resource, device_ids: List[UUID], model_ids: List[UUID], timestamp: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsTime(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            timestamp=int(timestamp.timestamp()*1000000)
+        )
+        response = stub.ListDataByIdsTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DataSchema.from_response(result))
+        return ls
+
+def list_data_by_ids_last_time(resource, device_ids: List[UUID], model_ids: List[UUID], last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsTime(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.ListDataByIdsLastTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DataSchema.from_response(result))
+        return ls
+
+def list_data_by_ids_range_time(resource, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsRange(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.ListDataByIdsRangeTime(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DataSchema.from_response(result))
+        return ls
+
+def list_data_by_ids_number_before(resource, device_ids: List[UUID], model_ids: List[UUID], before: datetime, number: int):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsNumber(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            timestamp=int(before.timestamp()*1000000),
+            number=number
+        )
+        response = stub.ListDataByIdsNumberBefore(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DataSchema.from_response(result))
+        return ls
+
+def list_data_by_ids_number_after(resource, device_ids: List[UUID], model_ids: List[UUID], after: datetime, number: int):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsNumber(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            timestamp=int(after.timestamp()*1000000),
+            number=number
+        )
+        response = stub.ListDataByIdsNumberAfter(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(DataSchema.from_response(result))
+        return ls
+
 def list_data_by_set_time(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)

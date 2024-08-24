@@ -873,6 +873,46 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_data_by_ids_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_ids_time(&self, device_ids, model_ids, timestamp)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_ids_last_time(&self, device_ids, model_ids, last)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_ids_range_time(&self, device_ids, model_ids, begin, end)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_ids_number_before(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_ids_number_before(&self, device_ids, model_ids, before, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_data_by_ids_number_after(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize)
+        -> Result<Vec<DataSchema>, Status>
+    {
+        data::list_data_by_ids_number_after(&self, device_ids, model_ids, after, number)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_data_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<Vec<DataSchema>, Status>
     {
@@ -1124,6 +1164,78 @@ impl Resource {
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_last_offset(&self, number, offset, device_id, model_id, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_ids_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_ids_time(&self, device_ids, model_ids, timestamp, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_ids_last_time(&self, device_ids, model_ids, last, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_ids_range_time(&self, device_ids, model_ids, begin, end, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_ids_number_before(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_ids_number_before(&self, device_ids, model_ids, before, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_by_ids_number_after(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_by_ids_number_after(&self, device_ids, model_ids, after, number, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_first_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_first_by_ids(&self, number, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_first_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_first_offset_by_ids(&self, number, offset, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_last_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_last_by_ids(&self, number, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_buffer_last_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer_last_offset_by_ids(&self, number, offset, device_ids, model_ids, status.map(|s| s.into()))
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }

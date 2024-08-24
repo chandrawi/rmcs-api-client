@@ -91,6 +91,29 @@ function get_data_schema_vec(r) {
 }
 
 /**
+ * @typedef {Object} DataIdsTime
+ * @property {Uuid[]} device_ids
+ * @property {Uuid[]} model_ids
+ * @property {Date} timestamp
+ */
+
+/**
+ * @typedef {Object} DataIdsRange
+ * @property {Uuid[]} device_ids
+ * @property {Uuid[]} model_ids
+ * @property {Date} begin
+ * @property {Date} end
+ */
+
+/**
+ * @typedef {Object} DataIdsNumber
+ * @property {Uuid[]} device_ids
+ * @property {Uuid[]} model_ids
+ * @property {Date} timestamp
+ * @property {number} number
+ */
+
+/**
  * @typedef {Object} DataSetId
  * @property {Uuid} set_id
  * @property {Date} timestamp
@@ -224,6 +247,89 @@ export async function list_data_by_number_after(server, request) {
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
     return client.listDataByNumberAfter(dataNumber, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read multiple data by uuid list and specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_ids_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsTime = new pb_data.DataIdsTime();
+    dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataByIdsTime(dataIdsTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read multiple data by uuid list and last time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_ids_last_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsTime = new pb_data.DataIdsTime();
+    dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataByIdsLastTime(dataIdsTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read multiple data by uuid list and range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_ids_range_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsRange = new pb_data.DataIdsRange();
+    dataIdsRange.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsRange.setBegin(request.begin.valueOf() * 1000);
+    dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    return client.listDataByIdsRangeTime(dataIdsRange, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read multiple data by uuid list and specific time and number before
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_ids_number_before(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsNumber = new pb_data.DataIdsNumber();
+    dataIdsNumber.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsNumber.setNumber(request.number);
+    return client.listDataByIdsNumberBefore(dataIdsNumber, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read multiple data by uuid list and specific time and number after
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_ids_number_after(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsNumber = new pb_data.DataIdsNumber();
+    dataIdsNumber.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsNumber.setNumber(request.number);
+    return client.listDataByIdsNumberAfter(dataIdsNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
