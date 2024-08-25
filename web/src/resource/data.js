@@ -48,20 +48,6 @@ import {
  */
 
 /**
- * @typedef {Object} DataCount
- * @property {Uuid} device_id
- * @property {Uuid} model_id
- * @property {?Date} timestamp
- * @property {?Date} begin
- * @property {?Date} end
- */
-
-/**
- * @typedef {Object} DataCountResult
- * @property {number} count
- */
-
-/**
  * @typedef {Object} DataSchema
  * @property {Uuid} model_id
  * @property {Uuid} device_id
@@ -348,10 +334,10 @@ export async function list_data_by_ids_number_after(server, request) {
  */
 export async function list_data_by_set_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetTime = new pb_data.DataSetTime();
-    datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetTime(datasetTime, metadata(server))
+    const dataSetTime = new pb_data.DataSetTime();
+    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataBySetTime(dataSetTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
@@ -363,10 +349,10 @@ export async function list_data_by_set_time(server, request) {
  */
 export async function list_data_by_set_last_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetTime = new pb_data.DataSetTime();
-    datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetLastTime(datasetTime, metadata(server))
+    const dataSetTime = new pb_data.DataSetTime();
+    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataBySetLastTime(dataSetTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
@@ -378,11 +364,11 @@ export async function list_data_by_set_last_time(server, request) {
  */
 export async function list_data_by_set_range_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetRange = new pb_data.DataSetRange();
-    datasetRange.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetRange.setBegin(request.begin.valueOf() * 1000);
-    datasetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataBySetRangeTime(datasetRange, metadata(server))
+    const dataSetRange = new pb_data.DataSetRange();
+    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetRange.setBegin(request.begin.valueOf() * 1000);
+    dataSetRange.setEnd(request.end.valueOf() * 1000);
+    return client.listDataBySetRangeTime(dataSetRange, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
@@ -394,11 +380,11 @@ export async function list_data_by_set_range_time(server, request) {
  */
 export async function list_data_by_set_number_before(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataBySetNumberBefore(datasetNumber, metadata(server))
+    const dataSetNumber = new pb_data.DataSetNumber();
+    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataSetNumber.setNumber(request.number);
+    return client.listDataBySetNumberBefore(dataSetNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
@@ -410,11 +396,11 @@ export async function list_data_by_set_number_before(server, request) {
  */
 export async function list_data_by_set_number_after(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataBySetNumberAfter(datasetNumber, metadata(server))
+    const dataSetNumber = new pb_data.DataSetNumber();
+    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataSetNumber.setNumber(request.number);
+    return client.listDataBySetNumberAfter(dataSetNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
 
@@ -426,10 +412,10 @@ export async function list_data_by_set_number_after(server, request) {
  */
 export async function read_data_set(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataId = new pb_data.DataSetId();
-    dataId.setSetId(uuid_hex_to_base64(request.set_id));
-    dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.readDataSet(dataId, metadata(server))
+    const datasetId = new pb_data.DataSetId();
+    datasetId.setSetId(uuid_hex_to_base64(request.set_id));
+    datasetId.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.readDataSet(datasetId, metadata(server))
         .then(response => get_data_set_schema(response.toObject().result));
 }
 
@@ -639,10 +625,10 @@ export async function list_data_timestamp_by_ids_range_time(server, request) {
  */
 export async function read_data_timestamp_by_set(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataId = new pb_data.DataSetId();
-    dataId.setSetId(uuid_hex_to_base64(request.set_id));
-    dataId.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.readDataTimestampBySet(dataId, metadata(server))
+    const dataSetId = new pb_data.DataSetId();
+    dataSetId.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetId.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.readDataTimestampBySet(dataSetId, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
 
@@ -654,10 +640,10 @@ export async function read_data_timestamp_by_set(server, request) {
  */
 export async function list_data_timestamp_by_set_last_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataTime = new pb_data.DataSetTime();
-    dataTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataTimestampBySetLastTime(dataTime, metadata(server))
+    const dataSetTime = new pb_data.DataSetTime();
+    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataTimestampBySetLastTime(dataSetTime, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
 
@@ -669,64 +655,151 @@ export async function list_data_timestamp_by_set_last_time(server, request) {
  */
 export async function list_data_timestamp_by_set_range_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataRange = new pb_data.DataSetRange();
-    dataRange.setSetId(uuid_hex_to_base64(request.set_id));
-    dataRange.setBegin(request.begin.valueOf() * 1000);
-    dataRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataTimestampBySetRangeTime(dataRange, metadata(server))
+    const dataSetRange = new pb_data.DataSetRange();
+    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
+    dataSetRange.setBegin(request.begin.valueOf() * 1000);
+    dataSetRange.setEnd(request.end.valueOf() * 1000);
+    return client.listDataTimestampBySetRangeTime(dataSetRange, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
 
 /**
  * Count data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataCount} request data count: device_id, model_id
- * @returns {Promise<DataCountResult>} data count: count
+ * @param {DataTime} request data count: device_id, model_id
+ * @returns {Promise<number>} data count
  */
 export async function count_data(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataCount = new pb_data.DataCount();
-    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
-    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
-    return client.countData(dataCount, metadata(server))
-        .then(response => response.toObject());
+    const dataTime = new pb_data.DataTime();
+    dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataTime.setModelId(uuid_hex_to_base64(request.model_id));
+    return client.countData(dataTime, metadata(server))
+        .then(response => response.toObject().count);
 }
 
 /**
  * Count data by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataCount} request data count: device_id, model_id, timestamp
- * @returns {Promise<DataCountResult>} data count: count
+ * @param {DataTime} request data count: device_id, model_id, timestamp
+ * @returns {Promise<number>} data count
  */
 export async function count_data_by_last_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataCount = new pb_data.DataCount();
-    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
-    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
-    if (request.timestamp) {
-        dataCount.setTimestamp(request.timestamp.valueOf() * 1000);
-    }
-    return client.countDataByLastTime(dataCount, metadata(server))
-        .then(response => response.toObject());
+    const dataTime = new pb_data.DataTime();
+    dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataTime.setModelId(uuid_hex_to_base64(request.model_id));
+    dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.countDataByLastTime(dataTime, metadata(server))
+        .then(response => response.toObject().count);
 }
 
 /**
  * Count data by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataCount} request data count: device_id, model_id, begin, end
- * @returns {Promise<DataCountResult>} data count: count
+ * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @returns {Promise<number>} data count
  */
 export async function count_data_by_range_time(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataCount = new pb_data.DataCount();
-    dataCount.setDeviceId(uuid_hex_to_base64(request.device_id));
-    dataCount.setModelId(uuid_hex_to_base64(request.model_id));
-    if (request.begin) {
-        dataCount.setTimestamp(request.begin.valueOf() * 1000);
-    }
-    if (request.end) {
-        dataCount.setTimestamp(request.end.valueOf() * 1000);
-    }
-    return client.countDataByRangeTime(dataCount, metadata(server))
-        .then(response => response.toObject());
+    const dataRange = new pb_data.DataRange();
+    dataRange.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataRange.setModelId(uuid_hex_to_base64(request.model_id));
+    dataRange.setBegin(request.begin.valueOf() * 1000);
+    dataRange.setEnd(request.end.valueOf() * 1000);
+    return client.countDataByRangeTime(dataRange, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by id list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_ids(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsTime = new pb_data.DataIdsTime();
+    dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    return client.countDataByIds(dataIdsTime, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by id list and last time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_ids_last_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsTime = new pb_data.DataIdsTime();
+    dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.countDataByIdsLastTime(dataIdsTime, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by id list and range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_ids_range_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataIdsRange = new pb_data.DataIdsRange();
+    dataIdsRange.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsRange.setBegin(request.begin.valueOf() * 1000);
+    dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    return client.countDataByIdsRangeTime(dataIdsRange, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by set id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetTime} request data set time: set_id, timestamp
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_set(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataSetTime = new pb_data.DataSetTime();
+    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
+    return client.countDataBySet(dataSetTime, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by set id and last time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetTime} request data set time: set_id, timestamp
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_set_last_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataSetTime = new pb_data.DataSetTime();
+    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
+    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.countDataBySetLastTime(dataSetTime, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data by set id and range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetRange} request data set range: set_id, begin, end
+ * @returns {Promise<number>} data count
+ */
+export async function count_data_by_set_range_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataSetRange = new pb_data.DataSetRange();
+    dataSetRange.setSetId(uuid_hex_to_base64(request.device_id));
+    dataSetRange.setBegin(request.begin.valueOf() * 1000);
+    dataSetRange.setEnd(request.end.valueOf() * 1000);
+    return client.countDataBySetRangeTime(dataSetRange, metadata(server))
+        .then(response => response.toObject().count);
 }

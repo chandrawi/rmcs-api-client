@@ -1094,6 +1094,48 @@ impl Resource {
         .await
     }
 
+    pub async fn count_data_by_ids(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_ids(&self, device_ids, model_ids)
+        .await
+    }
+
+    pub async fn count_data_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_ids_last_time(&self, device_ids, model_ids, last)
+        .await
+    }
+
+    pub async fn count_data_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_ids_range_time(&self, device_ids, model_ids, begin, end)
+        .await
+    }
+
+    pub async fn count_data_by_set(&self, set_id: Uuid)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_set(&self, set_id)
+        .await
+    }
+
+    pub async fn count_data_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_set_last_time(&self, set_id, last)
+        .await
+    }
+
+    pub async fn count_data_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<usize, Status>
+    {
+        data::count_data_by_set_range_time(&self, set_id, begin, end)
+        .await
+    }
+
     pub async fn read_buffer(&self, id: i32)
         -> Result<BufferSchema, Status>
     {
@@ -1415,6 +1457,20 @@ impl Resource {
         -> Result<usize, Status>
     {
         buffer::count_buffer(&self, device_id, model_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn count_buffer_by_ids(&self, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_by_ids(&self, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn count_buffer_by_set(&self, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_by_set(&self, set_id, status.map(|s| s.into()))
         .await
     }
 

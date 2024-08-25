@@ -716,3 +716,28 @@ def count_buffer(resource, device_id: Optional[UUID]=None, model_id: Optional[UU
         )
         response = stub.CountBuffer(request=request, metadata=resource.metadata)
         return response.count
+
+def count_buffer_by_ids(resource, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        device_bytes_list = None
+        if device_ids != None: device_bytes_list = list(map((lambda x: x.bytes), device_ids))
+        model_bytes_list = None
+        if model_ids != None: model_bytes_list = list(map((lambda x: x.bytes), model_ids))
+        request = buffer_pb2.BufferIdsSelector(
+            device_ids=device_bytes_list,
+            model_ids=model_bytes_list,
+            status=status_to_int(status)
+        )
+        response = stub.CountBufferByIds(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_buffer_by_set(resource, set_id: UUID, status: Optional[Union[str, int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferSetSelector(
+            set_id=set_id.bytes,
+            status=status_to_int(status)
+        )
+        response = stub.CountBufferBySet(request=request, metadata=resource.metadata)
+        return response.count

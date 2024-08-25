@@ -101,9 +101,16 @@ function get_buffer_id(r) {
  */
 
 /**
+ * @typedef {Object} BufferIdsSelector
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number|string} status
+ */
+
+/**
  * @typedef {Object} BuffersIdsSelector
- * @property {Uuid[]} device_ids
- * @property {Uuid[]} model_ids
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
  * @property {?number|string} status
  * @property {number} number
  * @property {number} offset
@@ -133,23 +140,17 @@ function get_buffer_id(r) {
  */
 
 /**
+ * @typedef {Object} BufferSetSelector
+ * @property {Uuid} set_id
+ * @property {?number|string} status
+ */
+
+/**
  * @typedef {Object} BuffersSetSelector
  * @property {Uuid} set_id
  * @property {?number|string} status
  * @property {number} number
  * @property {number} offset
- */
-
-/**
- * @typedef {Object} BufferCount
- * @property {?Uuid} device_id
- * @property {?Uuid} model_id
- * @property {?number|string} status
- */
-
-/**
- * @typedef {Object} BufferCountResult
- * @property {number} count
  */
 
 /**
@@ -1106,21 +1107,60 @@ export async function list_buffer_timestamp_last_by_set(server, request) {
 /**
  * Count data buffers
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferCount} request data buffer count: device_id, model_id, status
- * @returns {Promise<BufferCountResult>} data buffer count: count
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @returns {Promise<number>} data buffer count
  */
 export async function count_buffer(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferCount = new pb_buffer.BufferCount();
+    const bufferSelector = new pb_buffer.BufferSelector();
     if (request.device_id) {
-        bufferCount.setDeviceId(uuid_hex_to_base64(request.device_id));
+        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        bufferCount.setModelId(uuid_hex_to_base64(request.model_id));
+        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
     if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferCount.setStatus(set_buffer_status(request.status));
+        bufferSelector.setStatus(set_buffer_status(request.status));
     }
-    return client.countBuffer(bufferCount, metadata(server))
-        .then(response => response.toObject());
+    return client.countBuffer(bufferSelector, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data buffers by id list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferIdsSelector} request data buffer selector with id list: device_ids, model_ids, status
+ * @returns {Promise<number>} data buffer count
+ */
+export async function count_buffer_by_ids(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferIdsSelector = new pb_buffer.BufferIdsSelector();
+    if (request.device_ids) {
+        bufferIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        bufferIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferIdsSelector.setStatus(set_buffer_status(request.status));
+    }
+    return client.countBufferByIds(bufferIdsSelector, metadata(server))
+        .then(response => response.toObject().count);
+}
+
+/**
+ * Count data buffers by set id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferSetSelector} request data buffer set selector: set_id, status
+ * @returns {Promise<number>} data buffer count
+ */
+export async function count_buffer_by_set(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferSetSelector = new pb_buffer.BufferSetSelector();
+    bufferSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferSetSelector.setStatus(set_buffer_status(request.status));
+    }
+    return client.countBufferBySet(bufferSetSelector, metadata(server))
+        .then(response => response.toObject().count);
 }

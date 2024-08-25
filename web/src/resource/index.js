@@ -145,7 +145,13 @@ export {
     list_data_timestamp_by_set_range_time,
     count_data,
     count_data_by_last_time,
-    count_data_by_range_time
+    count_data_by_range_time,
+    count_data_by_ids,
+    count_data_by_ids_last_time,
+    count_data_by_ids_range_time,
+    count_data_by_set,
+    count_data_by_set_last_time,
+    count_data_by_set_range_time
 } from './data.js';
 export {
     read_buffer,
@@ -189,7 +195,9 @@ export {
     list_buffer_timestamp_last_by_ids,
     list_buffer_timestamp_first_by_set,
     list_buffer_timestamp_last_by_set,
-    count_buffer
+    count_buffer,
+    count_buffer_by_ids,
+    count_buffer_by_set
 } from './buffer.js';
 export {
     read_slice,

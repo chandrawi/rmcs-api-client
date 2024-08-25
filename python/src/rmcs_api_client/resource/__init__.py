@@ -432,6 +432,24 @@ class Resource:
     def count_data_by_range_time(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> int:
         return _data.count_data(self, model_id, device_id, begin, end)
 
+    def count_data_by_ids(self, device_ids: List[UUID], model_ids: List[UUID]) -> int:
+        return _data.count_data_by_ids(self, device_ids, model_ids)
+
+    def count_data_by_ids_last_time(self, device_ids: List[UUID], model_ids: List[UUID], last: datetime) -> int:
+        return _data.count_data_by_ids_last_time(self, device_ids, model_ids, last)
+
+    def count_data_by_ids_range_time(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime) -> int:
+        return _data.count_data_by_ids_range_time(self, device_ids, model_ids, begin, end)
+
+    def count_data_by_set(self, set_id: UUID) -> int:
+        return _data.count_data_by_set(self, set_id)
+
+    def count_data_by_set_last_time(self, set_id: UUID, last: datetime) -> int:
+        return _data.count_data_by_set_last_time(self, set_id, last)
+
+    def count_data_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> int:
+        return _data.count_data_by_set_range_time(self, set_id, begin, end)
+
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
 
@@ -557,6 +575,12 @@ class Resource:
 
     def count_buffer(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, status: Optional[Union[str, int]]=None) -> int:
         return _buffer.count_buffer(self, device_id, model_id, status)
+
+    def count_buffer_by_ids(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], status: Optional[Union[str, int]]=None) -> int:
+        return _buffer.count_buffer_by_ids(self, device_ids, model_ids, status)
+
+    def count_buffer_by_set(self, set_id: UUID, status: Optional[Union[str, int]]=None) -> int:
+        return _buffer.count_buffer_by_set(self, set_id, status)
 
     def read_slice(self, id: int) -> SliceSchema:
         return _slice.read_slice(self, id)

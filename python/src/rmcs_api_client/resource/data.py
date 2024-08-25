@@ -432,7 +432,7 @@ def list_data_timestamp_by_set_range_time(resource, set_id: UUID, begin: datetim
 def count_data(resource, device_id: UUID, model_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DataCount(
+        request = data_pb2.DataTime(
             device_id=device_id.bytes,
             model_id=model_id.bytes
         )
@@ -442,7 +442,7 @@ def count_data(resource, device_id: UUID, model_id: UUID):
 def count_data_by_last_time(resource, device_id: UUID, model_id: UUID, last: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DataCount(
+        request = data_pb2.DataTime(
             device_id=device_id.bytes,
             model_id=model_id.bytes,
             timestamp=int(last.timestamp()*1000000)
@@ -453,11 +453,74 @@ def count_data_by_last_time(resource, device_id: UUID, model_id: UUID, last: dat
 def count_data_by_range_time(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)
-        request = data_pb2.DataCount(
+        request = data_pb2.DataRange(
             device_id=device_id.bytes,
             model_id=model_id.bytes,
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
         response = stub.CountDataByRangeTime(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_ids(resource, device_ids: List[UUID], model_ids: List[UUID]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsTime(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids))
+        )
+        response = stub.CountDataByIds(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_ids_last_time(resource, device_ids: List[UUID], model_ids: List[UUID], last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsTime(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.CountDataByIdsLastTime(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_ids_range_time(resource, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataIdsRange(
+            device_ids=list(map((lambda x: x.bytes), device_ids)),
+            model_ids=list(map((lambda x: x.bytes), model_ids)),
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.CountDataByIdsRangeTime(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_set(resource, set_id: UUID):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetTime(
+            set_id=set_id.bytes
+        )
+        response = stub.CountDataBySet(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_set_last_time(resource, set_id: UUID, last: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetTime(
+            set_id=set_id.bytes,
+            timestamp=int(last.timestamp()*1000000)
+        )
+        response = stub.CountDataBySetLastTime(request=request, metadata=resource.metadata)
+        return response.count
+
+def count_data_by_set_range_time(resource, set_id: UUID, begin: datetime, end: datetime):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        request = data_pb2.DataSetRange(
+            set_id=set_id.bytes,
+            begin=int(begin.timestamp()*1000000),
+            end=int(end.timestamp()*1000000)
+        )
+        response = stub.CountDataBySetRangeTime(request=request, metadata=resource.metadata)
         return response.count

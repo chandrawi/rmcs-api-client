@@ -5,9 +5,9 @@ use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
-    BufferSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate, BufferCount,
-    BufferIdsTime, BufferIdsRange, BufferIdsNumber, BuffersIdsSelector,
-    BufferSetTime, BufferSetRange, BufferSetNumber, BuffersSetSelector
+    BufferSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate,
+    BufferIdsTime, BufferIdsRange, BufferIdsNumber, BufferIdsSelector, BuffersIdsSelector,
+    BufferSetTime, BufferSetRange, BufferSetNumber, BufferSetSelector, BuffersSetSelector
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -769,12 +769,45 @@ pub(crate) async fn count_buffer(resource: &Resource, device_id: Option<Uuid>, m
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(BufferCount {
+    let request = Request::new(BufferSelector {
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         status: status.map(|i| i as i32)
     });
     let response = client.count_buffer(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
+}
+
+pub async fn count_buffer_by_ids(resource: &Resource, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<i16>)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferIdsSelector {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.count_buffer_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.count as usize)
+}
+
+pub async fn count_buffer_by_set(resource: &Resource, set_id: Uuid, status: Option<i16>)
+    -> Result<usize, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferSetSelector {
+        set_id: set_id.as_bytes().to_vec(),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.count_buffer_by_set(request)
         .await?
         .into_inner();
     Ok(response.count as usize)
