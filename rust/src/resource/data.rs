@@ -2,7 +2,6 @@ use tonic::{Request, Status};
 use chrono::{DateTime, Utc, TimeZone};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
-use rmcs_resource_api::common;
 use rmcs_resource_api::data::data_service_client::DataServiceClient;
 use rmcs_resource_api::data::{
     DataSchema, DataId, DataTime, DataRange, DataNumber, DataIds, DataIdsTime, DataIdsRange, DataIdsNumber,
@@ -366,9 +365,7 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
         model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
-        data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
-            Into::<common::DataType>::into(el).into()
-        }).collect()
+        data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| el.into()).collect()
     });
     client.create_data(request)
         .await?;

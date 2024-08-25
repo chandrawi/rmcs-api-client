@@ -1,7 +1,6 @@
 use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataType, DataValue};
-use rmcs_resource_api::common;
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
     ModelSchema, ModelId, ModelIds, ModelName, ModelCategory, ModelOption, TypeId, ModelUpdate, 
@@ -116,7 +115,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, data_type: &[Dat
         category: category.to_owned(),
         name: name.to_owned(),
         description: description.unwrap_or("").to_owned(),
-        data_type: data_type.into_iter().map(|ty| i32::from(ty.to_owned())).collect::<Vec<i32>>().to_owned(),
+        data_type: data_type.into_iter().map(|ty| u32::from(ty.to_owned())).collect::<Vec<u32>>().to_owned(),
         configs: Vec::new()
     });
     let response = client.create_model(request)
@@ -138,8 +137,8 @@ pub(crate) async fn update_model(resource: &Resource, id: Uuid, data_type: Optio
         description: description.map(|s| s.to_owned()),
         data_type: data_type.map(|ty| {
             ty.into_iter()
-                .map(|t| i32::from(t.to_owned()))
-                .collect::<Vec<i32>>()
+                .map(|t| u32::from(t.to_owned()))
+                .collect::<Vec<u32>>()
         }).unwrap_or_default(),
         data_type_flag: data_type.is_some()
     });
@@ -204,7 +203,7 @@ pub(crate) async fn create_model_config(resource: &Resource, model_id: Uuid, ind
         index,
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::DataType>::into(value.get_type()).into(),
+        config_type: value.get_type().into(),
         category: category.to_owned(),
     });
     let response = client.create_model_config(request)
@@ -223,7 +222,7 @@ pub(crate) async fn update_model_config(resource: &Resource, id: i32, name: Opti
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
+        config_type: value.map(|s| s.get_type().into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_model_config(request)

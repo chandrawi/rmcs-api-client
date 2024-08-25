@@ -2,7 +2,6 @@ use tonic::{Request, Status};
 use chrono::{DateTime, TimeZone, Utc};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
-use rmcs_resource_api::common;
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
     BufferSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate,
@@ -573,9 +572,7 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id
         model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
         data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
-        data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| {
-            Into::<common::DataType>::into(el).into()
-        }).collect(),
+        data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| el.into()).collect(),
         status: status as i32
     });
     let response = client.create_buffer(request)
@@ -593,9 +590,7 @@ pub(crate) async fn update_buffer(resource: &Resource, id: i32, data: Option<Vec
     let request = Request::new(BufferUpdate {
         id,
         data_bytes: data.as_deref().map(|v| ArrayDataValue::from_vec(v).to_bytes()),
-        data_type: ArrayDataValue::from_vec(&data.unwrap_or_default()).get_types().into_iter().map(|el| {
-            Into::<common::DataType>::into(el).into()
-        }).collect(),
+        data_type: ArrayDataValue::from_vec(&data.unwrap_or_default()).get_types().into_iter().map(|el| el.into()).collect(),
         status: status.map(|i| i as i32)
     });
     client.update_buffer(request)

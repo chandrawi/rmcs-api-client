@@ -1,7 +1,6 @@
 use tonic::{Request, Status};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::DataValue;
-use rmcs_resource_api::common;
 use rmcs_resource_api::device::device_service_client::DeviceServiceClient;
 use rmcs_resource_api::device::{
     DeviceSchema, DeviceId, DeviceIds, DeviceName, DeviceOption, DeviceUpdate,
@@ -369,7 +368,7 @@ pub(crate) async fn create_device_config(resource: &Resource, device_id: Uuid, n
         device_id: device_id.as_bytes().to_vec(),
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::DataType>::into(value.get_type()).into(),
+        config_type: value.get_type().into(),
         category: category.to_owned()
     });
     let response = client.create_device_config(request)
@@ -388,7 +387,7 @@ pub(crate) async fn update_device_config(resource: &Resource, id: i32, name: Opt
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
+        config_type: value.map(|s| s.get_type().into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_device_config(request)
@@ -451,7 +450,7 @@ pub(crate) async fn create_gateway_config(resource: &Resource, gateway_id: Uuid,
         device_id: gateway_id.as_bytes().to_vec(),
         name: name.to_owned(),
         config_bytes: value.to_bytes(),
-        config_type: Into::<common::DataType>::into(value.get_type()).into(),
+        config_type: value.get_type().into(),
         category: category.to_owned()
     });
     let response = client.create_gateway_config(request)
@@ -470,7 +469,7 @@ pub(crate) async fn update_gateway_config(resource: &Resource, id: i32, name: Op
         id,
         name: name.map(|s| s.to_owned()),
         config_bytes: value.clone().map(|s| s.to_bytes()),
-        config_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into()),
+        config_type: value.map(|s| s.get_type().into()),
         category: category.map(|s| s.to_owned())
     });
     client.update_gateway_config(request)

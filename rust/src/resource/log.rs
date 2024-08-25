@@ -2,7 +2,6 @@ use tonic::{Request, Status};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::DataValue;
-use rmcs_resource_api::common;
 use rmcs_resource_api::log::log_service_client::LogServiceClient;
 use rmcs_resource_api::log::{
     LogSchema, LogId, LogTime, LogRange, LogUpdate
@@ -91,7 +90,7 @@ pub(crate) async fn create_log(resource: &Resource, timestamp: DateTime<Utc>, de
         device_id: device_id.as_bytes().to_vec(),
         status: status as i32,
         log_bytes: value.to_bytes(),
-        log_type: Into::<common::DataType>::into(value.get_type()).into()
+        log_type: value.get_type().into()
     });
     client.create_log(request)
         .await?;
@@ -109,7 +108,7 @@ pub(crate) async fn update_log(resource: &Resource, timestamp: DateTime<Utc>, de
         device_id: device_id.as_bytes().to_vec(),
         status: status.map(|i| i as i32),
         log_bytes: value.clone().map(|s| s.to_bytes()),
-        log_type: value.map(|s| Into::<common::DataType>::into(s.get_type()).into())
+        log_type: value.map(|s| s.get_type().into())
     });
     client.update_log(request)
         .await?;
