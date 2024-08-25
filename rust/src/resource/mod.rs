@@ -1029,6 +1029,28 @@ impl Resource {
         .await
     }
 
+    pub async fn read_data_timestamp_by_ids(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        data::read_data_timestamp_by_ids(&self, device_ids, model_ids, timestamp)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_data_timestamp_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_ids_last_time(&self, device_ids, model_ids, last)
+        .await
+    }
+
+    pub async fn list_data_timestamp_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        data::list_data_timestamp_by_ids_range_time(&self, device_ids, model_ids, begin, end)
+        .await
+    }
+
     pub async fn read_data_timestamp_by_set(&self, set_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<DateTime<Utc>, Status>
     {
@@ -1330,6 +1352,62 @@ impl Resource {
         -> Result<(), Status>
     {
         buffer::delete_buffer(&self, id)
+        .await
+    }
+
+    pub async fn read_buffer_timestamp_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        buffer::read_buffer_timestamp_first(&self, device_id, model_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn read_buffer_timestamp_last(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        buffer::read_buffer_timestamp_last(&self, device_id, model_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_first(&self, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_first(&self, number, device_id, model_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_last(&self, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_last(&self, number, device_id, model_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_first_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_first_by_ids(&self, number, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_last_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_last_by_ids(&self, number, device_ids, model_ids, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_first_by_set(&self, number: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_first_by_set(&self, number, set_id, status.map(|s| s.into()))
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_last_by_set(&self, number: usize, set_id: Uuid, status: Option<BufferStatus>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_last_by_set(&self, number, set_id, status.map(|s| s.into()))
         .await
     }
 

@@ -1,5 +1,5 @@
 use tonic::{Request, Status};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::common;
@@ -615,6 +615,152 @@ pub(crate) async fn delete_buffer(resource: &Resource, id: i32)
     client.delete_buffer(request)
         .await?;
     Ok(())
+}
+
+pub(crate) async fn read_buffer_timestamp_first(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<DateTime<Utc>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.read_buffer_timestamp_first(request)
+        .await?
+        .into_inner();
+    Ok(Utc.timestamp_nanos(response.timestamp * 1000))
+}
+
+pub(crate) async fn read_buffer_timestamp_last(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<DateTime<Utc>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BufferSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32)
+    });
+    let response = client.read_buffer_timestamp_last(request)
+        .await?
+        .into_inner();
+    Ok(Utc.timestamp_nanos(response.timestamp * 1000))
+}
+
+pub(crate) async fn list_buffer_timestamp_first(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_first(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_buffer_timestamp_last(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+    BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_last(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_buffer_timestamp_first_by_ids(resource: &Resource, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersIdsSelector {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_first_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_buffer_timestamp_last_by_ids(resource: &Resource, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersIdsSelector {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_last_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_buffer_timestamp_first_by_set(resource: &Resource, number: usize, set_id: Uuid, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSetSelector {
+        set_id: set_id.as_bytes().to_vec(),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_first_by_set(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
+}
+
+pub(crate) async fn list_buffer_timestamp_last_by_set(resource: &Resource, number: usize, set_id: Uuid, status: Option<i16>)
+    -> Result<Vec<DateTime<Utc>>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(BuffersSetSelector {
+        set_id: set_id.as_bytes().to_vec(),
+        status: status.map(|i| i as i32),
+        number: number as u32,
+        offset: 0
+    });
+    let response = client.list_buffer_timestamp_last_by_set(request)
+        .await?
+        .into_inner();
+    Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
 }
 
 pub(crate) async fn count_buffer(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, status: Option<i16>)

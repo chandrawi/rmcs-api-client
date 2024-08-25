@@ -932,6 +932,178 @@ export async function delete_buffer(server, request) {
 }
 
 /**
+ * Read first of a data buffer timestamp
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function read_buffer_timestamp_first(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferSelector = new pb_buffer.BufferSelector();
+    if (request.device_id) {
+        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferSelector.setStatus(set_buffer_status(request.status));
+    }
+    return client.readBufferTimestampFirst(bufferSelector, metadata(server))
+        .then(response => new Date(response.toObject().timestamp / 1000));
+}
+
+/**
+ * Read last of a data buffer timestamp
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function read_buffer_timestamp_last(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferSelector = new pb_buffer.BufferSelector();
+    if (request.device_id) {
+        bufferSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        bufferSelector.setStatus(set_buffer_status(request.status));
+    }
+    return client.readBufferTimestampLast(bufferSelector, metadata(server))
+        .then(response => new Date(response.toObject().timestamp / 1000));
+}
+
+/**
+ * Read first of data buffers timestamp
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_first(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSelector = new pb_buffer.BufferSelector();
+    if (request.device_id) {
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSelector.setNumber(request.number);
+    return client.listBufferTimestampFirst(buffersSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
+ * Read last of data buffers timestamp
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_last(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSelector = new pb_buffer.BufferSelector();
+    if (request.device_id) {
+        buffersSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSelector.setNumber(request.number);
+    return client.listBufferTimestampLast(buffersSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
+ * Read first of data buffers timestamp by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_first_by_ids(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    if (request.device_ids) {
+        buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersIdsSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersIdsSelector.setNumber(request.number);
+    return client.listBufferTimestampFirstByIds(buffersIdsSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
+ * Read last of data buffers timestamp by uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_last_by_ids(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    if (request.device_ids) {
+        buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersIdsSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersIdsSelector.setNumber(request.number);
+    return client.listBufferTimestampLastByIds(buffersIdsSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
+ * Read first of data buffers timestamp by set uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_first_by_set(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
+    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSetSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSetSelector.setNumber(request.number);
+    return client.listBufferTimestampFirstBySet(buffersSetSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
+ * Read last of data buffers timestamp by set uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
+ * @returns {Promise<Date>} data buffer timestamp
+ */
+export async function list_buffer_timestamp_last_by_set(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
+    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
+    if (typeof request.status == "number" || typeof request.status == "string") {
+        buffersSetSelector.setStatus(set_buffer_status(request.status));
+    }
+    buffersSetSelector.setNumber(request.number);
+    return client.listBufferTimestampLastBySet(buffersSetSelector, metadata(server))
+        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
+}
+
+/**
  * Count data buffers
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferCount} request data buffer count: device_id, model_id, status

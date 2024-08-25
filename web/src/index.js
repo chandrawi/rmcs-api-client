@@ -210,6 +210,9 @@ export {
     read_data_timestamp,
     list_data_timestamp_by_last_time,
     list_data_timestamp_by_range_time,
+    read_data_timestamp_by_ids,
+    list_data_timestamp_by_ids_last_time,
+    list_data_timestamp_by_ids_range_time,
     read_data_timestamp_by_set,
     list_data_timestamp_by_set_last_time,
     list_data_timestamp_by_set_range_time,
@@ -251,6 +254,14 @@ export {
     create_buffer,
     update_buffer,
     delete_buffer,
+    read_buffer_timestamp_first,
+    read_buffer_timestamp_last,
+    list_buffer_timestamp_first,
+    list_buffer_timestamp_last,
+    list_buffer_timestamp_first_by_ids,
+    list_buffer_timestamp_last_by_ids,
+    list_buffer_timestamp_first_by_set,
+    list_buffer_timestamp_last_by_set,
     count_buffer
 } from './resource/buffer.js';
 export {
