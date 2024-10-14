@@ -1,6 +1,7 @@
 pub mod api;
 pub mod role;
 pub mod user;
+pub mod profile;
 pub mod token;
 pub mod auth;
 
@@ -11,7 +12,9 @@ use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
 use rmcs_auth_db::schema::auth_role::RoleSchema;
 use rmcs_auth_db::schema::auth_user::UserSchema;
 use rmcs_auth_db::schema::auth_token::TokenSchema;
+use rmcs_auth_db::schema::profile::{RoleProfileSchema, UserProfileSchema, ProfileMode};
 use rmcs_auth_api::auth::{UserLoginResponse, UserRefreshResponse, UserLogoutResponse};
+use rmcs_resource_db::schema::value::{DataValue, DataType};
 
 #[derive(Debug, Clone)]
 pub struct Auth {
@@ -292,6 +295,43 @@ impl Auth {
         .await
     }
 
+    pub async fn read_role_profile(&self, id: i32)
+        -> Result<RoleProfileSchema, Status>
+    {
+        profile::read_role_profile(&self, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_role_profile_by_role(&self, role_id: Uuid)
+        -> Result<Vec<RoleProfileSchema>, Status>
+    {
+        profile::list_role_profile_by_role(&self, role_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_role_profile(&self, role_id: Uuid, name: &str, value_type: DataType, mode: ProfileMode)
+        -> Result<i32, Status>
+    {
+        profile::create_role_profile(&self, role_id, name, value_type, mode)
+        .await
+    }
+
+    pub async fn update_role_profile(&self, id: i32, name: Option<&str>, value_type: Option<DataType>, mode: Option<ProfileMode>)
+        -> Result<(), Status>
+    {
+        profile::update_role_profile(&self, id, name, value_type, mode)
+        .await
+    }
+
+    pub async fn delete_role_profile(&self, id: i32)
+        -> Result<(), Status>
+    {
+        profile::delete_role_profile(&self, id)
+        .await
+    }
+
     pub async fn read_user(&self, id: Uuid)
         -> Result<UserSchema, Status>
     {
@@ -380,6 +420,50 @@ impl Auth {
         -> Result<(), Status>
     {
         user::remove_user_role(&self, id, role_id)
+        .await
+    }
+
+    pub async fn read_user_profile(&self, id: i32)
+        -> Result<UserProfileSchema, Status>
+    {
+        profile::read_user_profile(&self, id)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_user_profile_by_user(&self, user_id: Uuid)
+        -> Result<Vec<UserProfileSchema>, Status>
+    {
+        profile::list_user_profile_by_user(&self, user_id)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn create_user_profile(&self, user_id: Uuid, name: &str, value: DataValue)
+        -> Result<i32, Status>
+    {
+        profile::create_user_profile(&self, user_id, name, value)
+        .await
+    }
+
+    pub async fn update_user_profile(&self, id: i32, name: Option<&str>, value: Option<DataValue>)
+        -> Result<(), Status>
+    {
+        profile::update_user_profile(&self, id, name, value)
+        .await
+    }
+
+    pub async fn delete_user_profile(&self, id: i32)
+        -> Result<(), Status>
+    {
+        profile::delete_user_profile(&self, id)
+        .await
+    }
+
+    pub async fn swap_user_profile(&self, user_id: Uuid, name: &str, order_1: i16, order_2: i16)
+        -> Result<(), Status>
+    {
+        profile::swap_user_profile(&self, user_id, name, order_1, order_2)
         .await
     }
 
