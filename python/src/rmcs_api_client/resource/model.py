@@ -12,7 +12,7 @@ class ModelConfigSchema:
     model_id: UUID
     index: int
     name: str
-    value: Union[int, float, str, None]
+    value: Union[int, float, str, bool, None]
     category: str
 
     def from_response(r):
@@ -154,7 +154,7 @@ def list_model_config_by_model(resource, model_id: UUID):
         for result in response.results: ls.append(ModelConfigSchema.from_response(result))
         return ls
 
-def create_model_config(resource, model_id: UUID, index: int, name: str, value: Union[int, float, str, None], category: str):
+def create_model_config(resource, model_id: UUID, index: int, name: str, value: Union[int, float, str, bool, None], category: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ConfigSchema(
@@ -168,7 +168,7 @@ def create_model_config(resource, model_id: UUID, index: int, name: str, value: 
         response = stub.CreateModelConfig(request=request, metadata=resource.metadata)
         return response.id
 
-def update_model_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, None]=None, category: Optional[str]=None):
+def update_model_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, bool, None]=None, category: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ConfigUpdate(

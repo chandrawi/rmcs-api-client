@@ -52,6 +52,19 @@ export {
     remove_user_role
 } from './auth/user.js';
 export {
+    read_role_profile,
+    list_role_profile_by_role,
+    create_role_profile,
+    update_role_profile,
+    delete_role_profile,
+    read_user_profile,
+    list_user_profile_by_user,
+    create_user_profile,
+    update_user_profile,
+    delete_user_profile,
+    swap_user_profile
+} from './auth/profile.js';
+export {
     read_access_token,
     list_auth_token,
     list_token_by_user,

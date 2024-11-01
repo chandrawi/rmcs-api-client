@@ -72,7 +72,7 @@ function get_log_schema_vec(r) {
  * @property {Date} timestamp
  * @property {Uuid} device_id
  * @property {?number|string} status
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  */
 
 /**

@@ -50,7 +50,7 @@ class LogSchema:
     timestamp: datetime
     device_id: UUID
     status: str
-    value: Union[int, float, str]
+    value: Union[bool, int, float, str, None]
 
     def from_response(r):
         timestamp = datetime.fromtimestamp(r.timestamp/1000000.0)

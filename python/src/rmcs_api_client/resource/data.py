@@ -12,7 +12,7 @@ class DataSchema:
     device_id: UUID
     model_id: UUID
     timestamp: datetime
-    data: List[Union[bool, int, float, str]]
+    data: List[Union[int, float, str, bool, None]]
 
     def from_response(r):
         timestamp = datetime.fromtimestamp(r.timestamp/1000000.0)
@@ -26,7 +26,7 @@ class DataSchema:
 class DataSetSchema:
     set_id: UUID
     timestamp: datetime
-    data: List[Union[bool, int, float, str]]
+    data: List[Union[int, float, str, bool, None]]
 
     def from_response(r):
         timestamp = datetime.fromtimestamp(r.timestamp/1000000.0)

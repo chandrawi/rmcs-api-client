@@ -1,12 +1,14 @@
 from datetime import datetime
 from uuid import UUID
-from typing import Optional, List, Tuple
+from typing import Optional, Union, List, Tuple
 from . import auth, api, role, user, token
+from ..resource.common import DataType
 from .auth import UserLogin, UserRefresh
 from .api import ApiSchema, ProcedureSchema
 from .role import RoleSchema
 from .user import UserSchema
 from .token import TokenSchema
+from .profile import RoleProfileSchema, UserProfileSchema
 
 
 class Auth:
@@ -115,6 +117,21 @@ class Auth:
     def remove_role_access(self, id: UUID, procedure_id: UUID):
         return role.remove_role_access(self, id, procedure_id)
 
+    def read_role_profile(self, id: int) -> RoleProfileSchema:
+        return profile.read_role_profile(self, id)
+
+    def list_role_profile_by_role(self, role_id: UUID) -> List[RoleProfileSchema]:
+        return profile.list_role_profile_by_role(self, role_id)
+
+    def create_role_profile(self, role_id: UUID, name: str, value_type: DataType, mode: Union[str, int]) -> int:
+        return profile.create_role_profile(self, role_id, name, value_type, mode)
+
+    def update_role_profile(self, id: int, name: Optional[str], value_type: Optional[DataType], mode: Optional[Union[str, int]]):
+        return profile.update_role_profile(self, id, name, value_type, mode)
+
+    def delete_role_profile(self, id: int):
+        return profile.delete_role_profile(self, id)
+
     def read_user(self, id: UUID) -> UserSchema:
         return user.read_user(self, id)
 
@@ -150,6 +167,24 @@ class Auth:
 
     def remove_user_role(self, id: UUID, role_id: UUID):
         return user.remove_user_role(self, id, role_id)
+
+    def read_user_profile(self, id: int) -> UserProfileSchema:
+        return profile.read_user_profile(self, id)
+
+    def list_user_profile_by_user(self, user_id: UUID) -> List[UserProfileSchema]:
+        return profile.list_user_profile_by_user(self, user_id)
+
+    def create_user_profile(self, user_id: UUID, name: str, value: Union[int, float, str, bool, None]) -> int:
+        return profile.create_user_profile(self, user_id, name, value)
+
+    def update_user_profile(self, id: int, name: Optional[str], value: Optional[Union[int, float, str, bool, None]]):
+        return profile.update_user_profile(self, id, name, value)
+
+    def delete_user_profile(self, id: int):
+        return profile.delete_user_profile(self, id)
+
+    def swap_user_profile(self, user_id: UUID, name: str, order_1: int, order_2: int):
+        return profile.swap_user_profile(self, user_id, name, order_1, order_2)
 
     def read_access_token(self, access_id: int) -> TokenSchema:
         return token.read_access_token(self, access_id)

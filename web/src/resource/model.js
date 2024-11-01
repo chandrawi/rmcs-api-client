@@ -153,7 +153,7 @@ function get_model_config_schema_vec(r) {
  * @typedef {Object} ModelConfigUpdate
  * @property {number} id
  * @property {?string} name
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  * @property {?string} category
  */
 

@@ -12,7 +12,7 @@ class DeviceConfigSchema:
     id: int
     device_id: UUID
     name: str
-    value: Union[int, float, str]
+    value: Union[int, float, str, bool, None]
     category: str
 
     def from_response(r):
@@ -25,7 +25,7 @@ class GatewayConfigSchema:
     id: int
     gateway_id: UUID
     name: str
-    value: Union[int, float, str]
+    value: Union[int, float, str, bool, None]
     category: str
 
     def from_response(r):
@@ -276,7 +276,7 @@ def list_device_config_by_device(resource, device_id: UUID):
         for result in response.results: ls.append(DeviceConfigSchema.from_response(result))
         return ls
 
-def create_device_config(resource, device_id: UUID, name: str, value: Union[int, float, str, None], category: str):
+def create_device_config(resource, device_id: UUID, name: str, value: Union[int, float, str, bool, None], category: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigSchema(
@@ -289,7 +289,7 @@ def create_device_config(resource, device_id: UUID, name: str, value: Union[int,
         response = stub.CreateDeviceConfig(request=request, metadata=resource.metadata)
         return response.id
 
-def update_device_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, None]=None, category: Optional[str]=None):
+def update_device_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, bool, None]=None, category: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigUpdate(
@@ -323,7 +323,7 @@ def list_gateway_config_by_gateway(resource, gateway_id: UUID):
         for result in response.results: ls.append(GatewayConfigSchema.from_response(result))
         return ls
 
-def create_gateway_config(resource, gateway_id: UUID, name: str, value: Union[int, float, str, None], category: str):
+def create_gateway_config(resource, gateway_id: UUID, name: str, value: Union[int, float, str, bool, None], category: str):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigSchema(
@@ -336,7 +336,7 @@ def create_gateway_config(resource, gateway_id: UUID, name: str, value: Union[in
         response = stub.CreateGatewayConfig(request=request, metadata=resource.metadata)
         return response.id
 
-def update_gateway_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, None]=None, category: Optional[str]=None):
+def update_gateway_config(resource, id: int, name: Optional[str]=None, value: Union[int, float, str, bool, None]=None, category: Optional[str]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = device_pb2_grpc.DeviceServiceStub(channel)
         request = device_pb2.ConfigUpdate(

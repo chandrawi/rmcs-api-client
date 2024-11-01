@@ -225,7 +225,7 @@ function get_config_id(r) {
  * @property {number} id
  * @property {Uuid} device_id
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -234,7 +234,7 @@ function get_config_id(r) {
  * @property {number} id
  * @property {Uuid} gateway_id
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -286,7 +286,7 @@ function get_gateway_config_schema_vec(r) {
  * @typedef {Object} ConfigUpdate
  * @property {number} id
  * @property {?string} name
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  * @property {?string} category
  */
 

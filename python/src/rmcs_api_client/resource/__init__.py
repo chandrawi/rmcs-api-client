@@ -54,10 +54,10 @@ class Resource:
     def list_model_config_by_model(self, model_id: UUID) -> List[ModelConfigSchema]:
         return _model.list_model_config_by_model(self, model_id)
 
-    def create_model_config(self, model_id: UUID, index: int, name: str, value: Union[int, float, str, None], category: str) -> int:
+    def create_model_config(self, model_id: UUID, index: int, name: str, value: Union[int, float, str, bool, None], category: str) -> int:
         return _model.create_model_config(self, model_id, index, name, value, category)
 
-    def update_model_config(self, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
+    def update_model_config(self, id: int, name: Optional[str], value: Union[int, float, str, bool, None], category: Optional[str]):
         return _model.update_model_config(self, id, name, value, category)
 
     def delete_model_config(self, id: int):
@@ -126,10 +126,10 @@ class Resource:
     def list_device_config_by_device(self, device_id: UUID) -> List[DeviceConfigSchema]:
         return _device.list_device_config_by_device(self, device_id)
 
-    def create_device_config(self, device_id: UUID, name: str, value: Union[int, float, str, None], category: str) -> int:
+    def create_device_config(self, device_id: UUID, name: str, value: Union[int, float, str, bool, None], category: str) -> int:
         return _device.create_device_config(self, device_id, name, value, category)
 
-    def update_device_config(self, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
+    def update_device_config(self, id: int, name: Optional[str], value: Union[int, float, str, bool, None], category: Optional[str]):
         return _device.update_device_config(self, id, name, value, category)
 
     def delete_device_config(self, id: int):
@@ -141,10 +141,10 @@ class Resource:
     def list_gateway_config_by_gateway(self, gateway_id: UUID) -> List[GatewayConfigSchema]:
         return _device.list_gateway_config_by_gateway(self, gateway_id)
 
-    def create_gateway_config(self, gateway_id: UUID, name: str, value: Union[int, float, str, None], category: str) -> int:
+    def create_gateway_config(self, gateway_id: UUID, name: str, value: Union[int, float, str, bool, None], category: str) -> int:
         return _device.create_gateway_config(self, gateway_id, name, value, category)
 
-    def update_gateway_config(self, id: int, name: Optional[str], value: Union[int, float, str, None], category: Optional[str]):
+    def update_gateway_config(self, id: int, name: Optional[str], value: Union[int, float, str, bool, None], category: Optional[str]):
         return _device.update_gateway_config(self, id, name, value, category)
 
     def delete_gateway_config(self, id: int):

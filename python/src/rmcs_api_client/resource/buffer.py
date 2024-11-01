@@ -69,7 +69,7 @@ class BufferSchema:
     device_id: UUID
     model_id: UUID
     timestamp: datetime
-    data: List[Union[bool, int, float, str]]
+    data: List[Union[int, float, str, bool, None]]
     status: Union[str, int]
 
     def from_response(r):

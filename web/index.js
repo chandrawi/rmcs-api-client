@@ -1,4 +1,4 @@
-import { pb_api, pb_role, pb_user, pb_token, pb_auth } from 'rmcs-auth-api';
+import { pb_api, pb_role, pb_user, pb_profile, pb_token, pb_auth } from 'rmcs-auth-api';
 import { pb_model, pb_device, pb_group, pb_set, pb_data, pb_buffer, pb_slice, pb_log } from 'rmcs-resource-api';
 
 /**
@@ -1196,6 +1196,617 @@ async function remove_user_role(server, request) {
 }
 
 /**
+ * @enum {number}
+ */
+const DataType = {
+    NULL: 0,
+    I8: 1,
+    I16: 2,
+    I32: 3,
+    I64: 4,
+    I128: 5,
+    U8: 6,
+    U16: 7,
+    U32: 8,
+    U64: 9,
+    U128: 10,
+    F32: 12,
+    F64: 13,
+    BOOL: 15,
+    CHAR: 16,
+    STRING: 17,
+    BYTES: 18
+};
+
+/**
+ * @param {number|string} type
+ * @returns {number}
+ */
+function set_data_type(type) {
+    if (typeof type === "number") {
+        if (type >= 0 && type <= 12) {
+            return type;
+        }
+    }
+    else if (typeof type === "string") {
+        switch (type.toUpperCase()) {
+            case "I8": return DataType.I8;
+            case "I16": return DataType.I16;
+            case "I32": return DataType.I32;
+            case "I64": return DataType.I64;
+            case "I128": return DataType.I128;
+            case "U8": return DataType.U8;
+            case "U16": return DataType.U16;
+            case "U32": return DataType.U32;
+            case "U64": return DataType.U64;
+            case "U128": return DataType.U128;
+            case "F32": return DataType.F32;
+            case "F64": return DataType.F64;
+            case "BOOL": return DataType.BOOL;
+            case "CHAR": return DataType.CHAR;
+            case "STRING": return DataType.STRING;
+            case "BYTES": return DataType.BYTES;
+        }
+    }
+    return DataType.NULL;
+}
+
+/**
+ * @param {number} type 
+ * @returns {string}
+ */
+function get_data_type(type) {
+    switch (type) {
+        case DataType.I8: return "I8";
+        case DataType.I16: return "I16";
+        case DataType.I32: return "I32";
+        case DataType.I64: return "I64";
+        case DataType.I128: return "I128";
+        case DataType.U8: return "U8";
+        case DataType.U16: return "U16";
+        case DataType.U32: return "U32";
+        case DataType.U64: return "U64";
+        case DataType.U128: return "U128";
+        case DataType.F32: return "F32";
+        case DataType.F64: return "F64";
+        case DataType.BOOL: return "BOOL";
+        case DataType.CHAR: return "CHAR";
+        case DataType.STRING: return "STRING";
+        case DataType.BYTES: return "BYTES";
+    }
+    return "NULL";
+}
+
+/**
+ * @param {string} base64 
+ * @returns {ArrayBufferLike}
+ */
+function base64_to_array_buffer(base64) {
+    let binaryString = atob(base64);
+    let bytes = new Uint8Array(binaryString.length);
+    for (let i=0; i<binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+
+/**
+ * @param {ArrayBufferLike} buffer 
+ * @returns {string}
+ */
+function array_buffer_to_base64(buffer) {
+    let bytes = new Uint8Array(buffer);
+    let binaryString = String.fromCharCode.apply(null, bytes);
+    return btoa(binaryString);
+}
+
+/**
+ * @param {string|ArrayBufferLike} base64 
+ * @param {number} type 
+ * @returns {number|bigint|string|Uint8Array|boolean|null}
+ */
+function get_data_value(base64, type) {
+    const buffer = base64_to_array_buffer(base64);
+    const array = new Uint8Array(buffer);
+    const view = new DataView(buffer);
+    switch (type) {
+        case DataType.I8: 
+            if (view.byteLength >= 1) return view.getInt8();
+        case DataType.I16: 
+            if (view.byteLength >= 2) return view.getInt16();
+        case DataType.I32: 
+            if (view.byteLength >= 4) return view.getInt32();
+        case DataType.I64: 
+            if (view.byteLength >= 8) return view.getBigInt64();
+        case DataType.I128: 
+            if (view.byteLength >= 8) return view.getBigInt64();
+        case DataType.U8: 
+            if (view.byteLength >= 1) return view.getUint8();
+        case DataType.U16: 
+            if (view.byteLength >= 2) return view.getUint16();
+        case DataType.U32: 
+            if (view.byteLength >= 4) return view.getUint32();
+        case DataType.U64: 
+            if (view.byteLength >= 8) return view.getBigUint64();
+        case DataType.U128: 
+            if (view.byteLength >= 8) return view.getBigUint64();
+        case DataType.F32:
+            if (view.byteLength >= 4) return view.getFloat32();
+        case DataType.F64:
+            if (view.byteLength >= 8) return view.getFloat64();
+        case DataType.BOOL:
+            if (view.byteLength >= 1) return Boolean(view.getUint8(offset));
+        case DataType.CHAR:
+            if (view.byteLength >= 1) return String.fromCharCode(view.getUint8(offset));
+        case DataType.STRING:
+            return new TextDecoder("utf-8").decode(array);
+        case DataType.BYTES:
+            return array;
+    }
+    return null;
+}
+
+/**
+ * @param {string} base64 
+ * @param {number[]} types 
+ * @returns {(number|bigint|string|Uint8Array|boolean|null)[]}
+ */
+function get_data_values(base64, types) {
+    const buffer = base64_to_array_buffer(base64);
+    let index = 0;
+    let values = [];
+    for (const type of types) {
+        let length = 0;
+        if (type == DataType.I8 || type == DataType.U8 || type == DataType.CHAR || type == DataType.BOOL) {
+            length = 1;
+        }
+        else if (type == DataType.I16 || type == DataType.U16) {
+            length = 2;
+        }
+        else if (type == DataType.I32 || type == DataType.U32 || type == DataType.F32) {
+            length = 4;
+        }
+        else if (type == DataType.I64 || type == DataType.U64 || type == DataType.F64) {
+            length = 8;
+        }
+        else if (type == DataType.I128 || type == DataType.U128) {
+            length = 16;
+        }
+        else if (type == DataType.STRING || type == DataType.BYTES) {
+            length = 1;
+            if (index < buffer.byteLength) {
+                const view = new DataView(buffer.slice(index));
+                length = view.getUint8();
+                index += 1;
+            }
+        }
+        if (index + length > buffer.byteLength) break;
+        const value = get_data_value(array_buffer_to_base64(buffer.slice(index, index + length)), type);
+        values.push(value);
+        index += length;
+    }
+    return values;
+}
+
+/**
+ * @param {number|bigint|string|Uint8Array|boolean} value
+ */
+function set_data_value(value) {
+    let base64 = "";
+    let type = DataType.NULL;
+    if (typeof value == "number") {
+        if (Number.isInteger(value)) {
+            const buffer = new ArrayBuffer(4);
+            const view = new DataView(buffer);
+            view.setInt32(0, value);
+            type = DataType.I32;
+            base64 += array_buffer_to_base64(view.buffer);
+        } else {
+            const buffer = new ArrayBuffer(8);
+            const view = new DataView(buffer);
+            view.setFloat64(0, value);
+            type = DataType.F64;
+            base64 += array_buffer_to_base64(view.buffer);
+        }
+    }
+    if (typeof value == "bigint") {
+        const buffer = new ArrayBuffer(8);
+        const view = new DataView(buffer);
+        view.setBigInt64(0, value);
+        type = DataType.I64;
+        base64 += array_buffer_to_base64(view.buffer);
+    }
+    else if (typeof value == "string") {
+        if (value.length == 1) {
+            type = DataType.CHAR;
+            base64 += btoa(value);
+        }
+        else {
+            type = DataType.STRING;
+            let array = new Uint8Array(value.length);
+            array.set(new TextEncoder("utf-8").encode(value));
+            base64 += array_buffer_to_base64(array.buffer);
+        }
+    }
+    else if (value instanceof Uint8Array) {
+        type = DataType.BYTES;
+        base64 += array_buffer_to_base64(value.buffer);
+    }
+    else if (typeof value == "boolean") {
+        type = DataType.BOOL;
+        base64 += btoa(String.fromCharCode(value));
+    }
+    return {
+        bytes: base64,
+        type: type
+    }
+}
+
+/**
+ * @param {(number|bigint|string|Uint8Array|boolean)[]} values
+ */
+function set_data_values(values) {
+    if (values === undefined) {
+        return {
+            bytes: "",
+            types: []
+        };
+    }
+    let arrays = new Uint8Array();
+    let types = [];
+    for (const value of values) {
+        let data_value = set_data_value(value);
+        if ((typeof value == "string" && value.length != 1) || value instanceof Uint8Array) {
+            let len = new Uint8Array([value.length % 256]);
+            let combine = new Uint8Array(arrays.byteLength + 1);
+            combine.set(arrays);
+            combine.set(len, arrays.byteLength);
+            arrays = combine;
+        }
+        let array = new Uint8Array(base64_to_array_buffer(data_value.bytes));
+        let combine = new Uint8Array(arrays.byteLength + array.byteLength);
+        combine.set(arrays);
+        combine.set(array, arrays.byteLength);
+        arrays = combine;
+        types.push(data_value.type);
+    }
+    return {
+        bytes: array_buffer_to_base64(arrays.buffer),
+        types: types
+    };
+}
+
+/**
+ * @typedef {(string|Uint8Array)} Uuid
+ */
+
+/**
+ * @typedef {Object} ServerConfig
+ * @property {string} address
+ * @property {?string} token
+ */
+
+/**
+ * @typedef {Object} ProfileId
+ * @property {number} id
+ */
+
+/**
+ * @typedef {Object} RoleId
+ * @property {Uuid} id
+ */
+
+/**
+ * @typedef {Object} UserId
+ * @property {Uuid} id
+ */
+
+/**
+ * @param {*} r 
+ * @returns {ProfileId}
+ */
+function get_profile_id(r) {
+    return {
+        id: r.id
+    };
+}
+
+/**
+ * @typedef {Object} RoleProfileSchema
+ * @property {number} id
+ * @property {Uuid} role_id
+ * @property {string} name
+ * @property {number|string} value_type
+ * @property {number|string} mode
+ */
+
+/**
+ * @param {*} r 
+ * @returns {RoleProfileSchema}
+ */
+function get_role_profile_schema(r) {
+    return {
+        id: r.id,
+        role_id: base64_to_uuid_hex(r.roleId),
+        name: r.name,
+        value_type: get_data_type(r.valueType),
+        mode: get_profile_mode(r.mode)
+    };
+}
+
+/**
+ * @param {*} r 
+ * @returns {RoleProfileSchema[]}
+ */
+function get_role_profile_schema_vec(r) {
+    return r.map((v) => {return get_role_profile_schema(v)});
+}
+
+/**
+ * @typedef {Object} UserProfileSchema
+ * @property {number} id
+ * @property {Uuid} user_id
+ * @property {string} name
+ * @property {number|bigint|string|Uint8Array|boolean} value
+ * @property {number} order
+ */
+
+/**
+ * @param {*} r 
+ * @returns {UserProfileSchema}
+ */
+function get_user_profile_schema(r) {
+    return {
+        id: r.id,
+        user_id: base64_to_uuid_hex(r.userId),
+        name: r.name,
+        value: get_data_value(r.valueBytes, r.valueType),
+        order: r.order
+    };
+}
+
+/**
+ * @param {*} r 
+ * @returns {UserProfileSchema[]}
+ */
+function get_user_profile_schema_vec(r) {
+    return r.map((v) => {return get_user_profile_schema(v)});
+}
+
+/**
+ * @typedef {Object} RoleProfileUpdate
+ * @property {number} id
+ * @property {?string} name
+ * @property {?number|string} value_type
+ * @property {?number|string} mode
+ */
+
+/**
+ * @typedef {Object} UserProfileUpdate
+ * @property {number} id
+ * @property {?string} name
+ * @property {?number|bigint|string|Uint8Array|boolean} value
+ */
+
+/**
+ * @typedef {Object} UserProfileSwap
+ * @property {Uuid} user_id
+ * @property {string} name
+ * @property {number} order_1
+ * @property {number} order_2
+ */
+
+/**
+ * @param {number} mode 
+ * @returns {string}
+ */
+function get_profile_mode(mode) {
+    switch (mode) {
+        case 1: return "SINGLE_REQUIRED";
+        case 2: return "MULTIPLE_OPTIONAL";
+        case 3: return "MULTIPLE_REQUIRED";
+        default: return "SINGLE_OPTIONAL";
+    }
+}
+
+/**
+ * @param {?number|string} mode 
+ * @returns {number}
+ */
+function set_profile_mode(mode) {
+    if (typeof mode == "number") {
+        if (mode > 0 && mode <= 3) return mode;
+    }
+    if (typeof mode == "string") {
+        mode = mode.replace(/[a-z][A-Z]/, s => `${s.charAt(0)}_${s.charAt(1)}`);
+        switch (mode.toUpperCase()) {
+            case "SINGLE_OPTIONAL": return 0;
+            case "SINGLE_REQUIRED": return 1;
+            case "MULTIPLE_OPTIONAL": return 2;
+            case "MULTIPLE_REQUIRED": return 3;
+        }
+    }
+    return 0;
+}
+
+
+/**
+ * Read a role profile by id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProfileId} request profile id: id
+ * @returns {Promise<RoleProfileSchema>} role profile schema: id, role_id, name, value_type, mode
+ */
+async function read_role_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const profileId = new pb_profile.ProfileId();
+    profileId.setId(request.id);
+    return client.readRoleProfile(profileId, metadata(server))
+        .then(response => get_role_profile_schema(response.toObject().result));
+}
+
+/**
+ * Read role profiles by role id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleId} request role id: id
+ * @returns {Promise<RoleProfileSchema[]>} role profile schema: id, role_id, name, value_type, mode
+ */
+async function list_role_profile_by_role(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const roleId = new pb_profile.RoleId();
+    roleId.setId(uuid_hex_to_base64(request.id));
+    return client.listRoleProfile(roleId, metadata(server))
+        .then(response => get_role_profile_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Create a role profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleProfileSchema} request role profile schema: role_id, name, value_type, mode
+ * @returns {Promise<ProfileId>} profile id: id
+ */
+async function create_role_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const roleProfileSchema = new pb_profile.RoleProfileSchema();
+    roleProfileSchema.setRoleId(uuid_hex_to_base64(request.role_id));
+    roleProfileSchema.setName(request.name);
+    roleProfileSchema.setValueType(set_data_type(request.value_type));
+    roleProfileSchema.setMode(set_profile_mode(request.mode));
+    return client.createRoleProfile(roleProfileSchema, metadata(server))
+        .then(response => get_profile_id(response.toObject()));
+}
+
+/**
+ * Update a role profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {RoleProfileUpdate} request role update: id, name, value_type, mode
+ * @returns {Promise<{}>} update response
+ */
+async function update_role_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const roleProfileUpdate = new pb_profile.RoleProfileUpdate();
+    roleProfileUpdate.setId(request.id);
+    roleProfileUpdate.setName(request.name);
+    if (request.value_type) {
+        roleProfileUpdate.setValueType(set_data_type(request.value_type));
+    }
+    roleProfileUpdate.setMode(set_profile_mode(request.mode));
+    return client.updateRoleProfile(roleProfileUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a role profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProfileId} request profile id: id
+ * @returns {Promise<{}>} delete response
+ */
+async function delete_role_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const profileId = new pb_profile.ProfileId();
+    profileId.setId(request.id);
+    return client.deleteRoleProfile(profileId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Read a user profile by id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProfileId} request profile id: id
+ * @returns {Promise<UserProfileSchema>} user profile schema: id, user_id, name, value, order
+ */
+async function read_user_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const profileId = new pb_profile.ProfileId();
+    profileId.setId(request.id);
+    return client.readUserProfile(profileId, metadata(server))
+        .then(response => get_user_profile_schema(response.toObject().result));
+}
+
+/**
+ * Read user profiles by user id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserId} request user id: id
+ * @returns {Promise<UserProfileSchema[]>} user profile schema: id, user_id, name, value, order
+ */
+async function list_user_profile_by_user(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const userId = new pb_profile.UserId();
+    userId.setId(uuid_hex_to_base64(request.id));
+    return client.listUserProfile(userId, metadata(server))
+        .then(response => get_user_profile_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Create a user profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserProfileSchema} request user profile schema: user_id, name, value, order
+ * @returns {Promise<ProfileId>} profile id: id
+ */
+async function create_user_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const userProfileSchema = new pb_profile.UserProfileSchema();
+    userProfileSchema.setUserId(uuid_hex_to_base64(request.user_id));
+    userProfileSchema.setName(request.name);
+    const value = set_data_value(request.value);
+    userProfileSchema.setValueBytes(value.bytes);
+    userProfileSchema.setValueType(value.type);
+    userProfileSchema.setOrder(request.order);
+    return client.createUserProfile(userProfileSchema, metadata(server))
+        .then(response => get_profile_id(response.toObject()));
+}
+
+/**
+ * Update a user profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserProfileUpdate} request user update: id, name, value
+ * @returns {Promise<{}>} update response
+ */
+async function update_user_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const userProfileUpdate = new pb_profile.UserProfileUpdate();
+    userProfileUpdate.setId(request.id);
+    userProfileUpdate.setName(request.name);
+    if (request.value) {
+        const value = set_data_value(request.value);
+        userProfileUpdate.setValueBytes(value.bytes);
+        userProfileUpdate.setValueType(value.type);
+    }
+    return client.updateUserProfile(userProfileUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a user profile
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ProfileId} request profile id: id
+ * @returns {Promise<{}>} delete response
+ */
+async function delete_user_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const profileId = new pb_profile.ProfileId();
+    profileId.setId(request.id);
+    return client.deleteUserProfile(profileId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Swap a user profile order
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {UserProfileSwap} request user profile swap: user_id, name, order_1, order_2
+ * @returns {Promise<{}>} change response
+ */
+async function swap_user_profile(server, request) {
+    const client = new pb_profile.ProfileServicePromiseClient(server.address, null, null);
+    const userProfileSwap = new pb_profile.UserProfileSwap();
+    userProfileSwap.setUserId(uuid_hex_to_base64(request.user_id));
+    userProfileSwap.setName(request.name);
+    userProfileSwap.setOrder1(request.order_1);
+    userProfileSwap.setOrder2(request.order_2);
+    return client.swapUserProfile(userProfileSwap, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
  * @typedef {(string|Uint8Array)} Uuid
  */
 
@@ -1685,14 +2296,18 @@ var index$1 = /*#__PURE__*/Object.freeze({
     create_auth_token: create_auth_token,
     create_procedure: create_procedure,
     create_role: create_role,
+    create_role_profile: create_role_profile,
     create_user: create_user,
+    create_user_profile: create_user_profile,
     delete_access_token: delete_access_token,
     delete_api: delete_api,
     delete_auth_token: delete_auth_token,
     delete_procedure: delete_procedure,
     delete_role: delete_role,
+    delete_role_profile: delete_role_profile,
     delete_token_by_user: delete_token_by_user,
     delete_user: delete_user,
+    delete_user_profile: delete_user_profile,
     list_api_by_category: list_api_by_category,
     list_api_by_ids: list_api_by_ids,
     list_api_by_name: list_api_by_name,
@@ -1707,12 +2322,14 @@ var index$1 = /*#__PURE__*/Object.freeze({
     list_role_by_name: list_role_by_name,
     list_role_by_user: list_role_by_user,
     list_role_option: list_role_option,
+    list_role_profile_by_role: list_role_profile_by_role,
     list_token_by_user: list_token_by_user,
     list_user_by_api: list_user_by_api,
     list_user_by_ids: list_user_by_ids,
     list_user_by_name: list_user_by_name,
     list_user_by_role: list_user_by_role,
     list_user_option: list_user_option,
+    list_user_profile_by_user: list_user_profile_by_user,
     read_access_token: read_access_token,
     read_api: read_api,
     read_api_by_name: read_api_by_name,
@@ -1720,302 +2337,26 @@ var index$1 = /*#__PURE__*/Object.freeze({
     read_procedure_by_name: read_procedure_by_name,
     read_role: read_role,
     read_role_by_name: read_role_by_name,
+    read_role_profile: read_role_profile,
     read_user: read_user,
     read_user_by_name: read_user_by_name,
+    read_user_profile: read_user_profile,
     remove_role_access: remove_role_access,
     remove_user_role: remove_user_role,
+    swap_user_profile: swap_user_profile,
     update_access_token: update_access_token,
     update_api: update_api,
     update_auth_token: update_auth_token,
     update_procedure: update_procedure,
     update_role: update_role,
+    update_role_profile: update_role_profile,
     update_user: update_user,
+    update_user_profile: update_user_profile,
     user_login: user_login,
     user_login_key: user_login_key,
     user_logout: user_logout,
     user_refresh: user_refresh
 });
-
-/**
- * @enum {number}
- */
-const DataType = {
-    NULL: 0,
-    I8: 1,
-    I16: 2,
-    I32: 3,
-    I64: 4,
-    I128: 5,
-    U8: 6,
-    U16: 7,
-    U32: 8,
-    U64: 9,
-    U128: 10,
-    F32: 12,
-    F64: 13,
-    BOOL: 15,
-    CHAR: 16,
-    STRING: 17,
-    BYTES: 18
-};
-
-/**
- * @param {number|string} type
- * @returns {number}
- */
-function set_data_type(type) {
-    if (typeof type === "number") {
-        if (type >= 0 && type <= 12) {
-            return type;
-        }
-    }
-    else if (typeof type === "string") {
-        switch (type.toUpperCase()) {
-            case "I8": return DataType.I8;
-            case "I16": return DataType.I16;
-            case "I32": return DataType.I32;
-            case "I64": return DataType.I64;
-            case "I128": return DataType.I128;
-            case "U8": return DataType.U8;
-            case "U16": return DataType.U16;
-            case "U32": return DataType.U32;
-            case "U64": return DataType.U64;
-            case "U128": return DataType.U128;
-            case "F32": return DataType.F32;
-            case "F64": return DataType.F64;
-            case "BOOL": return DataType.BOOL;
-            case "CHAR": return DataType.CHAR;
-            case "STRING": return DataType.STRING;
-            case "BYTES": return DataType.BYTES;
-        }
-    }
-    return DataType.NULL;
-}
-
-/**
- * @param {number} type 
- * @returns {string}
- */
-function get_data_type(type) {
-    switch (type) {
-        case DataType.I8: return "I8";
-        case DataType.I16: return "I16";
-        case DataType.I32: return "I32";
-        case DataType.I64: return "I64";
-        case DataType.I128: return "I128";
-        case DataType.U8: return "U8";
-        case DataType.U16: return "U16";
-        case DataType.U32: return "U32";
-        case DataType.U64: return "U64";
-        case DataType.U128: return "U128";
-        case DataType.F32: return "F32";
-        case DataType.F64: return "F64";
-        case DataType.BOOL: return "BOOL";
-        case DataType.CHAR: return "CHAR";
-        case DataType.STRING: return "STRING";
-        case DataType.BYTES: return "BYTES";
-    }
-    return "NULL";
-}
-
-/**
- * @param {string} base64 
- * @returns {ArrayBufferLike}
- */
-function base64_to_array_buffer(base64) {
-    let binaryString = atob(base64);
-    let bytes = new Uint8Array(binaryString.length);
-    for (let i=0; i<binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-
-/**
- * @param {ArrayBufferLike} buffer 
- * @returns {string}
- */
-function array_buffer_to_base64(buffer) {
-    let bytes = new Uint8Array(buffer);
-    let binaryString = String.fromCharCode.apply(null, bytes);
-    return btoa(binaryString);
-}
-
-/**
- * @param {string|ArrayBufferLike} base64 
- * @param {number} type 
- * @returns {number|bigint|string|Uint8Array|boolean|null}
- */
-function get_data_value(base64, type) {
-    const buffer = base64_to_array_buffer(base64);
-    const array = new Uint8Array(buffer);
-    const view = new DataView(buffer);
-    switch (type) {
-        case DataType.I8: 
-            if (view.byteLength >= 1) return view.getInt8();
-        case DataType.I16: 
-            if (view.byteLength >= 2) return view.getInt16();
-        case DataType.I32: 
-            if (view.byteLength >= 4) return view.getInt32();
-        case DataType.I64: 
-            if (view.byteLength >= 8) return view.getBigInt64();
-        case DataType.I128: 
-            if (view.byteLength >= 8) return view.getBigInt64();
-        case DataType.U8: 
-            if (view.byteLength >= 1) return view.getUint8();
-        case DataType.U16: 
-            if (view.byteLength >= 2) return view.getUint16();
-        case DataType.U32: 
-            if (view.byteLength >= 4) return view.getUint32();
-        case DataType.U64: 
-            if (view.byteLength >= 8) return view.getBigUint64();
-        case DataType.U128: 
-            if (view.byteLength >= 8) return view.getBigUint64();
-        case DataType.F32:
-            if (view.byteLength >= 4) return view.getFloat32();
-        case DataType.F64:
-            if (view.byteLength >= 8) return view.getFloat64();
-        case DataType.BOOL:
-            if (view.byteLength >= 1) return Boolean(view.getUint8(offset));
-        case DataType.CHAR:
-            if (view.byteLength >= 1) return String.fromCharCode(view.getUint8(offset));
-        case DataType.STRING:
-            return new TextDecoder("utf-8").decode(array);
-        case DataType.BYTES:
-            return array;
-    }
-    return null;
-}
-
-/**
- * @param {string} base64 
- * @param {number[]} types 
- * @returns {(number|bigint|string|Uint8Array|boolean|null)[]}
- */
-function get_data_values(base64, types) {
-    const buffer = base64_to_array_buffer(base64);
-    let index = 0;
-    let values = [];
-    for (const type of types) {
-        let length = 0;
-        if (type == DataType.I8 || type == DataType.U8 || type == DataType.CHAR || type == DataType.BOOL) {
-            length = 1;
-        }
-        else if (type == DataType.I16 || type == DataType.U16) {
-            length = 2;
-        }
-        else if (type == DataType.I32 || type == DataType.U32 || type == DataType.F32) {
-            length = 4;
-        }
-        else if (type == DataType.I64 || type == DataType.U64 || type == DataType.F64) {
-            length = 8;
-        }
-        else if (type == DataType.I128 || type == DataType.U128) {
-            length = 16;
-        }
-        else if (type == DataType.STRING || type == DataType.BYTES) {
-            length = 1;
-            if (index < buffer.byteLength) {
-                const view = new DataView(buffer.slice(index));
-                length = view.getUint8();
-                index += 1;
-            }
-        }
-        if (index + length > buffer.byteLength) break;
-        const value = get_data_value(array_buffer_to_base64(buffer.slice(index, index + length)), type);
-        values.push(value);
-        index += length;
-    }
-    return values;
-}
-
-/**
- * @param {number|bigint|string|Uint8Array|boolean} value
- */
-function set_data_value(value) {
-    let base64 = "";
-    let type = DataType.NULL;
-    if (typeof value == "number") {
-        if (Number.isInteger(value)) {
-            const buffer = new ArrayBuffer(4);
-            const view = new DataView(buffer);
-            view.setInt32(0, value);
-            type = DataType.I32;
-            base64 += array_buffer_to_base64(view.buffer);
-        } else {
-            const buffer = new ArrayBuffer(8);
-            const view = new DataView(buffer);
-            view.setFloat64(0, value);
-            type = DataType.F64;
-            base64 += array_buffer_to_base64(view.buffer);
-        }
-    }
-    if (typeof value == "bigint") {
-        const buffer = new ArrayBuffer(8);
-        const view = new DataView(buffer);
-        view.setBigInt64(0, value);
-        type = DataType.I64;
-        base64 += array_buffer_to_base64(view.buffer);
-    }
-    else if (typeof value == "string") {
-        if (value.length == 1) {
-            type = DataType.CHAR;
-            base64 += btoa(value);
-        }
-        else {
-            type = DataType.STRING;
-            let array = new Uint8Array(value.length);
-            array.set(new TextEncoder("utf-8").encode(value));
-            base64 += array_buffer_to_base64(array.buffer);
-        }
-    }
-    else if (value instanceof Uint8Array) {
-        type = DataType.BYTES;
-        base64 += array_buffer_to_base64(value.buffer);
-    }
-    else if (typeof value == "boolean") {
-        type = DataType.BOOL;
-        base64 += btoa(String.fromCharCode(value));
-    }
-    return {
-        bytes: base64,
-        type: type
-    }
-}
-
-/**
- * @param {(number|bigint|string|Uint8Array|boolean)[]} values
- */
-function set_data_values(values) {
-    if (values === undefined) {
-        return {
-            bytes: "",
-            types: []
-        };
-    }
-    let arrays = new Uint8Array();
-    let types = [];
-    for (const value of values) {
-        let data_value = set_data_value(value);
-        if ((typeof value == "string" && value.length != 1) || value instanceof Uint8Array) {
-            let len = new Uint8Array([value.length % 256]);
-            let combine = new Uint8Array(arrays.byteLength + 1);
-            combine.set(arrays);
-            combine.set(len, arrays.byteLength);
-            arrays = combine;
-        }
-        let array = new Uint8Array(base64_to_array_buffer(data_value.bytes));
-        let combine = new Uint8Array(arrays.byteLength + array.byteLength);
-        combine.set(arrays);
-        combine.set(array, arrays.byteLength);
-        arrays = combine;
-        types.push(data_value.type);
-    }
-    return {
-        bytes: array_buffer_to_base64(arrays.buffer),
-        types: types
-    };
-}
 
 /**
  * @typedef {(string|Uint8Array)} Uuid
@@ -2163,7 +2504,7 @@ function get_model_config_schema_vec(r) {
  * @typedef {Object} ModelConfigUpdate
  * @property {number} id
  * @property {?string} name
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  * @property {?string} category
  */
 
@@ -2824,7 +3165,7 @@ function get_config_id(r) {
  * @property {number} id
  * @property {Uuid} device_id
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -2833,7 +3174,7 @@ function get_config_id(r) {
  * @property {number} id
  * @property {Uuid} gateway_id
  * @property {string} name
- * @property {number|string} value
+ * @property {number|bigint|string|Uint8Array|boolean} value
  * @property {string} category
  */
 
@@ -2885,7 +3226,7 @@ function get_gateway_config_schema_vec(r) {
  * @typedef {Object} ConfigUpdate
  * @property {number} id
  * @property {?string} name
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  * @property {?string} category
  */
 
@@ -5491,7 +5832,7 @@ function get_buffer_schema_vec(r) {
 /**
  * @typedef {Object} BufferUpdate
  * @property {number} id
- * @property {?number|bigint|string|boolean} data
+ * @property {?number|bigint|string|Uint8Array|boolean} data
  * @property {?number|string} status
  */
 
@@ -7005,7 +7346,7 @@ function get_log_schema_vec(r) {
  * @property {Date} timestamp
  * @property {Uuid} device_id
  * @property {?number|string} status
- * @property {?number|string} value
+ * @property {?number|bigint|string|Uint8Array|boolean} value
  */
 
 /**
@@ -7410,4 +7751,4 @@ var index = /*#__PURE__*/Object.freeze({
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_buffer_by_set, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, count_data_by_set, count_data_by_set_last_time, count_data_by_set_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_set_last_time, list_buffer_by_set_number_after, list_buffer_by_set_number_before, list_buffer_by_set_range_time, list_buffer_by_set_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_by_set, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_first_offset_by_set, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_by_set, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_last_offset_by_set, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_first_by_set, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_buffer_timestamp_last_by_set, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, user_login, user_login_key, user_logout, user_refresh, utility };
+export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_buffer_by_set, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, count_data_by_set, count_data_by_set_last_time, count_data_by_set_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_data, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_role_profile, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, create_user_profile, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_role_profile, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, delete_user_profile, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_set_last_time, list_buffer_by_set_number_after, list_buffer_by_set_number_before, list_buffer_by_set_range_time, list_buffer_by_set_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_by_set, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_first_offset_by_set, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_by_set, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_last_offset_by_set, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_first_by_set, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_buffer_timestamp_last_by_set, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_role_profile_by_role, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, list_user_profile_by_user, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_role_profile, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, read_user_profile, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, swap_user_profile, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_role_profile, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, update_user_profile, user_login, user_login_key, user_logout, user_refresh, utility };

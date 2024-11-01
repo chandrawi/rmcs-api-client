@@ -189,7 +189,7 @@ function get_buffer_schema_vec(r) {
 /**
  * @typedef {Object} BufferUpdate
  * @property {number} id
- * @property {?number|bigint|string|boolean} data
+ * @property {?number|bigint|string|Uint8Array|boolean} data
  * @property {?number|string} status
  */
 
