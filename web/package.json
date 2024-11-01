@@ -18,13 +18,13 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "rollup": "^4.17.2",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "rollup": "^4.24.3",
     "rollup-plugin-exclude-dependencies-from-bundle": "^1.1.23"
   },
   "dependencies": {
-    "google-protobuf": "^3.21.2",
+    "google-protobuf": "^3.21.4",
     "grpc-web": "^1.5.0",
     "rmcs-auth-api": "file:../../rmcs-auth-api/web/",
     "rmcs-resource-api": "file:../../rmcs-resource-api/web/"
