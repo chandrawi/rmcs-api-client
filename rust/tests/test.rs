@@ -6,8 +6,10 @@ mod tests {
     use rmcs_resource_db::{ModelConfigSchema, DeviceConfigSchema};
     use rmcs_resource_db::{DataType::*, DataValue::{*, self}};
     use rmcs_resource_db::{BufferStatus::*, LogStatus::*};
+    use rmcs_resource_db::SetMember;
     use rmcs_api_client::{Auth, Resource};
     use rmcs_auth_db::utility::generate_access_key;
+    use rmcs_auth_db::ProfileMode::*;
     use rmcs_api_server::utility::test::{TestServerKind, TestServer};
 
     #[tokio::test]
@@ -135,6 +137,29 @@ mod tests {
 
         assert_ne!(user.password, hash);
 
+        // create role and user profile
+        let profile_role_id1 = auth.create_role_profile(role_id1, "name", StringT, SingleRequired).await.unwrap();
+        let profile_role_id2 = auth.create_role_profile(role_id1, "age", U16T, SingleOptional).await.unwrap();
+        let profile_user_id1 = auth.create_user_profile(user_id1, "name", String("john doe".to_owned())).await.unwrap();
+        let profile_user_id2 = auth.create_user_profile(user_id1, "age", U16(20)).await.unwrap();
+
+        // read role and user profile
+        let profile_role1 = auth.read_role_profile(profile_role_id1).await.unwrap();
+        let profile_role2 = auth.read_role_profile(profile_role_id2).await.unwrap();
+        let profile_user1 = auth.read_user_profile(profile_user_id1).await.unwrap();
+        let profile_users = auth.list_user_profile_by_user(user_id1).await.unwrap();
+
+        assert_eq!(profile_role1.name, "name");
+        assert_eq!(profile_role2.mode, SingleOptional);
+        assert_eq!(profile_user1.value, String("john doe".to_owned()));
+        assert!(profile_users.contains(&profile_user1));
+
+        // update user profile
+        auth.update_user_profile(profile_user_id2, None, Some(U16(21))).await.unwrap();
+        let profile_user2 = auth.read_user_profile(profile_user_id2).await.unwrap();
+
+        assert_eq!(profile_user2.value, U16(21));
+
         // create new access token and refresh token
         let expire1 = DateTime::parse_from_str("2023-01-01 00:00:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap().into();
         let expire2 = DateTime::parse_from_str("2023-01-01 12:00:00 +0000", "%Y-%m-%d %H:%M:%S %z").unwrap().into();
@@ -170,6 +195,17 @@ mod tests {
         assert_eq!(new_access_token.expire, expire3);
         assert_eq!(new_auth_token.expire, expire3);
         assert_eq!(new_auth_token.ip, [192, 168, 0, 100]);
+
+        // delete role and user profile
+        auth.delete_user_profile(profile_user_id1).await.unwrap();
+        auth.delete_role_profile(profile_role_id1).await.unwrap();
+
+        // check if role and user profile already deleted
+        let result_profile_user = auth.read_role_profile(profile_user_id1).await;
+        let result_profile_role = auth.read_role_profile(profile_role_id1).await;
+
+        assert!(result_profile_user.is_err());
+        assert!(result_profile_role.is_err());
 
         // try to delete resource API, procedure role and user without removing dependent item
         let try_role = auth.delete_role(role_id3).await;
@@ -341,6 +377,27 @@ mod tests {
         let group = resource.read_group_device(group_device_id).await.unwrap();
         assert_eq!(group.description, "Sensor devices");
 
+        // create set template and set
+        let template_id = resource.create_set_template(Uuid::new_v4(), "multiple compass", None).await.unwrap();
+        let set_id = resource.create_set(Uuid::new_v4(), template_id, "multiple compass 1", None).await.unwrap();
+        // add devices value to the set template and set
+        resource.add_set_template_member(template_id, type_id, model_id, &[1]).await.unwrap();
+        resource.add_set_member(set_id, device_id2, model_id, &[1]).await.unwrap();
+        resource.add_set_member(set_id, device_id1, model_id, &[1]).await.unwrap();
+
+        // read sets
+        let sets = resource.list_set_by_template(template_id).await.unwrap();
+        let set = sets.iter().next().unwrap();
+        assert_eq!(set.id, set_id);
+        assert!(set.members.contains(&SetMember { device_id: device_id1, model_id, data_index: vec![1] }));
+        assert!(set.members.contains(&SetMember { device_id: device_id2, model_id, data_index: vec![1] }));
+
+        // swap set members
+        resource.swap_set_member(set_id, device_id1, model_id, device_id2, model_id).await.unwrap();
+        let set = resource.read_set(set_id).await.unwrap();
+        assert_eq!(set.members[0], SetMember { device_id: device_id1, model_id, data_index: vec![1] });
+        assert_eq!(set.members[1], SetMember { device_id: device_id2, model_id, data_index: vec![1] });
+
         // generate raw data and create buffers
         let timestamp = DateTime::parse_from_str("2023-05-07 07:08:48.123456 +0000", "%Y-%m-%d %H:%M:%S.%6f %z").unwrap().into();
         let raw_1 = vec![I32(1231),I32(890)];
@@ -353,6 +410,11 @@ mod tests {
         assert_eq!(buffers[0].data, raw_1);
         assert_eq!(buffers[1].data, raw_2);
 
+        // read buffers from a device group
+        let buffers_group = resource.list_buffer_first_by_ids(100, Some(group_device.devices.clone()), None, None).await.unwrap();
+        assert_eq!(buffers_group[0].data, raw_1);
+        assert_eq!(buffers_group[1].data, raw_2);
+
         // get model config value then convert buffer data
         let conf_val = |model_configs: Vec<DeviceConfigSchema>, name: &str| -> DataValue {
             model_configs.iter().filter(|&cfg| cfg.name == name.to_owned())
@@ -363,19 +425,39 @@ mod tests {
         };
         let coef0 = conf_val(device_configs.clone(), "coef_0").try_into().unwrap();
         let coef1 = conf_val(device_configs.clone(), "coef_1").try_into().unwrap();
-        let speed = convert(raw_1[0].clone().try_into().unwrap(), coef0, coef1) as f32;
-        let direction = convert(raw_1[1].clone().try_into().unwrap(), coef0, coef1) as f32;
+        let speed1 = convert(raw_1[0].clone().try_into().unwrap(), coef0, coef1) as f32;
+        let direction1 = convert(raw_1[1].clone().try_into().unwrap(), coef0, coef1) as f32;
+        let speed2 = convert(raw_2[0].clone().try_into().unwrap(), coef0, coef1) as f32;
+        let direction2 = convert(raw_2[1].clone().try_into().unwrap(), coef0, coef1) as f32;
         // create data
-        resource.create_data(device_id1, model_id, timestamp, vec![F32(speed), F32(direction)]).await.unwrap();
+        resource.create_data(device_id1, model_id, timestamp, vec![F32(speed1), F32(direction1)]).await.unwrap();
+        resource.create_data(device_id2, model_id, timestamp, vec![F32(speed2), F32(direction2)]).await.unwrap();
 
         // read data
         let datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100).await.unwrap();
         let data = datas.iter().filter(|x| x.device_id == device_id1 && x.model_id == model_id).next().unwrap();
-        assert_eq!(vec![F32(speed), F32(direction)], data.data);
+        assert_eq!(vec![F32(speed1), F32(direction1)], data.data);
         assert_eq!(timestamp, data.timestamp);
+
+        // read data from a device group
+        let data_group = resource.list_data_by_ids_time(group_device.devices.clone(), vec![model_id], timestamp).await.unwrap();
+        let data_values_vec: Vec<Vec<DataValue>> = data_group.iter().map(|d| d.data.clone()).collect();
+        let data_values: Vec<DataValue> = data_values_vec.into_iter().flatten().collect();
+        assert!(data_values.contains(&F32(speed1)));
+        assert!(data_values.contains(&F32(speed2)));
+
+        // read data set and data using set
+        let data_set = resource.read_data_set(set_id, timestamp).await.unwrap();
+        let data_by_set = resource.list_data_by_set_time(set_id, timestamp).await.unwrap();
+        let data_by_set_values: Vec<Vec<DataValue>> = data_by_set.iter().map(|d| d.data.clone()).collect();
+        assert_eq!(data_set.data[0], F32(direction1));
+        assert_eq!(data_set.data[1], F32(direction2));
+        assert!(data_by_set_values.contains(&vec![F32(speed1), F32(direction1)]));
+        assert!(data_by_set_values.contains(&vec![F32(speed2), F32(direction2)]));
 
         // delete data
         resource.delete_data(device_id1, model_id, timestamp).await.unwrap();
+        resource.delete_data(device_id2, model_id, timestamp).await.unwrap();
         let result = resource.read_data(device_id1, model_id, timestamp).await;
         assert!(result.is_err());
 
@@ -472,6 +554,11 @@ mod tests {
         let result = resource.read_group_model(group_model_id).await;
         assert!(result.is_err());
         let result = resource.read_group_device(group_device_id).await;
+        assert!(result.is_err());
+
+        // delete set template and set
+        resource.delete_set(set_id).await.unwrap();
+        let result = resource.read_set(set_id).await;
         assert!(result.is_err());
 
         resource_server.stop_server();
