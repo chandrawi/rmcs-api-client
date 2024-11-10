@@ -8,7 +8,7 @@ from .model import ModelSchema, ModelConfigSchema
 from .device import DeviceSchema, GatewaySchema, DeviceConfigSchema, GatewayConfigSchema
 from .types import TypeSchema
 from .group import GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema
-from .set import SetSchema, SetTemplateSchema
+from .set import SetSchema, SetTemplateSchema, SetMember
 from .data import DataSchema, DataSetSchema
 from .buffer import BufferSchema
 from .slice import SliceSchema, SliceSetSchema

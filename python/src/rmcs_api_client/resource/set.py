@@ -132,9 +132,9 @@ def add_set_member(resource, id: UUID, device_id: UUID, model_id: UUID, data_ind
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetMemberRequest(
-            set_id=id,
-            device_id=device_id,
-            model_id=model_id,
+            set_id=id.bytes,
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
             data_index=bytes(data_index)
         )
         stub.AddSetMember(request=request, metadata=resource.metadata)
@@ -143,9 +143,9 @@ def remove_set_member(resource, id: UUID, device_id: UUID, model_id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetMemberRequest(
-            set_id=id,
-            device_id=device_id,
-            model_id=model_id
+            set_id=id.bytes,
+            device_id=device_id.bytes,
+            model_id=model_id.bytes
         )
         stub.RemoveSetMember(request=request, metadata=resource.metadata)
 
@@ -153,11 +153,11 @@ def swap_set_member(resource, id: UUID, device_id_1: UUID, model_id_1: UUID, dev
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetMemberSwap(
-            set_id=id,
-            device_id_1=device_id_1,
-            model_id_1=model_id_1,
-            device_id_2=device_id_2,
-            model_id_2=model_id_2
+            set_id=id.bytes,
+            device_id_1=device_id_1.bytes,
+            model_id_1=model_id_1.bytes,
+            device_id_2=device_id_2.bytes,
+            model_id_2=model_id_2.bytes
         )
         stub.SwapSetMember(request=request, metadata=resource.metadata)
 
@@ -228,9 +228,9 @@ def add_set_template_member(resource, id: UUID, type_id: UUID, model_id: UUID, d
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetTemplateMemberRequest(
-            set_id=id,
-            type_id=type_id,
-            model_id=model_id,
+            set_id=id.bytes,
+            type_id=type_id.bytes,
+            model_id=model_id.bytes,
             data_index=bytes(data_index)
         )
         stub.AddSetTemplateMember(request=request, metadata=resource.metadata)
@@ -239,7 +239,7 @@ def remove_set_template_member(resource, id: UUID, index: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetTemplateMemberRequest(
-            set_id=id,
+            set_id=id.bytes,
             template_index=index
         )
         stub.RemoveSetTemplateMember(request=request, metadata=resource.metadata)
@@ -248,7 +248,7 @@ def swap_set_template_member(resource, id: UUID, index_1: int, index_2: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = set_pb2_grpc.SetServiceStub(channel)
         request = set_pb2.SetTemplateMemberSwap(
-            set_id=id,
+            set_id=id.bytes,
             template_index_1=index_1,
             template_index_2=index_2
         )

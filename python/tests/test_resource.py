@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 import dotenv
 import pytest
-from rmcs_api_client.resource import Resource, DataType
+from rmcs_api_client.resource import Resource, DataType, SetMember
 from uuid import UUID
 import utility
 
@@ -98,7 +98,7 @@ def test_resource():
     # read group model
     groups = resource.list_group_model_by_category("APPLICATION")
     group_model_filter = filter(lambda x: model_id in x.models, groups)
-    group_model = list(group_model_filter)[0]
+    group_model = groups[0]
     assert group_model.name == "data"
     assert group_model.category == "APPLICATION"
     # read group device
@@ -142,6 +142,27 @@ def test_resource():
     group = resource.read_group_device(group_device_id)
     assert group.description == "Sensor devices"
 
+    # create set template and set
+    template_id = resource.create_set_template(uuid.uuid4(), "multiple compass", None)
+    set_id = resource.create_set(uuid.uuid4(), template_id, "multiple compass 1", None)
+    # add devices value to the set template and set
+    resource.add_set_template_member(template_id, type_id, model_id, [1,])
+    resource.add_set_member(set_id, device_id2, model_id, [1,])
+    resource.add_set_member(set_id, device_id1, model_id, [1,])
+
+    # read sets
+    sets = resource.list_set_by_template(template_id)
+    set = sets[0]
+    assert set.id == set_id
+    assert SetMember(device_id1, model_id, [1,]) in set.members
+    assert SetMember(device_id2, model_id, [1,]) in set.members
+
+    # swap set members
+    resource.swap_set_member(set_id, device_id1, model_id, device_id2, model_id)
+    set = resource.read_set(set_id)
+    assert set.members[0] == SetMember(device_id1, model_id, [1,])
+    assert set.members[1] == SetMember(device_id2, model_id, [1,])
+
     # generate raw data and create buffers
     timestamp = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
     raw_1 = [1231, 890]
@@ -154,6 +175,11 @@ def test_resource():
     assert buffers[0].data == raw_1
     assert buffers[1].data == raw_2
 
+    # read buffers from a device group
+    buffers_group = resource.list_buffer_first_by_ids(100, group_device.devices, None, None)
+    assert buffers_group[0].data == raw_1
+    assert buffers_group[1].data == raw_2
+
     # get model config value then convert buffer data
     def conf_val(model_configs, name):
         for config in model_configs:
@@ -163,20 +189,42 @@ def test_resource():
         return (raw - coef0) * coef1
     coef0 = conf_val(device_configs, "coef_0")
     coef1 = conf_val(device_configs, "coef_1")
-    speed = convert(raw_1[0], coef0, coef1)
-    direction = convert(raw_1[1], coef0, coef1)
+    speed1 = convert(raw_1[0], coef0, coef1)
+    direction1 = convert(raw_1[1], coef0, coef1)
+    speed2 = convert(raw_2[0], coef0, coef1)
+    direction2 = convert(raw_2[1], coef0, coef1)
     # create data
-    resource.create_data(device_id1, model_id, timestamp, [speed, direction])
+    resource.create_data(device_id1, model_id, timestamp, [speed1, direction1])
+    resource.create_data(device_id2, model_id, timestamp, [speed2, direction2])
 
     # read data
     datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100)
     data_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, datas)
     data = list(data_filter)[0]
-    assert [speed, direction] == data.data
+    assert [speed1, direction1] == data.data
     assert timestamp == data.timestamp
+
+    # read data from a device group
+    data_group = resource.list_data_by_ids_time(group_device.devices, [model_id,], timestamp)
+    data_values = []
+    for data in data_group:
+        for value in data.data: data_values.append(value)
+    assert speed1 in data_values
+    assert speed2 in data_values
+
+    # read data set and data using set
+    data_set = resource.read_data_set(set_id, timestamp)
+    data_by_set = resource.list_data_by_set_time(set_id, timestamp)
+    data_by_set_values = []
+    for data in data_by_set: data_by_set_values.append(data.data)
+    assert data_set.data[0] == direction1
+    assert data_set.data[1] == direction2
+    assert [speed1, direction1] in data_by_set_values
+    assert [speed2, direction2] in data_by_set_values
 
     # delete data
     resource.delete_data(device_id1, model_id, timestamp)
+    resource.delete_data(device_id2, model_id, timestamp)
     with pytest.raises(Exception):
         resource.read_data(device_id1, model_id, timestamp)
 
@@ -275,6 +323,11 @@ def test_resource():
         resource.read_group_model(group_model_id)
     with pytest.raises(Exception):
         resource.read_group_device(group_device_id)
+
+    # delete set template and set
+    resource.delete_set(set_id)
+    with pytest.raises(Exception):
+        resource.read_set(set_id)
 
     # stop auth server
     utility.stop_resource_server()

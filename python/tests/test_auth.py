@@ -11,6 +11,7 @@ import dotenv
 import pytest
 from argon2 import PasswordHasher
 from rmcs_api_client.auth import Auth
+from rmcs_api_client.resource import DataType
 import utility
 
 def test_auth():
@@ -138,6 +139,29 @@ def test_auth():
 
     assert user.password != password_admin
 
+    # create role and user profile
+    profile_role_id1 = auth.create_role_profile(role_id1, "name", DataType.STRING, "SINGLE_REQUIRED")
+    profile_role_id2 = auth.create_role_profile(role_id1, "age", DataType.U16, "SINGLE_OPTIONAL")
+    profile_user_id1 = auth.create_user_profile(user_id1, "name", "john doe")
+    profile_user_id2 = auth.create_user_profile(user_id1, "age", 20)
+
+    # read role and user profile
+    profile_role1 = auth.read_role_profile(profile_role_id1)
+    profile_role2 = auth.read_role_profile(profile_role_id2)
+    profile_user1 = auth.read_user_profile(profile_user_id1)
+    profile_users = auth.list_user_profile_by_user(user_id1)
+
+    assert profile_role1.name == "name"
+    assert profile_role2.mode == "SINGLE_OPTIONAL"
+    assert profile_user1.value == "john doe"
+    assert profile_user1 in profile_users
+
+    # update user profile
+    auth.update_user_profile(profile_user_id2, None, 21)
+    profile_user2 = auth.read_user_profile(profile_user_id2)
+
+    assert profile_user2.value == 21
+
     # create new access token and refresh token
     expire1 = datetime.strptime("2023-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
     expire2 = datetime.strptime("2023-01-01 12:00:00", "%Y-%m-%d %H:%M:%S")
@@ -175,6 +199,16 @@ def test_auth():
     assert new_access_token.expire == expire3
     assert new_auth_token.expire == expire3
     assert new_auth_token.ip == bytes([192, 168, 0, 100])
+
+    # delete role and user profile
+    auth.delete_user_profile(profile_user_id1)
+    auth.delete_role_profile(profile_role_id1)
+
+    # check if role and user profile already deleted
+    with pytest.raises(Exception):
+        auth.read_role_profile(profile_user_id1)
+    with pytest.raises(Exception):
+        auth.read_role_profile(profile_role_id1)
 
     # try to delete resource API, procedure role and user without removing dependent item
     with pytest.raises(Exception):

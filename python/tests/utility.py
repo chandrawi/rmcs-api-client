@@ -7,15 +7,12 @@ import psycopg
 def truncate_tables_auth(db_url: str):
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE \"api\" CASCADE;")
-            cur.execute("TRUNCATE TABLE \"user\" CASCADE;")
-            cur.execute("TRUNCATE TABLE \"token\" CASCADE;")
+            cur.execute("TRUNCATE TABLE \"profile_user\", \"profile_role\", \"token\", \"user_role\", \"user\", \"role_access\", \"role\", \"api_procedure\", \"api\";")
 
 def truncate_tables_resource(db_url: str):
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE \"device_type\" CASCADE;")
-            cur.execute("TRUNCATE TABLE \"model\" CASCADE;")
+            cur.execute("TRUNCATE TABLE \"system_log\", \"slice_data_set\", \"slice_data\", \"data_buffer\", \"data\", \"set_map\", \"set_template_map\", \"set\", \"set_template\", \"group_model_map\", \"group_device_map\", \"group_model\", \"group_device\", \"device_config\", \"device\", \"device_type_model\", \"device_type\", \"model_config\", \"model\";")
 
 def wait_server(server_name: str):
     name = server_name[0:15]

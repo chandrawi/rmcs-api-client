@@ -137,7 +137,7 @@ def update_user_profile(auth, id: int, name: Optional[str], value: Optional[List
             value_bytes=value_bytes,
             value_type=value_type
         )
-        stub.UpdateRoleProfile(request=request, metadata=auth.metadata)
+        stub.UpdateUserProfile(request=request, metadata=auth.metadata)
 
 def delete_user_profile(auth, id: int):
     with grpc.insecure_channel(auth.address) as channel:
