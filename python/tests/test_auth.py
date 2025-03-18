@@ -206,7 +206,7 @@ def test_auth():
 
     # check if role and user profile already deleted
     with pytest.raises(Exception):
-        auth.read_role_profile(profile_user_id1)
+        auth.read_user_profile(profile_user_id1)
     with pytest.raises(Exception):
         auth.read_role_profile(profile_role_id1)
 

@@ -15,7 +15,7 @@ mod tests {
     #[tokio::test]
     async fn test_auth()
     {
-        std::env::set_var("RUST_BACKTRACE", "1");
+        unsafe { std::env::set_var("RUST_BACKTRACE", "1"); }
 
         // start auth server
         let auth_server = TestServer::new(TestServerKind::Auth);
@@ -201,7 +201,7 @@ mod tests {
         auth.delete_role_profile(profile_role_id1).await.unwrap();
 
         // check if role and user profile already deleted
-        let result_profile_user = auth.read_role_profile(profile_user_id1).await;
+        let result_profile_user = auth.read_user_profile(profile_user_id1).await;
         let result_profile_role = auth.read_role_profile(profile_role_id1).await;
 
         assert!(result_profile_user.is_err());
@@ -253,7 +253,7 @@ mod tests {
     #[tokio::test]
     async fn test_resource()
     {
-        std::env::set_var("RUST_BACKTRACE", "1");
+        unsafe { std::env::set_var("RUST_BACKTRACE", "1"); }
 
         // start resource server
         let resource_server = TestServer::new(TestServerKind::Resource);
@@ -557,7 +557,10 @@ mod tests {
         assert!(result.is_err());
 
         // delete set template and set
+        resource.delete_set_template(template_id).await.unwrap();
         resource.delete_set(set_id).await.unwrap();
+        let result = resource.read_set_template(template_id).await;
+        assert!(result.is_err());
         let result = resource.read_set(set_id).await;
         assert!(result.is_err());
 

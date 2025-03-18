@@ -325,6 +325,9 @@ def test_resource():
         resource.read_group_device(group_device_id)
 
     # delete set template and set
+    resource.delete_set_template(template_id)
+    with pytest.raises(Exception):
+        resource.read_set_template(template_id)
     resource.delete_set(set_id)
     with pytest.raises(Exception):
         resource.read_set(set_id)

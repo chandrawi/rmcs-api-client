@@ -144,7 +144,7 @@ pub(crate) async fn add_set_member(resource: &Resource, id: Uuid, device_id: Uui
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetMemberRequest {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         data_index: data_index.to_owned()
@@ -161,7 +161,7 @@ pub(crate) async fn remove_set_member(resource: &Resource, id: Uuid, device_id: 
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetMemberRequest {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         data_index: Vec::new()
@@ -178,7 +178,7 @@ pub(crate) async fn swap_set_member(resource: &Resource, id: Uuid, device_id_1: 
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetMemberSwap {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         device_id_1: device_id_1.as_bytes().to_vec(),
         model_id_1: model_id_1.as_bytes().to_vec(),
         device_id_2: device_id_2.as_bytes().to_vec(),
@@ -304,7 +304,7 @@ pub(crate) async fn add_set_template_member(resource: &Resource, id: Uuid, type_
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetTemplateMemberRequest {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         type_id: type_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         data_index: data_index.to_owned(),
@@ -322,7 +322,7 @@ pub(crate) async fn remove_set_template_member(resource: &Resource, id: Uuid, in
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetTemplateMemberRequest {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         type_id: Uuid::nil().as_bytes().to_vec(),
         model_id: Uuid::nil().as_bytes().to_vec(),
         data_index: Vec::new(),
@@ -340,7 +340,7 @@ pub(crate) async fn swap_set_template_member(resource: &Resource, id: Uuid, inde
     let mut client = 
         SetServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let request = Request::new(SetTemplateMemberSwap {
-        set_id: id.as_bytes().to_vec(),
+        id: id.as_bytes().to_vec(),
         template_index_1: index_1 as i32,
         template_index_2: index_2 as i32
     });
