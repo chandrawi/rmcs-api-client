@@ -21,6 +21,9 @@ describe("RMCS Auth test", function() {
     const user_id = utility.uuid_v4_hex();
     const admin_password = "Adm1n_P4s5w0rd";
     const user_password = "Us3r_P4s5w0rd";
+    let profile_role_id = {};
+    let profile_user_id_1 = {};
+    let profile_user_id_2 = {};
     let admin_hash = "";
     let userToken = {};
 
@@ -221,6 +224,37 @@ describe("RMCS Auth test", function() {
         expect(user.password).not.toEqual(admin_hash);
     });
 
+    it("should create role and user profile", async function() {
+        profile_role_id = await auth.create_role_profile(server, {
+            role_id: role_admin_id,
+            name: "name",
+            value_type: "STRING",
+            mode: "SINGLE_REQUIRED"
+        });
+        profile_user_id_1 = await auth.create_user_profile(server, {
+            user_id: admin_id,
+            name: "name",
+            value: "john doe"
+        });
+        const profile_role = await auth.read_role_profile(server, { id: profile_role_id.id});
+        expect(profile_role.name).toEqual("name");
+        expect(profile_role.mode).toEqual("SINGLE_REQUIRED");
+        const profile_user = await auth.read_user_profile(server, { id: profile_user_id_1.id });
+        expect(profile_user.value).toEqual("john doe");
+        profile_user_id_2 = await auth.create_user_profile(server, {
+            user_id: admin_id,
+            name: "age",
+            value: 20
+        });
+    });
+
+    it("should update user profile", async function() {
+        const userProfileUpdate = await auth.update_user_profile(server, { id: profile_user_id_2.id, value: 21 });
+        expect(userProfileUpdate).toEqual({});
+        const profile_user = await auth.read_user_profile(server, { id: profile_user_id_2.id });
+        expect(profile_user.value).toEqual(21);
+    });
+
     const expire_1 = new Date(2023, 0, 1, 0, 0, 0);
     const expire_2 = new Date(2023, 0, 1, 12, 0, 0);
     const expire_3 = new Date(2023, 0, 1, 18, 0, 0);
@@ -328,6 +362,15 @@ describe("RMCS Auth test", function() {
         expect(logout).toEqual({});
         const tokens = await auth.list_token_by_user(server, { id: user_id });
         expect(tokens.length).toEqual(0);
+    });
+
+    it("should delete role and user profile", async function() {
+        const ProfileRoleDelete = await auth.delete_role_profile(server, { id: profile_role_id })
+            .catch(() => true);
+        expect(ProfileRoleDelete).toBeTrue();
+        const ProfileUserDelete = await auth.delete_user_profile(server, { id: profile_user_id_1 })
+            .catch(() => true);
+        expect(ProfileUserDelete).toBeTrue();
     });
 
     it("should failed to delete a role", async function() {

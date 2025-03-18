@@ -297,11 +297,9 @@ export async function update_user_profile(server, request) {
     const userProfileUpdate = new pb_profile.UserProfileUpdate();
     userProfileUpdate.setId(request.id);
     userProfileUpdate.setName(request.name);
-    if (request.value) {
-        const value = set_data_value(request.value);
-        userProfileUpdate.setValueBytes(value.bytes);
-        userProfileUpdate.setValueType(value.type);
-    }
+    const value = set_data_value(request.value);
+    userProfileUpdate.setValueBytes(value.bytes);
+    userProfileUpdate.setValueType(value.type);
     return client.updateUserProfile(userProfileUpdate, metadata(server))
         .then(response => response.toObject());
 }

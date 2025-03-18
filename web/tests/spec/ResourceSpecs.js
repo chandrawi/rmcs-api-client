@@ -14,10 +14,13 @@ describe("RMCS Resource test", function() {
     let device_cfg_id;
     const group_model_id = utility.uuid_v4_hex();
     const group_device_id = utility.uuid_v4_hex();
+    let group_device;
     let model;
     let device_1;
     let model_configs = [];
     let device_configs = [];
+    const template_id = utility.uuid_v4_hex();
+    const set_id = utility.uuid_v4_hex();
 
     it("should create data model", async function() {
         const modelId = await resource.create_model(server, {
@@ -219,7 +222,6 @@ describe("RMCS Resource test", function() {
 
     it("should read device groups", async function() {
         const groups = await resource.list_group_device_by_name(server, { category: "sensor" });
-        let group_device;
         for (const group of groups) {
             if (group.id == group_device_id) {
                 group_device = group;
@@ -278,6 +280,37 @@ describe("RMCS Resource test", function() {
         expect(groupDevice.description).toEqual("Sensor devices");
     });
 
+    it("should create set template and set", async function() {
+        const templateId = await resource.create_set_template(server, { id: template_id, name: "multiple compass" });
+        expect(templateId.id).toEqual(template_id);
+        const setId = await resource.create_set(server, { id: set_id, template_id: template_id, name: "multiple compass 1" });
+        expect(setId.id).toEqual(set_id);
+    });
+
+    it("should add type and devices to the set template and set", async function() {
+        const addTemplate = await resource.add_set_template_member(server, { id: template_id, type_id: type_id, model_id: model_id, data_index: [1,], template_index: 0 });
+        expect(addTemplate).toEqual({});
+        const addSet1 = await resource.add_set_member(server, { id: set_id, device_id: device_id_2, model_id: model_id, data_index: [1,] });
+        expect(addSet1).toEqual({});
+        const addSet2 = await resource.add_set_member(server, { id: set_id, device_id: device_id_1, model_id: model_id, data_index: [1] });
+        expect(addSet2).toEqual({});
+    });
+
+    it("should read sets", async function() {
+        const sets = await resource.list_set_by_template(server, { id: template_id });
+        const set = sets[0];
+        expect(set.id).toEqual(set_id);
+        expect(set.members).toContain({ device_id: device_id_1, model_id: model_id, data_index: [1] });
+        expect(set.members).toContain({ device_id: device_id_2, model_id: model_id, data_index: [1] });
+    });
+
+    it("should swap set members", async function() {
+        await resource.swap_set_member(server, { id: set_id, device_id_1: device_id_1, model_id_1: model_id, device_id_2: device_id_2, model_id_2: model_id });
+        const set = await resource.read_set(server, { id: set_id });
+        expect(set.members[0]).toEqual({ device_id: device_id_1, model_id: model_id, data_index: [1] });
+        expect(set.members[1]).toEqual({ device_id: device_id_2, model_id: model_id, data_index: [1] });
+    });
+
     const timestamp = new Date(2023, 4, 7, 7, 8, 48);
     const raw_1 = [1231, 890];
     const raw_2 = [1452, -341];
@@ -309,6 +342,12 @@ describe("RMCS Resource test", function() {
         }
     });
 
+    it("should read buffers from a device group", async function() {
+        const buffers_group = await resource.list_buffer_first_by_ids(server, { number: 100, device_ids: group_device.devices });
+        expect(buffers_group[0].data).toEqual(raw_1);
+        expect(buffers_group[1].data).toEqual(raw_2);
+    });
+
     const get_conf = (configs, name) => {
         for (const config of configs) {
             if (config.name == name) {
@@ -317,21 +356,32 @@ describe("RMCS Resource test", function() {
         }
     };
 
-    let speed = 0;
-    let direction = 0;
+    let speed_1 = 0;
+    let direction_1 = 0;
+    let speed_2 = 0;
+    let direction_2 = 0;
 
     it("should create a data", async function() {
         const coef_0 = get_conf(device_configs, "coef_0");
         const coef_1 = get_conf(device_configs, "coef_1");
-        speed = (raw_1[0] - coef_0) * coef_1;
-        direction = (raw_1[1] - coef_0) * coef_1;
-        const dataCreate = await resource.create_data(server, {
+        speed_1 = (raw_1[0] - coef_0) * coef_1;
+        direction_1 = (raw_1[1] - coef_0) * coef_1;
+        speed_2 = (raw_2[0] - coef_0) * coef_1;
+        direction_2 = (raw_2[1] - coef_0) * coef_1;
+        const dataCreate1 = await resource.create_data(server, {
             device_id: device_id_1,
             model_id: model_id,
             timestamp: timestamp,
-            data: [speed, direction]
+            data: [speed_1, direction_1]
         });
-        expect(dataCreate).toEqual({});
+        expect(dataCreate1).toEqual({});
+        const dataCreate2 = await resource.create_data(server, {
+            device_id: device_id_2,
+            model_id: model_id,
+            timestamp: timestamp,
+            data: [speed_2, direction_2]
+        });
+        expect(dataCreate2).toEqual({});
     });
 
     it("should read data", async function() {
@@ -347,12 +397,53 @@ describe("RMCS Resource test", function() {
                 data = dataSchema;
             }
         }
-        expect(data.data[0]).toBeCloseTo(speed, 0.1);
-        expect(data.data[1]).toBeCloseTo(direction, 0.1);
+        expect(data.data[0]).toBeCloseTo(speed_1, 0.1);
+        expect(data.data[1]).toBeCloseTo(direction_1, 0.1);
+    });
+
+    it("should read data from a device group", async function() {
+        let dataGroup = await resource.list_data_by_ids_time(server, {
+            device_ids: group_device.devices,
+            model_ids: [model_id],
+            timestamp: timestamp,
+            number: 100
+        });
+        let dataValues = [];
+        for (const dataSchema of dataGroup) {
+            for (const value of dataSchema.data) {
+                dataValues.push(Math.round(value * 10) / 10);
+            }
+        }
+        expect(dataValues).toContain(Math.round(speed_1 * 10) / 10);
+        expect(dataValues).toContain(Math.round(speed_2 * 10) / 10);
+    });
+
+    it("should read data set and data using set", async function() {
+        let dataSet = await resource.read_data_set(server, {
+            set_id: set_id,
+            timestamp: timestamp
+        });
+        let dataBySet = await resource.list_data_by_set_time(server, {
+            set_id: set_id,
+            timestamp: timestamp
+        });
+        let dataBySetValues = [];
+        for (const dataSchema of dataBySet) {
+            let dataVals = [];
+            for (const value of dataSchema.data) {
+                dataVals.push(Math.round(value * 10) / 10);
+            }
+            dataBySetValues.push(dataVals);
+        }
+        expect(dataSet.data[0]).toBeCloseTo(direction_1, 0.1);
+        expect(dataSet.data[1]).toBeCloseTo(direction_2, 0.1);
+        expect(dataBySetValues).toContain([Math.round(speed_1 * 10) / 10, Math.round(direction_1 * 10) / 10]);
+        expect(dataBySetValues).toContain([Math.round(speed_2 * 10) / 10, Math.round(direction_2 * 10) / 10]);
     });
 
     it("should delete a data", async function() {
         await resource.delete_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp });
+        await resource.delete_data(server, { device_id: device_id_2, model_id: model_id, timestamp: timestamp });
         const data = await resource.read_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp })
             .catch(() => null);
         expect(data).toBeNull();
@@ -511,6 +602,17 @@ describe("RMCS Resource test", function() {
         const group = await resource.read_group_device(server, { id: group_device_id })
             .catch(() => null);
         expect(group).toBeNull();
+    });
+
+    it("should delete set template and set", async function() {
+        await resource.delete_set_template(server, { id: template_id });
+        const set_template = await resource.read_set(server, { id: template_id })
+            .catch(() => null);
+        expect(set_template).toBeNull();
+        await resource.delete_set(server, { id: set_id });
+        const set = await resource.read_set(server, { id: set_id })
+            .catch(() => null);
+        expect(set).toBeNull();
     });
 
 });

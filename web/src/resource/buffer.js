@@ -189,7 +189,7 @@ function get_buffer_schema_vec(r) {
 /**
  * @typedef {Object} BufferUpdate
  * @property {number} id
- * @property {?number|bigint|string|Uint8Array|boolean} data
+ * @property {?(number|bigint|string|Uint8Array|boolean)[]} data
  * @property {?number|string} status
  */
 
@@ -905,8 +905,7 @@ export async function update_buffer(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferUpdate = new pb_buffer.BufferUpdate();
     bufferUpdate.setId(request.id);
-    const ty = typeof request.data;
-    if (ty == "number" || ty == "string" || ty == "bigint" || ty == "boolean") {
+    if (typeof request.data == "object" && 'length' in request.data) {
         const value = set_data_values(request.data);
         bufferUpdate.setDataBytes(value.bytes);
         for (const type of value.types) {

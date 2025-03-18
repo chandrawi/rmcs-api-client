@@ -114,7 +114,7 @@ export function get_set_member(r) {
 
 /**
  * @typedef {Object} SetMemberRequest
- * @property {Uuid} set_id
+ * @property {Uuid} id
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {number[]} data_index
@@ -122,7 +122,7 @@ export function get_set_member(r) {
 
 /**
  * @typedef {Object} SetMemberSwap
- * @property {Uuid} set_id
+ * @property {Uuid} id
  * @property {Uuid} device_id_1
  * @property {Uuid} model_id_1
  * @property {Uuid} device_id_2
@@ -221,7 +221,7 @@ export function get_set_template_member(r) {
 
 /**
  * @typedef {Object} SetTemplateMemberRequest
- * @property {Uuid} set_id
+ * @property {Uuid} id
  * @property {Uuid} type_id
  * @property {Uuid} model_id
  * @property {number[]} data_index
@@ -230,7 +230,7 @@ export function get_set_template_member(r) {
 
 /**
  * @typedef {Object} SetTemplateMemberSwap
- * @property {Uuid} set_id
+ * @property {Uuid} id
  * @property {number} template_index_1
  * @property {number} template_index_2
  */
@@ -273,7 +273,7 @@ export async function list_set_by_ids(server, request) {
 export async function list_set_by_template(server, request) {
     const client = new pb_set.SetServicePromiseClient(server.address, null, null);
     const templateId = new pb_set.SetTemplateId();
-    templateId.setTemplateId(uuid_hex_to_base64(request.id));
+    templateId.setId(uuid_hex_to_base64(request.id));
     return client.listSetByTemplate(templateId, metadata(server))
         .then(response => get_set_schema_vec(response.toObject().resultsList));
 }
@@ -360,7 +360,7 @@ export async function delete_set(server, request) {
 /**
  * Add a member to a set
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetMemberRequest} request set member request: set_id, device_id, model_id, data_index
+ * @param {SetMemberRequest} request set member request: id, device_id, model_id, data_index
  * @returns {Promise<{}>} change response
  */
 export async function add_set_member(server, request) {
@@ -377,7 +377,7 @@ export async function add_set_member(server, request) {
 /**
  * Remove a member from a set
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetMemberRequest} request set member request: set_id, device_id, model_id, data_index
+ * @param {SetMemberRequest} request set member request: id, device_id, model_id, data_index
  * @returns {Promise<{}>} change response
  */
 export async function remove_set_member(server, request) {
@@ -393,7 +393,7 @@ export async function remove_set_member(server, request) {
 /**
  * Swap a set member index position 
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetMemberSwap} request set member request: set_id, device_id_1, model_id_1, device_id_2, model_id_2
+ * @param {SetMemberSwap} request set member request: id, device_id_1, model_id_1, device_id_2, model_id_2
  * @returns {Promise<{}>} change response
  */
 export async function swap_set_member(server, request) {
@@ -513,7 +513,7 @@ export async function delete_set_template(server, request) {
 /**
  * Add a member to a set template
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetTemplateMemberRequest} request set member request: set_id, type_id, model_id, data_index
+ * @param {SetTemplateMemberRequest} request set member request: id, type_id, model_id, data_index
  * @returns {Promise<{}>} change response
  */
 export async function add_set_template_member(server, request) {
@@ -530,14 +530,14 @@ export async function add_set_template_member(server, request) {
 /**
  * Remove a member from a set template
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetTemplateMemberRequest} request set member request: set_id, template_index
+ * @param {SetTemplateMemberRequest} request set member request: id, template_index
  * @returns {Promise<{}>} change response
  */
 export async function remove_set_template_member(server, request) {
     const client = new pb_set.SetServicePromiseClient(server.address, null, null);
     const templateMember = new pb_set.SetTemplateMemberRequest();
     templateMember.setId(uuid_hex_to_base64(request.id));
-    templateMember.setTemplateIndex(uuid_hex_to_base64(request.device_id));
+    templateMember.setTemplateIndex(template_index);
     return client.removeSetTemplateMember(templateMember, metadata(server))
         .then(response => response.toObject());
 }
@@ -545,7 +545,7 @@ export async function remove_set_template_member(server, request) {
 /**
  * Swap a set template member index position 
  * @param {ServerConfig} server server configuration: address, token
- * @param {SetTemplateMemberSwap} request set template member swap: set_id, template_index_1, template_index_2
+ * @param {SetTemplateMemberSwap} request set template member swap: id, template_index_1, template_index_2
  * @returns {Promise<{}>} change response
  */
 export async function swap_set_template_member(server, request) {
