@@ -548,6 +548,25 @@ def create_buffer(resource, device_id: UUID, model_id: UUID, timestamp: datetime
         response = stub.CreateBuffer(request=request, metadata=resource.metadata)
         return response.id
 
+def create_buffer_multiple(resource, device_ids: list[UUID], model_ids: list[UUID], timestamps: list[datetime], data: List[List[Union[int, float, str, bool, None]]], statuses: List[Union[str, int]]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        schemas = []
+        for i in range(min(len(device_ids), len(model_ids), len(timestamps), len(data))):
+            data_type = []
+            for d in data[i]: data_type.append(DataType.from_value(d).value)
+            schemas.append(buffer_pb2.BufferSchema(
+                device_id=device_ids[i].bytes,
+                model_id=model_ids[i].bytes,
+                timestamp=int(timestamps[i].timestamp()*1000000),
+                data_bytes=pack_data_array(data[i]),
+                data_type=data_type,
+                status=status_to_int(statuses[i])
+            ))
+        request = buffer_pb2.BufferMultipleSchema(schemas=schemas)
+        response = stub.CreateBufferMultiple(request=request, metadata=resource.metadata)
+        return response.ids
+
 def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, bool, None]]]=None, status: Optional[Union[str, int]]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)

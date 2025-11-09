@@ -1000,6 +1000,13 @@ impl Resource {
         .await
     }
 
+    pub async fn create_data_multiple(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>)
+        -> Result<(), Status>
+    {
+        data::create_data_multiple(&self, device_ids, model_ids, timestamps, data)
+        .await
+    }
+
     pub async fn delete_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
         -> Result<(), Status>
     {
@@ -1380,6 +1387,13 @@ impl Resource {
         -> Result<i32, Status>
     {
         buffer::create_buffer(&self, device_id, model_id, timestamp, data, status.into())
+        .await
+    }
+
+    pub async fn create_buffer_multiple(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>, statuses: Vec<BufferStatus>)
+        -> Result<Vec<i32>, Status>
+    {
+        buffer::create_buffer_multiple(&self, device_ids, model_ids, timestamps, data, statuses.into_iter().map(|s| s.into()).collect())
         .await
     }
 

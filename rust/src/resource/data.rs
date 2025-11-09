@@ -4,7 +4,7 @@ use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::data::data_service_client::DataServiceClient;
 use rmcs_resource_api::data::{
-    DataSchema, DataId, DataTime, DataRange, DataNumber, DataIds, DataIdsTime, DataIdsRange, DataIdsNumber,
+    DataSchema, DataMultipleSchema, DataId, DataTime, DataRange, DataNumber, DataIds, DataIdsTime, DataIdsRange, DataIdsNumber,
     DataSetSchema, DataSetId, DataSetTime, DataSetRange, DataSetNumber
 };
 use crate::resource::Resource;
@@ -368,6 +368,27 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
         data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| el.into()).collect()
     });
     client.create_data(request)
+        .await?;
+    Ok(())
+}
+
+pub(crate) async fn create_data_multiple(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>)
+    -> Result<(), Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let number = vec![device_ids.len(), model_ids.len(), timestamps.len(), data.len()]
+        .into_iter().min().ok_or(Status::not_found(DATA_NOT_FOUND))?;
+    let schemas = (0..number).into_iter().map(|i| DataSchema {
+        device_id: device_ids[i].as_bytes().to_vec(),
+        model_id: model_ids[i].as_bytes().to_vec(),
+        timestamp: timestamps[i].timestamp_micros(),
+        data_bytes: ArrayDataValue::from_vec(&data[i]).to_bytes(),
+        data_type: ArrayDataValue::from_vec(&data[i]).get_types().into_iter().map(|el| el.into()).collect()
+    }).collect();
+    let request = Request::new(DataMultipleSchema { schemas });
+    client.create_data_multiple(request)
         .await?;
     Ok(())
 }

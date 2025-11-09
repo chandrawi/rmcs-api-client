@@ -33,6 +33,21 @@ function get_buffer_id(r) {
 }
 
 /**
+ * @typedef {Object} BufferIds
+ * @property {number[]} ids
+ */
+
+/**
+ * @param {*} r 
+ * @returns {BufferIds}
+ */
+function get_buffer_ids(r) {
+    return {
+        ids: r.idsList
+    };
+}
+
+/**
  * @typedef {Object} BufferTime
  * @property {Uuid} device_id
  * @property {Uuid} model_id
@@ -161,6 +176,16 @@ function get_buffer_id(r) {
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
  * @property {number|string} status
+ */
+
+/**
+ * @typedef {Object} BufferMultipleSchema
+ * @property {number[]} id
+ * @property {Uuid[]} model_ids
+ * @property {Uuid[]} device_ids
+ * @property {Date[]} timestamps
+ * @property {(number|bigint|string|Uint8Array|boolean)[][]} data
+ * @property {(number|string)[]} statuses
  */
 
 /**
@@ -893,6 +918,33 @@ export async function create_buffer(server, request) {
     bufferSchema.setStatus(set_buffer_status(request.status));
     return client.createBuffer(bufferSchema, metadata(server))
         .then(response => get_buffer_id(response.toObject()));
+}
+
+/**
+ * Create multiple data buffer
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferMultipleSchema} request data buffer schema: device_ids, model_ids, timestamps, data, statuses
+ * @returns {Promise<BufferIds>} data buffer id: ids
+ */
+export async function create_buffer_multiple(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferMultiSchema = new pb_buffer.BufferMultipleSchema();
+    const number = Math.min(request.device_ids.length, request.model_ids.length, request.timestamps.length, request.data.length, request.statuses.length);
+    for (let i=0; i<number; i++) {
+        const bufferSchema = new pb_buffer.BufferSchema();
+        bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_ids[i]));
+        bufferSchema.setModelId(uuid_hex_to_base64(request.model_ids[i]));
+        bufferSchema.setTimestamp(request.timestamps[i].valueOf() * 1000);
+        const value = set_data_values(request.data[i]);
+        bufferSchema.setDataBytes(value.bytes);
+        for (const type of value.types) {
+            bufferSchema.addDataType(type);
+        }
+        bufferSchema.setStatus(set_buffer_status(request.statuses[i]));
+        bufferMultiSchema.addSchemas(bufferSchema);
+    }
+    return client.createBufferMultiple(bufferMultiSchema, metadata(server))
+        .then(response => get_buffer_ids(response.toObject()));
 }
 
 /**

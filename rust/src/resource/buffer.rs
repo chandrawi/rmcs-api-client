@@ -4,7 +4,7 @@ use uuid::Uuid;
 use rmcs_resource_db::schema::value::{DataValue, ArrayDataValue};
 use rmcs_resource_api::buffer::buffer_service_client::BufferServiceClient;
 use rmcs_resource_api::buffer::{
-    BufferSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate,
+    BufferSchema, BufferMultipleSchema, BufferId, BufferTime, BufferRange, BufferNumber, BufferSelector, BuffersSelector, BufferUpdate,
     BufferIdsTime, BufferIdsRange, BufferIdsNumber, BufferIdsSelector, BuffersIdsSelector,
     BufferSetTime, BufferSetRange, BufferSetNumber, BufferSetSelector, BuffersSetSelector
 };
@@ -579,6 +579,30 @@ pub(crate) async fn create_buffer(resource: &Resource, device_id: Uuid, model_id
         .await?
         .into_inner();
     Ok(response.id)
+}
+
+pub(crate) async fn create_buffer_multiple(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>, statuses: Vec<i16>)
+    -> Result<Vec<i32>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        BufferServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let number = vec![device_ids.len(), model_ids.len(), timestamps.len(), data.len(), statuses.len()]
+        .into_iter().min().ok_or(Status::not_found(BUFFER_NOT_FOUND))?;
+    let schemas = (0..number).into_iter().map(|i| BufferSchema {
+        id: 0,
+        device_id: device_ids[i].as_bytes().to_vec(),
+        model_id: model_ids[i].as_bytes().to_vec(),
+        timestamp: timestamps[i].timestamp_micros(),
+        data_bytes: ArrayDataValue::from_vec(&data[i]).to_bytes(),
+        data_type: ArrayDataValue::from_vec(&data[i]).get_types().into_iter().map(|el| el.into()).collect(),
+        status: statuses[i] as i32
+    }).collect();
+    let request = Request::new(BufferMultipleSchema { schemas });
+    let response = client.create_buffer_multiple(request)
+        .await?
+        .into_inner();
+    Ok(response.ids)
 }
 
 pub(crate) async fn update_buffer(resource: &Resource, id: i32, data: Option<Vec<DataValue>>, status: Option<i16>)

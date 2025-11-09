@@ -308,6 +308,23 @@ def create_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime, 
         )
         stub.CreateData(request=request, metadata=resource.metadata)
 
+def create_data_multiple(resource, device_ids: list[UUID], model_ids: list[UUID], timestamps: list[datetime], data: List[List[Union[int, float, str, bool, None]]]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = data_pb2_grpc.DataServiceStub(channel)
+        schemas = []
+        for i in range(min(len(device_ids), len(model_ids), len(timestamps), len(data))):
+            data_type = []
+            for d in data[i]: data_type.append(DataType.from_value(d).value)
+            schemas.append(data_pb2.DataSchema(
+                device_id=device_ids[i].bytes,
+                model_id=model_ids[i].bytes,
+                timestamp=int(timestamps[i].timestamp()*1000000),
+                data_bytes=pack_data_array(data[i]),
+                data_type=data_type
+            ))
+        request = data_pb2.DataMultipleSchema(schemas=schemas)
+        stub.CreateDataMultiple(request=request, metadata=resource.metadata)
+
 def delete_data(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = data_pb2_grpc.DataServiceStub(channel)

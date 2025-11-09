@@ -393,6 +393,9 @@ class Resource:
     def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]]):
         return _data.create_data(self, device_id, model_id, timestamp, data)
 
+    def create_data_multiple(self, device_ids: list[UUID], model_ids: list[UUID], timestamps: list[datetime], data: List[List[Union[int, float, str, bool, None]]]):
+        return _data.create_data_multiple(self, device_ids, model_ids, timestamps, data)
+
     def delete_data(self, device_id: UUID, model_id: UUID, timestamp: datetime):
         return _data.delete_data(self, device_id, model_id, timestamp)
 
@@ -542,6 +545,9 @@ class Resource:
 
     def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], status: Union[str, int]) -> int:
         return _buffer.create_buffer(self, device_id, model_id, timestamp, data, status)
+
+    def create_buffer_multiple(self, device_ids: list[UUID], model_ids: list[UUID], timestamps: list[datetime], data: List[List[Union[int, float, str, bool, None]]], statuses: List[Union[str, int]]) -> List[int]:
+        return _buffer.create_buffer_multiple(self, device_ids, model_ids, timestamps, data, statuses)
 
     def update_buffer(self, id: int, data: Optional[List[Union[int, float, str, bool, None]]], status: Optional[Union[str, int]]):
         return _buffer.update_buffer(self, id, data, status)

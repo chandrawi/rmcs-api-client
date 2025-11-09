@@ -56,6 +56,14 @@ import {
  */
 
 /**
+ * @typedef {Object} DataMultipleSchema
+ * @property {Uuid[]} model_ids
+ * @property {Uuid[]} device_ids
+ * @property {Date[]} timestamps
+ * @property {(number|bigint|string|Uint8Array|boolean)[][]} data
+ */
+
+/**
  * @param {*} r 
  * @returns {DataSchema}
  */
@@ -500,6 +508,32 @@ export async function create_data(server, request) {
         dataSchema.addDataType(type);
     }
     return client.createData(dataSchema, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Create multiple data
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataMultipleSchema} request data schema: device_ids, model_ids, timestamps, data
+ * @returns {Promise<{}>} create response
+ */
+export async function create_data_multiple(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataMultiSchema = new pb_data.DataMultipleSchema();
+    const number = Math.min(request.device_ids.length, request.model_ids.length, request.timestamps.length, request.data.length);
+    for (let i=0; i<number; i++) {
+        const dataSchema = new pb_data.DataSchema();
+        dataSchema.setDeviceId(uuid_hex_to_base64(request.device_ids[i]));
+        dataSchema.setModelId(uuid_hex_to_base64(request.model_ids[i]));
+        dataSchema.setTimestamp(request.timestamps[i].valueOf() * 1000);
+        const value = set_data_values(request.data[i]);
+        dataSchema.setDataBytes(value.bytes);
+        for (const type of value.types) {
+            dataSchema.addDataType(type);
+        }
+        dataMultiSchema.addSchemas(dataSchema);
+    }
+    return client.createDataMultiple(dataMultiSchema, metadata(server))
         .then(response => response.toObject());
 }
 

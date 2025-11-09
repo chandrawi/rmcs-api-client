@@ -164,16 +164,19 @@ def test_resource():
     assert set.members[1] == SetMember(device_id2, model_id, [1,])
 
     # generate raw data and create buffers
-    timestamp = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
+    timestamp_1 = datetime.strptime("2023-05-07 07:08:48.123456", "%Y-%m-%d %H:%M:%S.%f")
+    timestamp_2 = datetime.strptime("2025-06-11 14:49:36.123456", "%Y-%m-%d %H:%M:%S.%f")
     raw_1 = [1231, 890]
     raw_2 = [1452, -341]
-    resource.create_buffer(device_id1, model_buf_id, timestamp, raw_1, "ANALYSIS_1")
-    resource.create_buffer(device_id2, model_buf_id, timestamp, raw_2, "ANALYSIS_1")
+    resource.create_buffer(device_id1, model_buf_id, timestamp_1, raw_1, "ANALYSIS_1")
+    resource.create_buffer(device_id2, model_buf_id, timestamp_1, raw_2, "ANALYSIS_1")
+    ids = resource.create_buffer_multiple([device_id1, device_id2], [model_buf_id, model_buf_id], [timestamp_2, timestamp_2], [raw_1, raw_2], ["TRANSFER_LOCAL", "TRANSFER_LOCAL"])
 
     # read buffer
     buffers = resource.list_buffer_first(100, None, None, None)
     assert buffers[0].data == raw_1
     assert buffers[1].data == raw_2
+    assert len(ids) == 2
 
     # read buffers from a device group
     buffers_group = resource.list_buffer_first_by_ids(100, group_device.devices, None, None)
@@ -194,18 +197,19 @@ def test_resource():
     speed2 = convert(raw_2[0], coef0, coef1)
     direction2 = convert(raw_2[1], coef0, coef1)
     # create data
-    resource.create_data(device_id1, model_id, timestamp, [speed1, direction1])
-    resource.create_data(device_id2, model_id, timestamp, [speed2, direction2])
+    resource.create_data(device_id1, model_id, timestamp_1, [speed1, direction1])
+    resource.create_data(device_id2, model_id, timestamp_1, [speed2, direction2])
+    resource.create_data_multiple([device_id1, device_id2], [model_id, model_id], [timestamp_2, timestamp_2], [[speed1, direction1], [speed2, direction2]])
 
     # read data
-    datas = resource.list_data_by_number_before(device_id1, model_id, timestamp, 100)
+    datas = resource.list_data_by_number_before(device_id1, model_id, timestamp_1, 100)
     data_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, datas)
     data = list(data_filter)[0]
     assert [speed1, direction1] == data.data
-    assert timestamp == data.timestamp
+    assert timestamp_1 == data.timestamp
 
     # read data from a device group
-    data_group = resource.list_data_by_ids_time(group_device.devices, [model_id,], timestamp)
+    data_group = resource.list_data_by_ids_time(group_device.devices, [model_id,], timestamp_1)
     data_values = []
     for data in data_group:
         for value in data.data: data_values.append(value)
@@ -213,8 +217,8 @@ def test_resource():
     assert speed2 in data_values
 
     # read data set and data using set
-    data_set = resource.read_data_set(set_id, timestamp)
-    data_by_set = resource.list_data_by_set_time(set_id, timestamp)
+    data_set = resource.read_data_set(set_id, timestamp_1)
+    data_by_set = resource.list_data_by_set_time(set_id, timestamp_1)
     data_by_set_values = []
     for data in data_by_set: data_by_set_values.append(data.data)
     assert data_set.data[0] == direction1
@@ -223,10 +227,12 @@ def test_resource():
     assert [speed2, direction2] in data_by_set_values
 
     # delete data
-    resource.delete_data(device_id1, model_id, timestamp)
-    resource.delete_data(device_id2, model_id, timestamp)
+    resource.delete_data(device_id1, model_id, timestamp_1)
+    resource.delete_data(device_id2, model_id, timestamp_1)
+    resource.delete_data(device_id1, model_id, timestamp_2)
+    resource.delete_data(device_id2, model_id, timestamp_2)
     with pytest.raises(Exception):
-        resource.read_data(device_id1, model_id, timestamp)
+        resource.read_data(device_id1, model_id, timestamp_1)
 
     # update buffer status
     resource.update_buffer(buffers[0].id, None, "DELETE")
@@ -237,16 +243,18 @@ def test_resource():
     # delete buffer data
     resource.delete_buffer(buffers[0].id)
     resource.delete_buffer(buffers[1].id)
+    resource.delete_buffer(buffers[2].id)
+    resource.delete_buffer(buffers[3].id)
     with pytest.raises(Exception):
         resource.read_buffer(buffers[0].id)
 
     # create data slice
-    slice_id = resource.create_slice(device_id1, model_id, timestamp, timestamp, "Speed and compass slice", None)
+    slice_id = resource.create_slice(device_id1, model_id, timestamp_1, timestamp_2, "Speed and compass slice", None)
     # read data slice
     slices = resource.list_slice_option(None, None, "slice", None, None)
     slice_filter = filter(lambda x: x.device_id == device_id1 and x.model_id == model_id, slices)
     slice = list(slice_filter)[0]
-    assert slice.timestamp_begin == timestamp
+    assert slice.timestamp_begin == timestamp_1
     assert slice.name == "Speed and compass slice"
 
     # update data slice
@@ -260,22 +268,22 @@ def test_resource():
         resource.read_slice(slice_id)
 
     # create system log
-    resource.create_log(timestamp, device_id1, "UNKNOWN_ERROR", "testing success")
+    resource.create_log(timestamp_1, device_id1, "UNKNOWN_ERROR", "testing success")
     # read log
-    logs = resource.list_log_by_range_time(timestamp, datetime.now(), None, None)
-    log_filter = filter(lambda x: x.device_id == device_id1 and x.timestamp == timestamp, logs)
+    logs = resource.list_log_by_range_time(timestamp_1, datetime.now(), None, None)
+    log_filter = filter(lambda x: x.device_id == device_id1 and x.timestamp == timestamp_1, logs)
     log = list(log_filter)[0]
     assert log.value == "testing success"
 
     # update system log
-    resource.update_log(timestamp, device_id1, "SUCCESS", None)
-    log = resource.read_log(timestamp, device_id1)
+    resource.update_log(timestamp_1, device_id1, "SUCCESS", None)
+    log = resource.read_log(timestamp_1, device_id1)
     assert log.status == "SUCCESS"
 
     # delete system log
-    resource.delete_log(timestamp, device_id1)
+    resource.delete_log(timestamp_1, device_id1)
     with pytest.raises(Exception):
-        resource.read_log(timestamp, device_id1)
+        resource.read_log(timestamp_1, device_id1)
 
     # delete model config
     config_id = model_configs[0].id

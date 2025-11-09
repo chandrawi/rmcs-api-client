@@ -311,7 +311,8 @@ describe("RMCS Resource test", function() {
         expect(set.members[1]).toEqual({ device_id: device_id_2, model_id: model_id, data_index: [1] });
     });
 
-    const timestamp = new Date(2023, 4, 7, 7, 8, 48);
+    const timestamp_1 = new Date(2023, 4, 7, 7, 8, 48);
+    const timestamp_2 = new Date(2025, 5, 11, 14, 49, 36);
     const raw_1 = [1231, 890];
     const raw_2 = [1452, -341];
     let buffers = [];
@@ -320,7 +321,7 @@ describe("RMCS Resource test", function() {
         const bufferId1 = await resource.create_buffer(server, {
             device_id: device_id_1,
             model_id: model_buf_id,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             data: raw_1,
             status: "ANALYSIS_1"
         });
@@ -328,11 +329,22 @@ describe("RMCS Resource test", function() {
         const bufferId2 = await resource.create_buffer(server, {
             device_id: device_id_2,
             model_id: model_buf_id,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             data: raw_2,
             status: "ANALYSIS_1"
         });
         expect(bufferId2.id).toBeDefined();
+    });
+
+    it("should create multiple buffers", async function() {
+        const bufferIds = await resource.create_buffer_multiple(server, {
+            device_ids: [device_id_1, device_id_2],
+            model_ids: [model_buf_id, model_buf_id],
+            timestamps: [timestamp_2, timestamp_2],
+            data: [raw_1, raw_2],
+            statuses: ["TRANSFER_LOCAL" ,"TRANSFER_LOCAL"]
+        });
+        expect(bufferIds.ids.length).toEqual(2);
     });
 
     it("should read buffers", async function() {
@@ -371,29 +383,45 @@ describe("RMCS Resource test", function() {
         const dataCreate1 = await resource.create_data(server, {
             device_id: device_id_1,
             model_id: model_id,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             data: [speed_1, direction_1]
         });
         expect(dataCreate1).toEqual({});
         const dataCreate2 = await resource.create_data(server, {
             device_id: device_id_2,
             model_id: model_id,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             data: [speed_2, direction_2]
         });
         expect(dataCreate2).toEqual({});
+    });
+
+    it("should create multiple data", async function() {
+        const coef_0 = get_conf(device_configs, "coef_0");
+        const coef_1 = get_conf(device_configs, "coef_1");
+        speed_1 = (raw_1[0] - coef_0) * coef_1;
+        direction_1 = (raw_1[1] - coef_0) * coef_1;
+        speed_2 = (raw_2[0] - coef_0) * coef_1;
+        direction_2 = (raw_2[1] - coef_0) * coef_1;
+        const dataCreates = await resource.create_data_multiple(server, {
+            device_ids: [device_id_1, device_id_2],
+            model_ids: [model_id, model_id],
+            timestamps: [timestamp_2, timestamp_2],
+            data: [[speed_1, direction_1], [speed_2, direction_2]]
+        });
+        expect(dataCreates).toEqual({});
     });
 
     it("should read data", async function() {
         let dataVec = await resource.list_data_by_number_before(server, {
             device_id: device_id_1,
             model_id: model_id,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             number: 100
         });
         let data;
         for (const dataSchema of dataVec) {
-            if (dataSchema.timestamp.valueOf() == timestamp.valueOf()) {
+            if (dataSchema.timestamp.valueOf() == timestamp_1.valueOf()) {
                 data = dataSchema;
             }
         }
@@ -405,7 +433,7 @@ describe("RMCS Resource test", function() {
         let dataGroup = await resource.list_data_by_ids_time(server, {
             device_ids: group_device.devices,
             model_ids: [model_id],
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             number: 100
         });
         let dataValues = [];
@@ -421,11 +449,11 @@ describe("RMCS Resource test", function() {
     it("should read data set and data using set", async function() {
         let dataSet = await resource.read_data_set(server, {
             set_id: set_id,
-            timestamp: timestamp
+            timestamp: timestamp_1
         });
         let dataBySet = await resource.list_data_by_set_time(server, {
             set_id: set_id,
-            timestamp: timestamp
+            timestamp: timestamp_1
         });
         let dataBySetValues = [];
         for (const dataSchema of dataBySet) {
@@ -442,9 +470,11 @@ describe("RMCS Resource test", function() {
     });
 
     it("should delete a data", async function() {
-        await resource.delete_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp });
-        await resource.delete_data(server, { device_id: device_id_2, model_id: model_id, timestamp: timestamp });
-        const data = await resource.read_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp })
+        await resource.delete_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp_1 });
+        await resource.delete_data(server, { device_id: device_id_2, model_id: model_id, timestamp: timestamp_1 });
+        await resource.delete_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp_2 });
+        await resource.delete_data(server, { device_id: device_id_2, model_id: model_id, timestamp: timestamp_2 });
+        const data = await resource.read_data(server, { device_id: device_id_1, model_id: model_id, timestamp: timestamp_1 })
             .catch(() => null);
         expect(data).toBeNull();
     });
@@ -459,6 +489,8 @@ describe("RMCS Resource test", function() {
     it("should delete buffers", async function() {
         await resource.delete_buffer(server, { id: buffers[0].id });
         await resource.delete_buffer(server, { id: buffers[1].id });
+        await resource.delete_buffer(server, { id: buffers[2].id });
+        await resource.delete_buffer(server, { id: buffers[3].id });
         const buffer1 = await resource.read_buffer(server, { id: buffers[0].id })
             .catch(() => null);
         const buffer2 = await resource.read_buffer(server, { id: buffers[1].id })
@@ -473,8 +505,8 @@ describe("RMCS Resource test", function() {
         const sliceId = await resource.create_slice(server, {
             device_id: device_id_1,
             model_id: model_id,
-            timestamp_begin: timestamp,
-            timestamp_end: timestamp,
+            timestamp_begin: timestamp_1,
+            timestamp_end: timestamp_2,
             name: "Speed and compass slice",
             description: ""
         });
@@ -485,7 +517,7 @@ describe("RMCS Resource test", function() {
     it("should read data slices", async function() {
         const slices = await resource.list_slice_option(server, { name: "slice" });
         for (const slice of slices) {
-            expect(slice.timestamp_begin).toEqual(timestamp);
+            expect(slice.timestamp_begin).toEqual(timestamp_1);
             expect(slice.name).toEqual("Speed and compass slice");
         }
     });
@@ -506,7 +538,7 @@ describe("RMCS Resource test", function() {
     it("should create a system log", async function() {
         const createLog = await resource.create_log(server, {
             device_id: device_id_1,
-            timestamp: timestamp,
+            timestamp: timestamp_1,
             status: "UNKNOWN_ERROR",
             value: "testing success"
         });
@@ -514,10 +546,10 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read system logs", async function() {
-        const logs = await resource.list_log_by_range_time(server, { begin: timestamp, end: new Date() });
+        const logs = await resource.list_log_by_range_time(server, { begin: timestamp_1, end: new Date() });
         let log;
         for (const logSchema of logs) {
-            if (logSchema.timestamp.valueOf() == timestamp.valueOf() && logSchema.device_id == device_id_1) {
+            if (logSchema.timestamp.valueOf() == timestamp_1.valueOf() && logSchema.device_id == device_id_1) {
                 log = logSchema;
             }
         }
@@ -525,14 +557,14 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a system log", async function() {
-        await resource.update_log(server, { device_id: device_id_1, timestamp: timestamp, status: "SUCCESS" });
-        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp });
+        await resource.update_log(server, { device_id: device_id_1, timestamp: timestamp_1, status: "SUCCESS" });
+        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp_1 });
         expect(log.status).toEqual("SUCCESS");
     });
 
     it("should delete a system log", async function() {
-        await resource.delete_log(server, { device_id: device_id_1, timestamp: timestamp });
-        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp })
+        await resource.delete_log(server, { device_id: device_id_1, timestamp: timestamp_1 });
+        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp_1 })
             .catch(() => null);
         expect(log).toBeNull();
     });
