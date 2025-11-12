@@ -4,17 +4,21 @@ pub mod user;
 pub mod profile;
 pub mod token;
 pub mod auth;
+pub mod utility {
+    pub use rmcs_auth_db::utility::generate_access_key;
+    pub use rmcs_auth_db::utility::generate_token_string;
+}
 
 use tonic::{Status, transport::Channel};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
-use rmcs_auth_db::schema::auth_role::RoleSchema;
-use rmcs_auth_db::schema::auth_user::UserSchema;
-use rmcs_auth_db::schema::auth_token::TokenSchema;
-use rmcs_auth_db::schema::profile::{RoleProfileSchema, UserProfileSchema, ProfileMode};
+pub use rmcs_auth_db::schema::api::{ApiSchema, ProcedureSchema};
+pub use rmcs_auth_db::schema::auth_role::RoleSchema;
+pub use rmcs_auth_db::schema::auth_user::{UserSchema, UserRoleSchema};
+pub use rmcs_auth_db::schema::auth_token::TokenSchema;
+pub use rmcs_auth_db::schema::profile::{RoleProfileSchema, UserProfileSchema, ProfileMode};
 use rmcs_auth_api::auth::{UserLoginResponse, UserRefreshResponse, UserLogoutResponse};
-use rmcs_resource_db::schema::value::{DataValue, DataType};
+pub use rmcs_resource_db::schema::value::{DataValue, DataType, ArrayDataValue};
 
 #[derive(Debug, Clone)]
 pub struct Auth {

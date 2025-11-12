@@ -4,7 +4,7 @@ use rmcs_resource_db::schema::value::{DataType, DataValue};
 use rmcs_resource_api::model::model_service_client::ModelServiceClient;
 use rmcs_resource_api::model::{
     ModelSchema, ModelId, ModelIds, ModelName, ModelCategory, ModelOption, TypeId, ModelUpdate, 
-    ConfigSchema, ConfigId, ConfigUpdate
+    ConfigSchema, ConfigId, ConfigUpdate, TagSchema, TagId, TagUpdate
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -116,6 +116,7 @@ pub(crate) async fn create_model(resource: &Resource, id: Uuid, data_type: &[Dat
         name: name.to_owned(),
         description: description.unwrap_or("").to_owned(),
         data_type: data_type.into_iter().map(|ty| u32::from(ty.to_owned())).collect::<Vec<u32>>().to_owned(),
+        tags: Vec::new(),
         configs: Vec::new()
     });
     let response = client.create_model(request)
@@ -240,6 +241,88 @@ pub(crate) async fn delete_model_config(resource: &Resource, id: i32)
         id
     });
     client.delete_model_config(request)
+        .await?;
+    Ok(())
+}
+
+pub(crate) async fn read_tag(resource: &Resource, model_id: Uuid, tag: i16)
+    -> Result<TagSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TagId {
+        model_id: model_id.as_bytes().to_vec(),
+        tag: tag as i32
+    });
+    let response = client.read_tag(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(CONF_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_tag_by_model(resource: &Resource, model_id: Uuid)
+    -> Result<Vec<TagSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(ModelId {
+        id: model_id.as_bytes().to_vec()
+    });
+    let response = client.list_tag_by_model(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn create_tag(resource: &Resource, model_id: Uuid, tag: i16, name: &str, members: Vec<i16>)
+    -> Result<(), Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TagSchema {
+        model_id: model_id.as_bytes().to_vec(),
+        tag: tag as i32,
+        name: name.to_owned(),
+        members: members.into_iter().map(|t| t as i32).collect()
+    });
+    client.create_tag(request)
+        .await?
+        .into_inner();
+    Ok(())
+}
+
+pub(crate) async fn update_tag(resource: &Resource, model_id: Uuid, tag: i16, name: Option<&str>, members: Option<Vec<i16>>)
+    -> Result<(), Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TagUpdate {
+        model_id: model_id.as_bytes().to_vec(),
+        tag: tag as i32,
+        name: name.map(|s| s.to_owned()),
+        members: members.clone().unwrap_or_default().into_iter().map(|t| t as i32).collect(),
+        members_flag: members.is_some()
+    });
+    client.update_tag(request)
+        .await?;
+    Ok(())
+}
+
+pub(crate) async fn delete_tag(resource: &Resource, model_id: Uuid, tag: i16)
+    -> Result<(), Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        ModelServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(TagId {
+        model_id: model_id.as_bytes().to_vec(),
+        tag: tag as i32
+    });
+    client.delete_tag(request)
         .await?;
     Ok(())
 }
