@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 import dotenv
 import pytest
-from rmcs_api_client.resource import Resource, DataType, SetMember
+from rmcs_api_client.resource import Resource, DataType, SetMember, Tag
 from uuid import UUID
 import utility
 
@@ -168,9 +168,9 @@ def test_resource():
     timestamp_2 = datetime.strptime("2025-06-11 14:49:36.123456", "%Y-%m-%d %H:%M:%S.%f")
     raw_1 = [1231, 890]
     raw_2 = [1452, -341]
-    resource.create_buffer(device_id1, model_buf_id, timestamp_1, raw_1, "ANALYSIS_1")
-    resource.create_buffer(device_id2, model_buf_id, timestamp_1, raw_2, "ANALYSIS_1")
-    ids = resource.create_buffer_multiple([device_id1, device_id2], [model_buf_id, model_buf_id], [timestamp_2, timestamp_2], [raw_1, raw_2], ["TRANSFER_LOCAL", "TRANSFER_LOCAL"])
+    resource.create_buffer(device_id1, model_buf_id, timestamp_1, raw_1, Tag.ANALYSIS_1)
+    resource.create_buffer(device_id2, model_buf_id, timestamp_1, raw_2, Tag.ANALYSIS_1)
+    ids = resource.create_buffer_multiple([device_id1, device_id2], [model_buf_id, model_buf_id], [timestamp_2, timestamp_2], [raw_1, raw_2], [Tag.TRANSFER_LOCAL, Tag.TRANSFER_LOCAL])
 
     # read buffer
     buffers = resource.list_buffer_first(100, None, None, None)
@@ -207,6 +207,7 @@ def test_resource():
     data = list(data_filter)[0]
     assert [speed1, direction1] == data.data
     assert timestamp_1 == data.timestamp
+    assert Tag.DEFAULT == data.tag
 
     # read data from a device group
     data_group = resource.list_data_by_ids_time(group_device.devices, [model_id,], timestamp_1)
@@ -234,11 +235,11 @@ def test_resource():
     with pytest.raises(Exception):
         resource.read_data(device_id1, model_id, timestamp_1)
 
-    # update buffer status
-    resource.update_buffer(buffers[0].id, None, "DELETE")
+    # update buffer tag
+    resource.update_buffer(buffers[0].id, None, Tag.DELETE)
     buffer = resource.read_buffer(buffers[0].id)
     assert buffers[0].data == buffer.data
-    assert buffer.status == "DELETE"
+    assert buffer.tag == Tag.DELETE
 
     # delete buffer data
     resource.delete_buffer(buffers[0].id)
@@ -268,22 +269,22 @@ def test_resource():
         resource.read_slice(slice_id)
 
     # create system log
-    resource.create_log(timestamp_1, device_id1, "UNKNOWN_ERROR", "testing success")
+    log_id = resource.create_log(timestamp_1, device_id1, None, "testing success", Tag.ERROR_UNKNOWN)
     # read log
-    logs = resource.list_log_by_range_time(timestamp_1, datetime.now(), None, None)
+    logs = resource.list_log_by_range_time(timestamp_1, datetime.now(), None, None, None)
     log_filter = filter(lambda x: x.device_id == device_id1 and x.timestamp == timestamp_1, logs)
     log = list(log_filter)[0]
     assert log.value == "testing success"
 
     # update system log
-    resource.update_log(timestamp_1, device_id1, "SUCCESS", None)
-    log = resource.read_log(timestamp_1, device_id1)
-    assert log.status == "SUCCESS"
+    resource.update_log(log_id, None, Tag.SUCCESS)
+    log = resource.read_log(log.id)
+    assert log.tag == Tag.SUCCESS
 
     # delete system log
-    resource.delete_log(timestamp_1, device_id1)
+    resource.delete_log(log_id)
     with pytest.raises(Exception):
-        resource.read_log(timestamp_1, device_id1)
+        resource.read_log(log.id)
 
     # delete model config
     config_id = model_configs[0].id

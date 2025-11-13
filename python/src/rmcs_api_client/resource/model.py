@@ -41,6 +41,17 @@ class ModelSchema:
         return ModelSchema(UUID(bytes=r.id), r.category, r.name, r.description, types, configs)
 
 
+@dataclass
+class TagSchema:
+    model_id: UUID
+    tag: int
+    name: str
+    members: List[int]
+
+    def from_response(r):
+        return TagSchema(UUID(bytes=r.model_id), r.tag, r.name, r.members)
+
+
 def read_model(resource, id: UUID):
     with grpc.insecure_channel(resource.address) as channel:
         stub = model_pb2_grpc.ModelServiceStub(channel)
@@ -185,3 +196,55 @@ def delete_model_config(resource, id: int):
         stub = model_pb2_grpc.ModelServiceStub(channel)
         request = model_pb2.ConfigId(id=id)
         stub.DeleteModelConfig(request=request, metadata=resource.metadata)
+
+def read_tag(resource, model_id: UUID, tag: int):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.TagId(
+            model_id=model_id.bytes,
+            tag=tag
+        )
+        response = stub.ReadTag(request=request, metadata=resource.metadata)
+        return TagSchema.from_response(response.result)
+
+def list_tag_by_model(resource, model_id: UUID):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.ModelId(id=model_id.bytes)
+        response = stub.ListTagByModel(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(TagSchema.from_response(result))
+        return ls
+
+def create_tag(resource, model_id: UUID, tag: int, name: str, members: List[int]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.TagSchema(
+            model_id=model_id.bytes,
+            tag=tag,
+            name=name,
+            members=members
+        )
+        stub.CreateTag(request=request, metadata=resource.metadata)
+
+def update_tag(resource, model_id: UUID, tag: int, name: Optional[str]=None, members: Optional[List[int]]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        flag = members is not None
+        request = model_pb2.TagUpdate(
+            model_id=model_id.bytes,
+            tag=tag,
+            name=name,
+            members=members,
+            members_flag=flag
+        )
+        stub.UpdateTag(request=request, metadata=resource.metadata)
+
+def delete_tag(resource, model_id: UUID, tag: int):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = model_pb2_grpc.ModelServiceStub(channel)
+        request = model_pb2.TagId(
+            model_id=model_id.bytes,
+            tag=tag
+        )
+        stub.DeleteTag(request=request, metadata=resource.metadata)
