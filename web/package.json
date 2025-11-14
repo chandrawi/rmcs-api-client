@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",
-    "grpc-web": "^1.5.0",
+    "grpc-web": "^2.0.2",
     "rmcs-auth-api": "file:../../rmcs-auth-api/web/",
     "rmcs-resource-api": "file:../../rmcs-resource-api/web/"
   }

@@ -1,3 +1,5 @@
+export {DataType, Tag} from './common.js';
+
 export {
     read_model,
     list_model_by_ids,
@@ -12,7 +14,12 @@ export {
     list_model_config_by_model,
     create_model_config,
     update_model_config,
-    delete_model_config
+    delete_model_config,
+    read_tag,
+    list_tag_by_model,
+    create_tag,
+    update_tag,
+    delete_tag
 } from './model.js';
 export {
     read_device,
@@ -113,6 +120,7 @@ export {
 } from './set.js';
 export {
     read_data,
+    list_data_by_time,
     list_data_by_last_time,
     list_data_by_range_time,
     list_data_by_number_before,
@@ -128,6 +136,7 @@ export {
     list_data_by_set_number_before,
     list_data_by_set_number_after,
     read_data_set,
+    list_data_set_by_time,
     list_data_set_by_last_time,
     list_data_set_by_range_time,
     list_data_set_by_number_before,
@@ -157,6 +166,7 @@ export {
 export {
     read_buffer,
     read_buffer_by_time,
+    list_buffer_by_time,
     list_buffer_by_last_time,
     list_buffer_by_range_time,
     list_buffer_by_number_before,
@@ -223,6 +233,7 @@ export {
 } from './slice.js';
 export {
     read_log,
+    read_log_by_time,
     list_log_by_time,
     list_log_by_last_time,
     list_log_by_range_time,

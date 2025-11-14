@@ -1224,7 +1224,7 @@ const DataType = {
  */
 function set_data_type(type) {
     if (typeof type === "number") {
-        if (type >= 0 && type <= 12) {
+        if (type >= 0 && type <= 18) {
             return type;
         }
     }
@@ -1475,6 +1475,78 @@ function set_data_values(values) {
         types: types
     };
 }
+
+/**
+ * @enum {number}
+ */
+const Tag = {
+    DEFAULT: 0,
+    MINUTELY: 1,
+    MINUTELY_AVG: 2,
+    MINUTELY_MIN: 3,
+    MINUTELY_MAX: 4,
+    HOURLY: 5,
+    HOURLY_AVG: 6,
+    HOURLY_MIN: 7,
+    HOURLY_MAX: 8,
+    DAILY: 9,
+    DAILY_AVG: 10,
+    DAILY_MIN: 11,
+    DAILY_MAX: 12,
+    WEEKLY: 13,
+    WEEKLY_AVG: 14,
+    WEEKLY_MIN: 15,
+    WEEKLY_MAX: 16,
+    MONTHLY: 17,
+    MONTHLY_AVG: 18,
+    MONTHLY_MIN: 19,
+    MONTHLY_MAX: 20,
+    ANNUAL: 21,
+    ANNUAL_AVG: 22,
+    ANNUAL_MIN: 23,
+    ANNUAL_MAX: 24,
+    GROUP_MINUTELY: 25,
+    GROUP_HOURLY: 26,
+    GROUP_DAILY: 27,
+    GROUP_WEEKLY: 28,
+    GROUP_MONTHLY: 29,
+    GROUP_ANNUAL: 30,
+    ERROR: -1,
+    DELETE: -2,
+    HOLD: -3,
+    SEND_UPLINK: -4,
+    SEND_DOWNLINK: -5,
+    TRANSFER_LOCAL: -6,
+    TRANSFER_GATEWAY: -7,
+    TRANSFER_SERVER: -8,
+    BACKUP: -9,
+    RESTORE: -10,
+    ANALYSIS_1: -11,
+    ANALYSIS_2: -12,
+    ANALYSIS_3: -13,
+    ANALYSIS_4: -14,
+    ANALYSIS_5: -15,
+    ANALYSIS_6: -16,
+    ANALYSIS_7: -17,
+    ANALYSIS_8: -18,
+    ANALYSIS_9: -19,
+    ANALYSIS_10: -20,
+    EXTERNAL_INPUT: -21,
+    EXTERNAL_OUTPUT: -22,
+    SUCCESS: 1,
+    ERROR_UNKNOWN: -1,
+    ERROR_LOG: -2,
+    ERROR_SEND: -3,
+    ERROR_TRANSFER: -4,
+    ERROR_ANALYSIS: -5,
+    ERROR_NETWORK: -6,
+    FAIL_READ: -7,
+    FAIL_CREATE: -8,
+    FAIL_UPDATE: -9,
+    FAIL_DELETE: -10,
+    INVALID_TOKEN: -11,
+    INVALID_REQUEST: -12
+};
 
 /**
  * @typedef {(string|Uint8Array)} Uuid
@@ -2506,6 +2578,41 @@ function get_model_config_schema_vec(r) {
  * @property {?string} category
  */
 
+/**
+ * @typedef {Object} TagId
+ * @property {Uuid} model_id
+ * @property {number} tag
+ */
+
+/**
+ * @typedef {Object} TagSchema
+ * @property {Uuid} model_id
+ * @property {number} tag
+ * @property {string} name
+ * @property {number[]} members
+ */
+
+/**
+ * @param {*} r 
+ * @returns {ModelConfigSchema}
+ */
+function get_tag_schema(r) {
+    return {
+        model_id: base64_to_uuid_hex(r.modelId),
+        tag: r.tag,
+        name: r.name,
+        members: r.membersList
+    };
+}
+
+/**
+ * @typedef {Object} TagUpdate
+ * @property {Uuid} model_id
+ * @property {number} tag
+ * @property {?string} name
+ * @property {?number[]} members
+ */
+
 
 /**
  * Read a model by uuid
@@ -2728,6 +2835,84 @@ async function delete_model_config(server, request) {
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
     return client.deleteModelConfig(configId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Read a tag by model uuid and tag number
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagId} request tag id: model_id, tag
+ * @returns {Promise<TagSchema>} tag schema: model_id, tag, name, members
+ */
+async function read_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagId = new pb_model.TagId();
+    tagId.setModelId(uuid_hex_to_base64(request.model_id));
+    tagId.setTag(request.tag);
+    return client.readTag(tagId, metadata(server))
+        .then(response => get_tag_schema(response.toObject().result));
+}
+
+/**
+ * Read Tags by model uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ModelId} request model uuid: id
+ * @returns {Promise<TagSchema[]>} tag schema: model_id, tag, name, members
+ */
+async function list_tag_by_model(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const modelId = new pb_model.ModelId();
+    modelId.setId(uuid_hex_to_base64(request.id));
+    return client.listTagByModel(modelId, metadata(server))
+        .then(response => get_tag_schema(response.toObject().resultsList));
+}
+
+/**
+ * Create a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagSchema} request tag schema: model_id, tag, name, members
+ * @returns {Promise<{}>} create response
+ */
+async function create_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagSchema = new pb_model.TagSchema();
+    tagSchema.setModelId(uuid_hex_to_base64(request.model_id));
+    tagSchema.setTag(request.tag);
+    tagSchema.setName(request.name);
+    tagSchema.setMembersList(request.members);
+    return client.createTag(tagSchema, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Update a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagUpdate} request tag update: model_id, tag, name, members
+ * @returns {Promise<{}>} update response 
+ */
+async function update_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagUpdate = new pb_model.TagUpdate();
+    tagUpdate.setModelId(uuid_hex_to_base64(request.model_id));
+    tagUpdate.setTag(request.tag);
+    tagUpdate.setName(request.name);
+    tagUpdate.setMembersList(request.members);
+    return client.updateTag(tagUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagId} request tag id: model_id, tag
+ * @returns {Promise<{}>} delete response 
+ */
+async function delete_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagId = new pb_model.TagId();
+    tagId.setModelId(uuid_hex_to_base64(request.model_id));
+    tagId.setTag(request.tag);
+    return client.deleteTag(tagId, metadata(server))
         .then(response => response.toObject());
 }
 
@@ -4866,6 +5051,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -4873,6 +5059,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -4881,6 +5068,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} model_id
  * @property {Date} begin
  * @property {Date} end
+ * @property {?number} tag
  */
 
 /**
@@ -4889,6 +5077,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} model_id
  * @property {Date} timestamp
  * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -4897,6 +5086,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid} device_id
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
+ * @property {?number} tag
  */
 
 /**
@@ -4905,6 +5095,7 @@ async function swap_set_template_member(server, request) {
  * @property {Uuid[]} device_ids
  * @property {Date[]} timestamps
  * @property {(number|bigint|string|Uint8Array|boolean)[][]} data
+ * @property {?number[]} tags
  */
 
 /**
@@ -4916,7 +5107,8 @@ function get_data_schema(r) {
         device_id: base64_to_uuid_hex(r.deviceId),
         model_id: base64_to_uuid_hex(r.modelId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_values(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList),
+        tag: r.tag ?? Tag.DEFAULT
     };
 }
 
@@ -4933,6 +5125,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -4940,6 +5133,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -4948,6 +5142,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} begin
  * @property {Date} end
+ * @property {?number} tag
  */
 
 /**
@@ -4956,6 +5151,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
  * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -5015,7 +5211,7 @@ function get_data_set_schema_vec(r) {
 /**
  * Read a data by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<DataSchema>} data schema: device_id, model_id, timestamp, data
  */
 async function read_data(server, request) {
@@ -5024,14 +5220,32 @@ async function read_data(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.readData(dataId, metadata(server))
         .then(response => get_data_schema(response.toObject().result));
 }
 
 /**
+ * Read multiple data by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+async function list_data_by_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataTime = new pb_data.DataTime();
+    dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataTime.setModelId(uuid_hex_to_base64(request.model_id));
+    dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
+    return client.listDataByTime(dataTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read multiple data by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data time: device_id, model_id, timestamp
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_last_time(server, request) {
@@ -5040,6 +5254,7 @@ async function list_data_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.listDataByLastTime(dataTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5047,7 +5262,7 @@ async function list_data_by_last_time(server, request) {
 /**
  * Read multiple data by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_range_time(server, request) {
@@ -5057,6 +5272,7 @@ async function list_data_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.listDataByRangeTime(dataRange, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5064,7 +5280,7 @@ async function list_data_by_range_time(server, request) {
 /**
  * Read multiple data by specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
+ * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_number_before(server, request) {
@@ -5074,6 +5290,7 @@ async function list_data_by_number_before(server, request) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
+    dataNumber.setTag(request.tag);
     return client.listDataByNumberBefore(dataNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5081,7 +5298,7 @@ async function list_data_by_number_before(server, request) {
 /**
  * Read multiple data by specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
+ * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_number_after(server, request) {
@@ -5091,6 +5308,7 @@ async function list_data_by_number_after(server, request) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
+    dataNumber.setTag(request.tag);
     return client.listDataByNumberAfter(dataNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5098,7 +5316,7 @@ async function list_data_by_number_after(server, request) {
 /**
  * Read multiple data by uuid list and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_time(server, request) {
@@ -5107,6 +5325,7 @@ async function list_data_by_ids_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataByIdsTime(dataIdsTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5114,7 +5333,7 @@ async function list_data_by_ids_time(server, request) {
 /**
  * Read multiple data by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_last_time(server, request) {
@@ -5123,6 +5342,7 @@ async function list_data_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5130,7 +5350,7 @@ async function list_data_by_ids_last_time(server, request) {
 /**
  * Read multiple data by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_range_time(server, request) {
@@ -5140,6 +5360,7 @@ async function list_data_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.listDataByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5147,7 +5368,7 @@ async function list_data_by_ids_range_time(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_number_before(server, request) {
@@ -5157,6 +5378,7 @@ async function list_data_by_ids_number_before(server, request) {
     dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataIdsNumber.setNumber(request.number);
+    dataIdsNumber.setTag(request.tag);
     return client.listDataByIdsNumberBefore(dataIdsNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5164,7 +5386,7 @@ async function list_data_by_ids_number_before(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_number_after(server, request) {
@@ -5174,6 +5396,7 @@ async function list_data_by_ids_number_after(server, request) {
     dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataIdsNumber.setNumber(request.number);
+    dataIdsNumber.setTag(request.tag);
     return client.listDataByIdsNumberAfter(dataIdsNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -5272,6 +5495,21 @@ async function read_data_set(server, request) {
 }
 
 /**
+ * Read multiple dataset by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+async function list_data_set_by_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const datasetTime = new pb_data.DataSetTime();
+    datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
+    datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataSetByTime(datasetTime, metadata(server))
+        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read multiple dataset by last time
  * @param {ServerConfig} server server configuration: address, token
  * @param {DataSetTime} request dataset time: set_id, timestamp
@@ -5337,7 +5575,7 @@ async function list_data_set_by_number_after(server, request) {
 /**
  * Create a data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSchema} request data schema: device_id, model_id, timestamp, data
+ * @param {DataSchema} request data schema: device_id, model_id, timestamp, data, tag
  * @returns {Promise<{}>} create response
  */
 async function create_data(server, request) {
@@ -5348,6 +5586,7 @@ async function create_data(server, request) {
     dataSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     const value = set_data_values(request.data);
     dataSchema.setDataBytes(value.bytes);
+    dataSchema.setTag(request.tag ?? Tag.DEFAULT);
     for (const type of value.types) {
         dataSchema.addDataType(type);
     }
@@ -5358,13 +5597,18 @@ async function create_data(server, request) {
 /**
  * Create multiple data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataMultipleSchema} request data schema: device_ids, model_ids, timestamps, data
+ * @param {DataMultipleSchema} request data schema: device_ids, model_ids, timestamps, data, tags
  * @returns {Promise<{}>} create response
  */
 async function create_data_multiple(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataMultiSchema = new pb_data.DataMultipleSchema();
-    const number = Math.min(request.device_ids.length, request.model_ids.length, request.timestamps.length, request.data.length);
+    const number = request.device_ids.length;
+    const tags = request.tags ?? Array(number).fill(Tag.DEFAULT);
+    const lengths = [request.model_ids.length, request.timestamps.length, request.data.length, tags.length];
+    if (lengths.some(length => length != number)) {
+        throw new Error("INVALID_ARGUMENT");
+    }
     for (let i=0; i<number; i++) {
         const dataSchema = new pb_data.DataSchema();
         dataSchema.setDeviceId(uuid_hex_to_base64(request.device_ids[i]));
@@ -5375,6 +5619,7 @@ async function create_data_multiple(server, request) {
         for (const type of value.types) {
             dataSchema.addDataType(type);
         }
+        dataSchema.setTag(tags[i] ?? Tag.DEFAULT);
         dataMultiSchema.addSchemas(dataSchema);
     }
     return client.createDataMultiple(dataMultiSchema, metadata(server))
@@ -5384,7 +5629,7 @@ async function create_data_multiple(server, request) {
 /**
  * Delete a data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<{}>} delete response
  */
 async function delete_data(server, request) {
@@ -5393,6 +5638,7 @@ async function delete_data(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.deleteData(dataId, metadata(server))
         .then(response => response.toObject());
 }
@@ -5400,7 +5646,7 @@ async function delete_data(server, request) {
 /**
  * Read a data timestamp by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<Date>} data timestamp
  */
 async function read_data_timestamp(server, request) {
@@ -5409,6 +5655,7 @@ async function read_data_timestamp(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.readDataTimestamp(dataId, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -5416,7 +5663,7 @@ async function read_data_timestamp(server, request) {
 /**
  * Read multiple data timestamp by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data time: device_id, model_id, timestamp
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 async function list_data_timestamp_by_last_time(server, request) {
@@ -5425,6 +5672,7 @@ async function list_data_timestamp_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.listDataTimestampByLastTime(dataTime, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -5432,7 +5680,7 @@ async function list_data_timestamp_by_last_time(server, request) {
 /**
  * Read multiple data timestamp by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 async function list_data_timestamp_by_range_time(server, request) {
@@ -5442,6 +5690,7 @@ async function list_data_timestamp_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.listDataTimestampByRangeTime(dataRange, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -5449,7 +5698,7 @@ async function list_data_timestamp_by_range_time(server, request) {
 /**
  * Read a data timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIds} request data id list: device_ids, model_ids, timestamp
+ * @param {DataIds} request data id list: device_ids, model_ids, timestamp, tag
  * @returns {Promise<Date>} data timestamp
  */
 async function read_data_timestamp_by_ids(server, request) {
@@ -5458,6 +5707,7 @@ async function read_data_timestamp_by_ids(server, request) {
     dataIds.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIds.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIds.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIds.setTag(request.tag);
     return client.readDataTimestampByIds(dataIds, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -5465,7 +5715,7 @@ async function read_data_timestamp_by_ids(server, request) {
 /**
  * Read multiple data timestamp by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 async function list_data_timestamp_by_ids_last_time(server, request) {
@@ -5474,6 +5724,7 @@ async function list_data_timestamp_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataTimestampByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -5481,7 +5732,7 @@ async function list_data_timestamp_by_ids_last_time(server, request) {
 /**
  * Read multiple data timestamp by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 async function list_data_timestamp_by_ids_range_time(server, request) {
@@ -5491,6 +5742,7 @@ async function list_data_timestamp_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.listDataTimestampByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -5559,7 +5811,7 @@ async function count_data(server, request) {
 /**
  * Count data by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data count: device_id, model_id, timestamp
+ * @param {DataTime} request data count: device_id, model_id, timestamp, tag
  * @returns {Promise<number>} data count
  */
 async function count_data_by_last_time(server, request) {
@@ -5568,6 +5820,7 @@ async function count_data_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.countDataByLastTime(dataTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -5575,7 +5828,7 @@ async function count_data_by_last_time(server, request) {
 /**
  * Count data by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<number>} data count
  */
 async function count_data_by_range_time(server, request) {
@@ -5585,6 +5838,7 @@ async function count_data_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.countDataByRangeTime(dataRange, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -5592,7 +5846,7 @@ async function count_data_by_range_time(server, request) {
 /**
  * Count data by id list
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<number>} data count
  */
 async function count_data_by_ids(server, request) {
@@ -5600,6 +5854,7 @@ async function count_data_by_ids(server, request) {
     const dataIdsTime = new pb_data.DataIdsTime();
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setTag(request.tag);
     return client.countDataByIds(dataIdsTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -5607,7 +5862,7 @@ async function count_data_by_ids(server, request) {
 /**
  * Count data by id list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<number>} data count
  */
 async function count_data_by_ids_last_time(server, request) {
@@ -5616,6 +5871,7 @@ async function count_data_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.countDataByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -5623,7 +5879,7 @@ async function count_data_by_ids_last_time(server, request) {
 /**
  * Count data by id list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<number>} data count
  */
 async function count_data_by_ids_range_time(server, request) {
@@ -5633,6 +5889,7 @@ async function count_data_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.countDataByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -5727,7 +5984,7 @@ function get_buffer_ids(r) {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
@@ -5736,7 +5993,7 @@ function get_buffer_ids(r) {
  * @property {Uuid} model_id
  * @property {Date} begin
  * @property {Date} end
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
@@ -5745,23 +6002,23 @@ function get_buffer_ids(r) {
  * @property {Uuid} model_id
  * @property {Date} timestamp
  * @property {number} number
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} BufferSelector
  * @property {?Uuid} device_id
  * @property {?Uuid} model_id
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} BuffersSelector
- * @property {?Uuid} device_id
- * @property {?Uuid} model_id
- * @property {?number|string} status
  * @property {number} number
  * @property {number} offset
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?number} tag
  */
 
 /**
@@ -5769,7 +6026,7 @@ function get_buffer_ids(r) {
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
@@ -5778,7 +6035,7 @@ function get_buffer_ids(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} begin
  * @property {Date} end
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
@@ -5787,30 +6044,29 @@ function get_buffer_ids(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
  * @property {number} number
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} BufferIdsSelector
  * @property {?Uuid[]} device_ids
  * @property {?Uuid[]} model_ids
- * @property {?number|string} status
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} BuffersIdsSelector
- * @property {?Uuid[]} device_ids
- * @property {?Uuid[]} model_ids
- * @property {?number|string} status
  * @property {number} number
  * @property {number} offset
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} BufferSetTime
  * @property {Uuid} set_id
  * @property {Date} timestamp
- * @property {?number|string} status
  */
 
 /**
@@ -5818,7 +6074,6 @@ function get_buffer_ids(r) {
  * @property {Uuid} set_id
  * @property {Date} begin
  * @property {Date} end
- * @property {?number|string} status
  */
 
 /**
@@ -5826,19 +6081,16 @@ function get_buffer_ids(r) {
  * @property {Uuid} set_id
  * @property {Date} timestamp
  * @property {number} number
- * @property {?number|string} status
  */
 
 /**
  * @typedef {Object} BufferSetSelector
  * @property {Uuid} set_id
- * @property {?number|string} status
  */
 
 /**
  * @typedef {Object} BuffersSetSelector
  * @property {Uuid} set_id
- * @property {?number|string} status
  * @property {number} number
  * @property {number} offset
  */
@@ -5850,7 +6102,7 @@ function get_buffer_ids(r) {
  * @property {Uuid} model_id
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
- * @property {number|string} status
+ * @property {?number} tag
  */
 
 /**
@@ -5860,7 +6112,7 @@ function get_buffer_ids(r) {
  * @property {Uuid[]} device_ids
  * @property {Date[]} timestamps
  * @property {(number|bigint|string|Uint8Array|boolean)[][]} data
- * @property {(number|string)[]} statuses
+ * @property {?number[]} tags
  */
 
 /**
@@ -5874,7 +6126,7 @@ function get_buffer_schema(r) {
         model_id: base64_to_uuid_hex(r.modelId),
         timestamp: new Date(r.timestamp / 1000),
         data: get_data_values(r.dataBytes, r.dataTypeList),
-        status: get_buffer_status(r.status)
+        tag: r.tag ?? Tag.DEFAULT
     };
 }
 
@@ -5890,87 +6142,15 @@ function get_buffer_schema_vec(r) {
  * @typedef {Object} BufferUpdate
  * @property {number} id
  * @property {?(number|bigint|string|Uint8Array|boolean)[]} data
- * @property {?number|string} status
+ * @property {?number} tag
  */
-
-/**
- * @param {number} status 
- * @returns {number|string}
- */
-function get_buffer_status(status) {
-    switch (status) {
-        case 0: return "DEFAULT";
-        case 1: return "ERROR";
-        case 2: return "DELETE";
-        case 3: return "HOLD";
-        case 4: return "SEND_UPLINK";
-        case 5: return "SEND_DOWNLINK";
-        case 6: return "TRANSFER_LOCAL";
-        case 7: return "TRANSFER_GATEWAY";
-        case 8: return "TRANSFER_SERVER";
-        case 9: return "BACKUP";
-        case 10: return "RESTORE";
-        case 11: return "ANALYSIS_1";
-        case 12: return "ANALYSIS_2";
-        case 13: return "ANALYSIS_3";
-        case 14: return "ANALYSIS_4";
-        case 15: return "ANALYSIS_5";
-        case 16: return "ANALYSIS_6";
-        case 17: return "ANALYSIS_7";
-        case 18: return "ANALYSIS_8";
-        case 19: return "ANALYSIS_9";
-        case 20: return "ANALYSIS_10";
-        case 21: return "EXTERNAL_OUTPUT";
-        case 22: return "EXTERNAL_INPUT";
-    }
-    return status;
-}
-
-/**
- * @param {number|string} status 
- * @returns {number}
- */
-function set_buffer_status(status) {
-    if (typeof status == "number") {
-        return status;
-    }
-    if (typeof status == "string") {
-        status = status.replace(/[a-z][A-Z]/, s => `${s.charAt(0)}_${s.charAt(1)}`);
-        switch (status.toUpperCase()) {
-            case "DEFAULT": return 0;
-            case "ERROR": return 1;
-            case "DELETE": return 2;
-            case "HOLD": return 3;
-            case "SEND_UPLINK": return 4;
-            case "SEND_DOWNLINK": return 5;
-            case "TRANSFER_LOCAL": return 6;
-            case "TRANSFER_GATEWAY": return 7;
-            case "TRANSFER_SERVER": return 8;
-            case "BACKUP": return 9;
-            case "RESTORE": return 10;
-            case "ANALYSIS_1": return 11;
-            case "ANALYSIS_2": return 12;
-            case "ANALYSIS_3": return 13;
-            case "ANALYSIS_4": return 14;
-            case "ANALYSIS_5": return 15;
-            case "ANALYSIS_6": return 16;
-            case "ANALYSIS_7": return 17;
-            case "ANALYSIS_8": return 18;
-            case "ANALYSIS_9": return 19;
-            case "ANALYSIS_10": return 20;
-            case "EXTERNAL_INPUT": return 21;
-            case "EXTERNAL_OUTPUT": return 22;
-        }
-    }
-    return 0;
-}
 
 
 /**
  * Read a data buffer by id
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferId} request data buffer id: id
- * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function read_buffer(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -5983,8 +6163,8 @@ async function read_buffer(server, request) {
 /**
  * Read a data buffer by time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, status
- * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, tag
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function read_buffer_by_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -5992,16 +6172,33 @@ async function read_buffer_by_time(server, request) {
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    bufferTime.setStatus(set_buffer_status(request.status));
+    bufferTime.setTag(request.tag);
     return client.readBufferByTime(bufferTime, metadata(server))
         .then(response => get_buffer_schema(response.toObject().result));
 }
 
 /**
+ * Read data buffers by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
+ */
+async function list_buffer_by_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferTime = new pb_buffer.BufferTime();
+    bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferTime.setTag(request.tag);
+    return client.listBufferByTime(bufferTime, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read data buffers by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_last_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6009,9 +6206,7 @@ async function list_buffer_by_last_time(server, request) {
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferTime.setStatus(set_buffer_status(request.status));
-    }
+    bufferTime.setTag(request.tag);
     return client.listBufferByLastTime(bufferTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6019,8 +6214,8 @@ async function list_buffer_by_last_time(server, request) {
 /**
  * Read data buffers by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferRange} request data buffer range: device_id, model_id, begin, end, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferRange} request data buffer range: device_id, model_id, begin, end, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_range_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6029,9 +6224,7 @@ async function list_buffer_by_range_time(server, request) {
     bufferRange.setModelId(uuid_hex_to_base64(request.model_id));
     bufferRange.setBegin(request.begin.valueOf() * 1000);
     bufferRange.setEnd(request.end.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferRange.setStatus(set_buffer_status(request.status));
-    }
+    bufferRange.setTag(request.tag);
     return client.listBufferByRangeTime(bufferRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6039,8 +6232,8 @@ async function list_buffer_by_range_time(server, request) {
 /**
  * Read data buffers by specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_number_before(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6049,9 +6242,7 @@ async function list_buffer_by_number_before(server, request) {
     bufferNumber.setModelId(uuid_hex_to_base64(request.model_id));
     bufferNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferNumber.setStatus(set_buffer_status(request.status));
-    }
+    bufferNumber.setTag(request.tag);
     return client.listBufferByNumberBefore(bufferNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6059,8 +6250,8 @@ async function list_buffer_by_number_before(server, request) {
 /**
  * Read data buffers by specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferNumber} request data buffer time and number: device_id, model_id, timestamp, number, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_number_after(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6069,9 +6260,7 @@ async function list_buffer_by_number_after(server, request) {
     bufferNumber.setModelId(uuid_hex_to_base64(request.model_id));
     bufferNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferNumber.setStatus(set_buffer_status(request.status));
-    }
+    bufferNumber.setTag(request.tag);
     return client.listBufferByNumberAfter(bufferNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6079,8 +6268,8 @@ async function list_buffer_by_number_after(server, request) {
 /**
  * Read first of a data buffer
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSelector} request data buffer selector: device_id, model_id, status
- * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function read_buffer_first(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6091,9 +6280,7 @@ async function read_buffer_first(server, request) {
     if (request.model_id) {
         bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSelector.setTag(request.tag);
     return client.readBufferFirst(bufferSelector, metadata(server))
         .then(response => get_buffer_schema(response.toObject().result));
 }
@@ -6101,8 +6288,8 @@ async function read_buffer_first(server, request) {
 /**
  * Read last of a data buffer
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSelector} request data buffer selector: device_id, model_id, status
- * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function read_buffer_last(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6113,9 +6300,7 @@ async function read_buffer_last(server, request) {
     if (request.model_id) {
         bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSelector.setTag(request.tag);
     return client.readBufferLast(bufferSelector, metadata(server))
         .then(response => get_buffer_schema(response.toObject().result));
 }
@@ -6123,8 +6308,8 @@ async function read_buffer_last(server, request) {
 /**
  * Read first of data buffers
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSelector} request data buffer selector: number, device_id, model_id, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6135,9 +6320,7 @@ async function list_buffer_first(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSelector.setTag(request.tag);
     buffersSelector.setNumber(request.number);
     return client.listBufferFirst(buffersSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6146,8 +6329,8 @@ async function list_buffer_first(server, request) {
 /**
  * Read first of data buffers with offset
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSelector} request data buffer selector: number, offset, device_id, model_id, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first_offset(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6158,9 +6341,7 @@ async function list_buffer_first_offset(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSelector.setTag(request.tag);
     buffersSelector.setNumber(request.number);
     buffersSelector.setOffset(request.offset);
     return client.listBufferFirstOffset(buffersSelector, metadata(server))
@@ -6170,8 +6351,8 @@ async function list_buffer_first_offset(server, request) {
 /**
  * Read last of data buffers
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSelector} request data buffer selector: number, device_id, model_id, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6182,9 +6363,7 @@ async function list_buffer_last(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSelector.setTag(request.tag);
     buffersSelector.setNumber(request.number);
     return client.listBufferLast(buffersSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6193,8 +6372,8 @@ async function list_buffer_last(server, request) {
 /**
  * Read last of data buffers with offset
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSelector} request data buffer selector: number, offset, device_id, model_id, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last_offset(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6205,9 +6384,7 @@ async function list_buffer_last_offset(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSelector.setTag(request.tag);
     buffersSelector.setNumber(request.number);
     buffersSelector.setOffset(request.offset);
     return client.listBufferLastOffset(buffersSelector, metadata(server))
@@ -6217,8 +6394,8 @@ async function list_buffer_last_offset(server, request) {
 /**
  * Read data buffers by uuid list and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_ids_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6226,9 +6403,7 @@ async function list_buffer_by_ids_time(server, request) {
     bufferIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsTime.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsTime.setTag(request.tag);
     return client.listBufferByIdsTime(bufferIdsTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6236,8 +6411,8 @@ async function list_buffer_by_ids_time(server, request) {
 /**
  * Read data buffers by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_ids_last_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6245,9 +6420,7 @@ async function list_buffer_by_ids_last_time(server, request) {
     bufferIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsTime.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsTime.setTag(request.tag);
     return client.listBufferByIdsLastTime(bufferIdsTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6255,8 +6428,8 @@ async function list_buffer_by_ids_last_time(server, request) {
 /**
  * Read data buffers by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsRange} request data buffer id list and range: device_ids, model_ids, begin, end, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferIdsRange} request data buffer id list and range: device_ids, model_ids, begin, end, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_ids_range_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6265,9 +6438,7 @@ async function list_buffer_by_ids_range_time(server, request) {
     bufferIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsRange.setBegin(request.begin.valueOf() * 1000);
     bufferIdsRange.setEnd(request.end.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsRange.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsRange.setTag(request.tag);
     return client.listBufferByIdsRangeTime(bufferIdsRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6275,8 +6446,8 @@ async function list_buffer_by_ids_range_time(server, request) {
 /**
  * Read data buffers by uuid list, specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_ids_number_before(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6285,9 +6456,7 @@ async function list_buffer_by_ids_number_before(server, request) {
     bufferIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsNumber.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsNumber.setTag(request.tag);
     return client.listBufferByIdsNumberBefore(bufferIdsNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6295,8 +6464,8 @@ async function list_buffer_by_ids_number_before(server, request) {
 /**
  * Read data buffers by uuid list, specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_ids_number_after(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6305,9 +6474,7 @@ async function list_buffer_by_ids_number_after(server, request) {
     bufferIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsNumber.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsNumber.setTag(request.tag);
     return client.listBufferByIdsNumberAfter(bufferIdsNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6315,8 +6482,8 @@ async function list_buffer_by_ids_number_after(server, request) {
 /**
  * Read first of data buffers by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first_by_ids(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6327,9 +6494,7 @@ async function list_buffer_first_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     return client.listBufferFirstByIds(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6338,8 +6503,8 @@ async function list_buffer_first_by_ids(server, request) {
 /**
  * Read first of data buffers with offset by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first_offset_by_ids(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6350,9 +6515,7 @@ async function list_buffer_first_offset_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     buffersIdsSelector.setOffset(request.offset);
     return client.listBufferFirstOffsetByIds(buffersIdsSelector, metadata(server))
@@ -6362,8 +6525,8 @@ async function list_buffer_first_offset_by_ids(server, request) {
 /**
  * Read last of data buffers by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last_by_ids(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6374,9 +6537,7 @@ async function list_buffer_last_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     return client.listBufferLastByIds(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6385,8 +6546,8 @@ async function list_buffer_last_by_ids(server, request) {
 /**
  * Read last of data buffers with offset by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last_offset_by_ids(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6397,9 +6558,7 @@ async function list_buffer_last_offset_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     buffersIdsSelector.setOffset(request.offset);
     return client.listBufferLastOffsetByIds(buffersIdsSelector, metadata(server))
@@ -6409,17 +6568,14 @@ async function list_buffer_last_offset_by_ids(server, request) {
 /**
  * Read data buffers by set uuid and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetTime} request data buffer set time: set_id, timestamp, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSetTime} request data buffer set time: set_id, timestamp
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_set_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetTime = new pb_buffer.BufferSetTime();
     bufferSetTime.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetTime.setStatus(set_buffer_status(request.status));
-    }
     return client.listBufferBySetTime(bufferSetTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6427,17 +6583,14 @@ async function list_buffer_by_set_time(server, request) {
 /**
  * Read data buffers by set uuid and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetTime} request data buffer set time: set_id, timestamp, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSetTime} request data buffer set time: set_id, timestamp
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_set_last_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetTime = new pb_buffer.BufferSetTime();
     bufferSetTime.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetTime.setStatus(set_buffer_status(request.status));
-    }
     return client.listBufferBySetLastTime(bufferSetTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6445,8 +6598,8 @@ async function list_buffer_by_set_last_time(server, request) {
 /**
  * Read data buffers by set uuid and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetRange} request data buffer set range: set_id, begin, end, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSetRange} request data buffer set range: set_id, begin, end
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_set_range_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6454,9 +6607,6 @@ async function list_buffer_by_set_range_time(server, request) {
     bufferSetRange.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetRange.setBegin(request.begin.valueOf() * 1000);
     bufferSetRange.setEnd(request.end.valueOf() * 1000);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetRange.setStatus(set_buffer_status(request.status));
-    }
     return client.listBufferBySetRangeTime(bufferSetRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6464,8 +6614,8 @@ async function list_buffer_by_set_range_time(server, request) {
 /**
  * Read data buffers by set uuid, specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_set_number_before(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6473,9 +6623,6 @@ async function list_buffer_by_set_number_before(server, request) {
     bufferSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferSetNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetNumber.setStatus(set_buffer_status(request.status));
-    }
     return client.listBufferBySetNumberBefore(bufferSetNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6483,8 +6630,8 @@ async function list_buffer_by_set_number_before(server, request) {
 /**
  * Read data buffers by set uuid, specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number, status
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_by_set_number_after(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6492,9 +6639,6 @@ async function list_buffer_by_set_number_after(server, request) {
     bufferSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferSetNumber.setNumber(request.number);
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetNumber.setStatus(set_buffer_status(request.status));
-    }
     return client.listBufferBySetNumberAfter(bufferSetNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
@@ -6502,16 +6646,13 @@ async function list_buffer_by_set_number_after(server, request) {
 /**
  * Read first of data buffers by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, number
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSetSelector.setNumber(request.number);
     return client.listBufferFirstBySet(buffersSetSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6520,16 +6661,13 @@ async function list_buffer_first_by_set(server, request) {
 /**
  * Read first of data buffers with offset by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, number, offset
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_first_offset_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSetSelector.setNumber(request.number);
     buffersSetSelector.setOffset(request.offset);
     return client.listBufferFirstOffsetBySet(buffersSetSelector, metadata(server))
@@ -6539,16 +6677,13 @@ async function list_buffer_first_offset_by_set(server, request) {
 /**
  * Read last of data buffers by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, number
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSetSelector.setNumber(request.number);
     return client.listBufferLastBySet(buffersSetSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
@@ -6557,16 +6692,13 @@ async function list_buffer_last_by_set(server, request) {
 /**
  * Read last of data buffers with offset by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, status
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, number, offset
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
 async function list_buffer_last_offset_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSetSelector.setNumber(request.number);
     buffersSetSelector.setOffset(request.offset);
     return client.listBufferLastOffsetBySet(buffersSetSelector, metadata(server))
@@ -6576,7 +6708,7 @@ async function list_buffer_last_offset_by_set(server, request) {
 /**
  * Create a data buffer
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSchema} request data buffer schema: device_id, model_id, timestamp, data, status
+ * @param {BufferSchema} request data buffer schema: device_id, model_id, timestamp, data, tag
  * @returns {Promise<BufferId>} data buffer id: id
  */
 async function create_buffer(server, request) {
@@ -6590,7 +6722,7 @@ async function create_buffer(server, request) {
     for (const type of value.types) {
         bufferSchema.addDataType(type);
     }
-    bufferSchema.setStatus(set_buffer_status(request.status));
+    bufferSchema.setTag(request.tag ?? Tag.DEFAULT);
     return client.createBuffer(bufferSchema, metadata(server))
         .then(response => get_buffer_id(response.toObject()));
 }
@@ -6598,13 +6730,18 @@ async function create_buffer(server, request) {
 /**
  * Create multiple data buffer
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferMultipleSchema} request data buffer schema: device_ids, model_ids, timestamps, data, statuses
+ * @param {BufferMultipleSchema} request data buffer schema: device_ids, model_ids, timestamps, data, tags
  * @returns {Promise<BufferIds>} data buffer id: ids
  */
 async function create_buffer_multiple(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferMultiSchema = new pb_buffer.BufferMultipleSchema();
-    const number = Math.min(request.device_ids.length, request.model_ids.length, request.timestamps.length, request.data.length, request.statuses.length);
+    const number = request.device_ids.length;
+    const tags = request.tags ?? Array(number).fill(Tag.DEFAULT);
+    const lengths = [request.model_ids.length, request.timestamps.length, request.data.length, tags.length];
+    if (lengths.some(length => length != number)) {
+        throw new Error("INVALID_ARGUMENT");
+    }
     for (let i=0; i<number; i++) {
         const bufferSchema = new pb_buffer.BufferSchema();
         bufferSchema.setDeviceId(uuid_hex_to_base64(request.device_ids[i]));
@@ -6615,7 +6752,7 @@ async function create_buffer_multiple(server, request) {
         for (const type of value.types) {
             bufferSchema.addDataType(type);
         }
-        bufferSchema.setStatus(set_buffer_status(request.statuses[i]));
+        bufferSchema.setTag(tags[i] ?? Tag.DEFAULT);
         bufferMultiSchema.addSchemas(bufferSchema);
     }
     return client.createBufferMultiple(bufferMultiSchema, metadata(server))
@@ -6625,8 +6762,8 @@ async function create_buffer_multiple(server, request) {
 /**
  * Update a data buffer
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferUpdate} request data buffer update: id, data, status
-* @returns {Promise<{}>} update response
+ * @param {BufferUpdate} request data buffer update: id, data, tag
+ * @returns {Promise<{}>} update response
  */
 async function update_buffer(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6639,7 +6776,7 @@ async function update_buffer(server, request) {
             bufferUpdate.addDataType(type);
         }
     }
-    bufferUpdate.setStatus(set_buffer_status(request.status));
+    bufferUpdate.setTag(request.tag);
     return client.updateBuffer(bufferUpdate, metadata(server))
         .then(response => response.toObject());
 }
@@ -6648,7 +6785,7 @@ async function update_buffer(server, request) {
  * Delete a data buffer
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferId} request data buffer id: id
-* @returns {Promise<{}>} delete response
+ * @returns {Promise<{}>} delete response
  */
 async function delete_buffer(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
@@ -6661,7 +6798,7 @@ async function delete_buffer(server, request) {
 /**
  * Read first of a data buffer timestamp
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function read_buffer_timestamp_first(server, request) {
@@ -6673,9 +6810,7 @@ async function read_buffer_timestamp_first(server, request) {
     if (request.model_id) {
         bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSelector.setTag(request.tag);
     return client.readBufferTimestampFirst(bufferSelector, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -6683,7 +6818,7 @@ async function read_buffer_timestamp_first(server, request) {
 /**
  * Read last of a data buffer timestamp
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function read_buffer_timestamp_last(server, request) {
@@ -6695,9 +6830,7 @@ async function read_buffer_timestamp_last(server, request) {
     if (request.model_id) {
         bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSelector.setTag(request.tag);
     return client.readBufferTimestampLast(bufferSelector, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -6705,7 +6838,7 @@ async function read_buffer_timestamp_last(server, request) {
 /**
  * Read first of data buffers timestamp
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
+ * @param {BuffersSelector} request data buffer selector: number, device_id, model_id, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_first(server, request) {
@@ -6717,10 +6850,8 @@ async function list_buffer_timestamp_first(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSelector.setNumber(request.number);
+    buffersSelector.setTag(request.tag);
     return client.listBufferTimestampFirst(buffersSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -6728,7 +6859,7 @@ async function list_buffer_timestamp_first(server, request) {
 /**
  * Read last of data buffers timestamp
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSelector} request data buffer selector: device_id, model_id, status, number
+ * @param {BuffersSelector} request data buffer selector: number, device_id, model_id, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_last(server, request) {
@@ -6740,10 +6871,8 @@ async function list_buffer_timestamp_last(server, request) {
     if (request.model_id) {
         buffersSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSelector.setStatus(set_buffer_status(request.status));
-    }
     buffersSelector.setNumber(request.number);
+    buffersSelector.setTag(request.tag);
     return client.listBufferTimestampLast(buffersSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -6751,7 +6880,7 @@ async function list_buffer_timestamp_last(server, request) {
 /**
  * Read first of data buffers timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_first_by_ids(server, request) {
@@ -6763,9 +6892,7 @@ async function list_buffer_timestamp_first_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     return client.listBufferTimestampFirstByIds(buffersIdsSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
@@ -6774,7 +6901,7 @@ async function list_buffer_timestamp_first_by_ids(server, request) {
 /**
  * Read last of data buffers timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: device_ids, model_ids, status, number
+ * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_last_by_ids(server, request) {
@@ -6786,9 +6913,7 @@ async function list_buffer_timestamp_last_by_ids(server, request) {
     if (request.model_ids) {
         buffersIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     return client.listBufferTimestampLastByIds(buffersIdsSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
@@ -6797,16 +6922,14 @@ async function list_buffer_timestamp_last_by_ids(server, request) {
 /**
  * Read first of data buffers timestamp by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, tag, number
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_first_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSetSelector.setTag(request.tag);
     buffersSetSelector.setNumber(request.number);
     return client.listBufferTimestampFirstBySet(buffersSetSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
@@ -6815,16 +6938,14 @@ async function list_buffer_timestamp_first_by_set(server, request) {
 /**
  * Read last of data buffers timestamp by set uuid
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, status, number
+ * @param {BuffersSetSelector} request data buffer set selector: set_id, tag, number
  * @returns {Promise<Date>} data buffer timestamp
  */
 async function list_buffer_timestamp_last_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const buffersSetSelector = new pb_buffer.BuffersSetSelector();
     buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        buffersSetSelector.setStatus(set_buffer_status(request.status));
-    }
+    buffersSetSelector.setTag(request.tag);
     buffersSetSelector.setNumber(request.number);
     return client.listBufferTimestampLastBySet(buffersSetSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
@@ -6833,7 +6954,7 @@ async function list_buffer_timestamp_last_by_set(server, request) {
 /**
  * Count data buffers
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSelector} request data buffer selector: device_id, model_id, status
+ * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
  * @returns {Promise<number>} data buffer count
  */
 async function count_buffer(server, request) {
@@ -6845,9 +6966,7 @@ async function count_buffer(server, request) {
     if (request.model_id) {
         bufferSelector.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSelector.setTag(request.tag);
     return client.countBuffer(bufferSelector, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -6855,7 +6974,7 @@ async function count_buffer(server, request) {
 /**
  * Count data buffers by id list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsSelector} request data buffer selector with id list: device_ids, model_ids, status
+ * @param {BufferIdsSelector} request data buffer selector with id list: device_ids, model_ids, tag
  * @returns {Promise<number>} data buffer count
  */
 async function count_buffer_by_ids(server, request) {
@@ -6867,9 +6986,7 @@ async function count_buffer_by_ids(server, request) {
     if (request.model_ids) {
         bufferIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferIdsSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferIdsSelector.setTag(request.tag);
     return client.countBufferByIds(bufferIdsSelector, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -6877,16 +6994,14 @@ async function count_buffer_by_ids(server, request) {
 /**
  * Count data buffers by set id
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetSelector} request data buffer set selector: set_id, status
+ * @param {BufferSetSelector} request data buffer set selector: set_id, tag
  * @returns {Promise<number>} data buffer count
  */
 async function count_buffer_by_set(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetSelector = new pb_buffer.BufferSetSelector();
     bufferSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        bufferSetSelector.setStatus(set_buffer_status(request.status));
-    }
+    bufferSetSelector.setTag(request.tag);
     return client.countBufferBySet(bufferSetSelector, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -7376,15 +7491,25 @@ async function delete_slice_set(server, request) {
 
 /**
  * @typedef {Object} LogId
- * @property {Date} timestamp
- * @property {Uuid} device_id
+ * @property {number} id
  */
+
+/**
+ * @param {*} r 
+ * @returns {LogId}
+ */
+function get_log_id(r) {
+    return {
+        id: r.id
+    };
+}
 
 /**
  * @typedef {Object} LogTime
  * @property {Date} timestamp
  * @property {?Uuid} device_id
- * @property {?number|string} status
+ * @property {?Uuid} model_id
+ * @property {?number} tag
  */
 
 /**
@@ -7392,15 +7517,18 @@ async function delete_slice_set(server, request) {
  * @property {Date} begin
  * @property {Date} end
  * @property {?Uuid} device_id
- * @property {?number|string} status
+ * @property {?Uuid} model_id
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} LogSchema
+ * @property {number} id
  * @property {Date} timestamp
- * @property {Uuid} device_id
- * @property {number|string} status
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
  * @property {number|bigint|string|Uint8Array|boolean} value
+ * @property {?number} tag
  */
 
 /**
@@ -7409,10 +7537,12 @@ async function delete_slice_set(server, request) {
  */
 function get_log_schema(r) {
     return {
+        id: r.id,
         timestamp: new Date(r.timestamp / 1000),
-        device_id: base64_to_uuid_hex(r.deviceId),
-        status: get_log_status(r.status),
-        value: get_data_value(r.logBytes, r.logType)
+        device_id: r.deviceId ? base64_to_uuid_hex(r.deviceId) : null,
+        model_id: r.model_id ? base64_to_uuid_hex(r.model_id) : null,
+        value: get_data_value(r.logBytes, r.logType),
+        tag: r.tag
     };
 }
 
@@ -7426,87 +7556,52 @@ function get_log_schema_vec(r) {
 
 /**
  * @typedef {Object} LogUpdate
- * @property {Date} timestamp
- * @property {Uuid} device_id
- * @property {?number|string} status
+ * @property {number} id
  * @property {?number|bigint|string|Uint8Array|boolean} value
+ * @property {?number} tag
  */
-
-/**
- * @param {number} status 
- * @returns {number|string}
- */
-function get_log_status(status) {
-    switch (status) {
-        case 0: return "DEFAULT";
-        case 1: return "SUCCESS";
-        case 2: return "ERROR_SEND";
-        case 3: return "ERROR_TRANSFER";
-        case 4: return "ERROR_ANALYSIS";
-        case 5: return "ERROR_NETWORK";
-        case 6: return "FAIL_READ";
-        case 7: return "FAIL_CREATE";
-        case 8: return "FAIL_UPDATE";
-        case 9: return "FAIL_DELETE";
-        case 10: return "INVALID_TOKEN";
-        case 11: return "INVALID_REQUEST";
-        case 12: return "UNKNOWN_ERROR";
-        case 13: return "UNKNOWN_STATUS";
-    }
-    return status;
-}
-
-/**
- * @param {number|string} status 
- * @returns {number}
- */
-function set_log_status(status) {
-    if (typeof status == "number") {
-        return status;
-    }
-    if (typeof status == "string") {
-        status = status.replace(/[a-z][A-Z]/, s => `${s.charAt(0)}_${s.charAt(1)}`);
-        switch (status.toUpperCase()) {
-            case "DEFAULT": return 0;
-            case "SUCCESS": return 1;
-            case "ERROR_SEND": return 2;
-            case "ERROR_TRANSFER": return 3;
-            case "ERROR_ANALYSIS": return 4;
-            case "ERROR_NETWORK": return 5;
-            case "FAIL_READ": return 6;
-            case "FAIL_CREATE": return 7;
-            case "FAIL_UPDATE": return 8;
-            case "FAIL_DELETE": return 9;
-            case "INVALID_TOKEN": return 10;
-            case "INVALID_REQUEST": return 11;
-            case "UNKNOWN_ERROR": return 12;
-            case "UNKNOWN_STATUS": return 13;
-        }
-    }
-    return 0;
-}
 
 
 /**
  * Read a system log by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogId} request system log id: timestamp, device_id
- * @returns {Promise<LogSchema>} system log schema: timestamp, device_id, status, value
+ * @param {LogId} request system log id: id
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 async function read_log(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logId = new pb_log.LogId();
-    logId.setTimestamp(request.timestamp.valueOf() * 1000);
-    logId.setDeviceId(uuid_hex_to_base64(request.device_id));
+    logId.setId(request.id);
     return client.readLog(logId, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read a system log by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogId} request system log time: timestamp, device_id, model_id, tag
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+async function read_log_by_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logTime = new pb_log.LogTime();
+    logTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logTime.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logTime.setTag(request.tag);
+    return client.readLogByTime(logTime, metadata(server))
         .then(response => get_log_schema(response.toObject().result));
 }
 
 /**
  * Read system logs by time
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogTime} request system log time: timestamp, device_id, status
- * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
+ * @param {LogTime} request system log time: timestamp, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 async function list_log_by_time(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
@@ -7515,9 +7610,10 @@ async function list_log_by_time(server, request) {
     if (request.device_id) {
         logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        logTime.setStatus(request.status);
+    if (request.model_id) {
+        logTime.setModelId(uuid_hex_to_base64(request.model_id));
     }
+    logTime.setTag(request.tag);
     return client.listLogByTime(logTime, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
@@ -7525,8 +7621,8 @@ async function list_log_by_time(server, request) {
 /**
  * Read system logs by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogTime} request system log last time: timestamp, device_id, status
- * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
+ * @param {LogTime} request system log last time: timestamp, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 async function list_log_by_last_time(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
@@ -7535,9 +7631,10 @@ async function list_log_by_last_time(server, request) {
     if (request.device_id) {
         logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        logTime.setStatus(request.status);
+    if (request.model_id) {
+        logTime.setModelId(uuid_hex_to_base64(request.model_id));
     }
+    logTime.setTag(request.tag);
     return client.listLogByLastTime(logTime, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
@@ -7545,8 +7642,8 @@ async function list_log_by_last_time(server, request) {
 /**
  * Read system logs by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogRange} request system log time: begin, end, device_id, status
- * @returns {Promise<LogSchema[]>} system log schema: timestamp, device_id, status, value
+ * @param {LogRange} request system log time: begin, end, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 async function list_log_by_range_time(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
@@ -7556,9 +7653,10 @@ async function list_log_by_range_time(server, request) {
     if (request.device_id) {
         logRange.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        logRange.setStatus(request.status);
+    if (request.model_id) {
+        logRange.setModelId(uuid_hex_to_base64(request.model_id));
     }
+    logRange.setTag(request.tag);
     return client.listLogByRangeTime(logRange, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
@@ -7566,39 +7664,41 @@ async function list_log_by_range_time(server, request) {
 /**
  * Create a system log
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogSchema} request system log schema: timestamp, device_id, status, value
- * @returns {Promise<{}>} create response
+ * @param {LogSchema} request system log schema: timestamp, device_id, model_id, value, tag
+ * @returns {Promise<LogId>} data buffer id: id
  */
 async function create_log(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logSchema = new pb_log.LogSchema();
     logSchema.setTimestamp(request.timestamp.valueOf() * 1000);
-    logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
-    logSchema.setStatus(set_log_status(request.status));
+    if (request.device_id) {
+        logSchema.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logSchema.setModelId(uuid_hex_to_base64(request.model_id));
+    }
     const value = set_data_value(request.value);
     logSchema.setLogBytes(value.bytes);
     logSchema.setLogType(value.type);
+    logSchema.setTag(request.tag ?? Tag.DEFAULT);
     return client.createLog(logSchema, metadata(server))
-        .then(response => response.toObject());
+        .then(response => get_log_id(response.toObject()));
 }
 
 /**
  * Update a system log
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogUpdate} request system log id: timestamp, device_id, status, value
+ * @param {LogUpdate} request system log update: id, value, tag
  * @returns {Promise<{}>} update response
  */
 async function update_log(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logUpdate = new pb_log.LogUpdate();
-    logUpdate.setTimestamp(request.timestamp.valueOf() * 1000);
-    logUpdate.setDeviceId(uuid_hex_to_base64(request.device_id));
-    if (typeof request.status == "number" || typeof request.status == "string") {
-        logUpdate.setStatus(set_log_status(request.status));
-    }
+    logUpdate.setId(request.id);
     const value = set_data_value(request.value);
     logUpdate.setLogBytes(value.bytes);
     logUpdate.setLogType(value.type);
+    logUpdate.setTag(request.tag);
     return client.updateLog(logUpdate, metadata(server))
         .then(response => response.toObject());
 }
@@ -7606,20 +7706,21 @@ async function update_log(server, request) {
 /**
  * Delete a system log
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogId} request system log id: timestamp, device_id
+ * @param {LogId} request system log id: id
  * @returns {Promise<{}>} delete response
  */
 async function delete_log(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logId = new pb_log.LogId();
-    logId.setTimestamp(request.timestamp.valueOf() * 1000);
-    logId.setDeviceId(uuid_hex_to_base64(request.device_id));
+    logId.setId(request.id);
     return client.deleteLog(logId, metadata(server))
         .then(response => response.toObject());
 }
 
 var index = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    DataType: DataType,
+    Tag: Tag,
     add_group_device_member: add_group_device_member,
     add_group_gateway_member: add_group_gateway_member,
     add_group_model_member: add_group_model_member,
@@ -7656,6 +7757,7 @@ var index = /*#__PURE__*/Object.freeze({
     create_set_template: create_set_template,
     create_slice: create_slice,
     create_slice_set: create_slice_set,
+    create_tag: create_tag,
     create_type: create_type,
     delete_buffer: delete_buffer,
     delete_data: delete_data,
@@ -7673,6 +7775,7 @@ var index = /*#__PURE__*/Object.freeze({
     delete_set_template: delete_set_template,
     delete_slice: delete_slice,
     delete_slice_set: delete_slice_set,
+    delete_tag: delete_tag,
     delete_type: delete_type,
     list_buffer_by_ids_last_time: list_buffer_by_ids_last_time,
     list_buffer_by_ids_number_after: list_buffer_by_ids_number_after,
@@ -7688,6 +7791,7 @@ var index = /*#__PURE__*/Object.freeze({
     list_buffer_by_set_number_before: list_buffer_by_set_number_before,
     list_buffer_by_set_range_time: list_buffer_by_set_range_time,
     list_buffer_by_set_time: list_buffer_by_set_time,
+    list_buffer_by_time: list_buffer_by_time,
     list_buffer_first: list_buffer_first,
     list_buffer_first_by_ids: list_buffer_first_by_ids,
     list_buffer_first_by_set: list_buffer_first_by_set,
@@ -7720,10 +7824,12 @@ var index = /*#__PURE__*/Object.freeze({
     list_data_by_set_number_before: list_data_by_set_number_before,
     list_data_by_set_range_time: list_data_by_set_range_time,
     list_data_by_set_time: list_data_by_set_time,
+    list_data_by_time: list_data_by_time,
     list_data_set_by_last_time: list_data_set_by_last_time,
     list_data_set_by_number_after: list_data_set_by_number_after,
     list_data_set_by_number_before: list_data_set_by_number_before,
     list_data_set_by_range_time: list_data_set_by_range_time,
+    list_data_set_by_time: list_data_set_by_time,
     list_data_timestamp_by_ids_last_time: list_data_timestamp_by_ids_last_time,
     list_data_timestamp_by_ids_range_time: list_data_timestamp_by_ids_range_time,
     list_data_timestamp_by_last_time: list_data_timestamp_by_last_time,
@@ -7779,6 +7885,7 @@ var index = /*#__PURE__*/Object.freeze({
     list_slice_set_by_range_time: list_slice_set_by_range_time,
     list_slice_set_by_time: list_slice_set_by_time,
     list_slice_set_option: list_slice_set_option,
+    list_tag_by_model: list_tag_by_model,
     list_type_by_ids: list_type_by_ids,
     list_type_by_name: list_type_by_name,
     list_type_option: list_type_option,
@@ -7803,12 +7910,14 @@ var index = /*#__PURE__*/Object.freeze({
     read_group_gateway: read_group_gateway,
     read_group_model: read_group_model,
     read_log: read_log,
+    read_log_by_time: read_log_by_time,
     read_model: read_model,
     read_model_config: read_model_config,
     read_set: read_set,
     read_set_template: read_set_template,
     read_slice: read_slice,
     read_slice_set: read_slice_set,
+    read_tag: read_tag,
     read_type: read_type,
     remove_group_device_member: remove_group_device_member,
     remove_group_gateway_member: remove_group_gateway_member,
@@ -7833,7 +7942,8 @@ var index = /*#__PURE__*/Object.freeze({
     update_set_template: update_set_template,
     update_slice: update_slice,
     update_slice_set: update_slice_set,
+    update_tag: update_tag,
     update_type: update_type
 });
 
-export { add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_buffer_by_set, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, count_data_by_set, count_data_by_set_last_time, count_data_by_set_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_buffer_multiple, create_data, create_data_multiple, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_role_profile, create_set, create_set_template, create_slice, create_slice_set, create_type, create_user, create_user_profile, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_role_profile, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_token_by_user, delete_type, delete_user, delete_user_profile, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_set_last_time, list_buffer_by_set_number_after, list_buffer_by_set_number_before, list_buffer_by_set_range_time, list_buffer_by_set_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_by_set, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_first_offset_by_set, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_by_set, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_last_offset_by_set, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_first_by_set, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_buffer_timestamp_last_by_set, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_role_profile_by_role, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, list_user_profile_by_user, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_role_profile, read_set, read_set_template, read_slice, read_slice_set, read_type, read_user, read_user_by_name, read_user_profile, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, swap_user_profile, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_role_profile, update_set, update_set_template, update_slice, update_slice_set, update_type, update_user, update_user_profile, user_login, user_login_key, user_logout, user_refresh, utility };
+export { DataType, Tag, add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_buffer_by_set, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, count_data_by_set, count_data_by_set_last_time, count_data_by_set_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_buffer_multiple, create_data, create_data_multiple, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_role_profile, create_set, create_set_template, create_slice, create_slice_set, create_tag, create_type, create_user, create_user_profile, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_model, delete_model_config, delete_procedure, delete_role, delete_role_profile, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_tag, delete_token_by_user, delete_type, delete_user, delete_user_profile, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_set_last_time, list_buffer_by_set_number_after, list_buffer_by_set_number_before, list_buffer_by_set_range_time, list_buffer_by_set_time, list_buffer_by_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_by_set, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_first_offset_by_set, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_by_set, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_last_offset_by_set, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_first_by_set, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_buffer_timestamp_last_by_set, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_by_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_set_by_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_role_profile_by_role, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_tag_by_model, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, list_user_profile_by_user, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_log_by_time, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_role_profile, read_set, read_set_template, read_slice, read_slice_set, read_tag, read_type, read_user, read_user_by_name, read_user_profile, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, swap_user_profile, update_access_token, update_api, update_auth_token, update_buffer, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_model, update_model_config, update_procedure, update_role, update_role_profile, update_set, update_set_template, update_slice, update_slice_set, update_tag, update_type, update_user, update_user_profile, user_login, user_login_key, user_logout, user_refresh, utility };

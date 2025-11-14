@@ -1,6 +1,7 @@
 export * as auth from './auth/index.js';
 export * as resource from './resource/index.js';
 export * as utility from './utility.js';
+export {DataType, Tag} from './resource/common.js';
 
 
 export {
@@ -98,7 +99,12 @@ export {
     list_model_config_by_model,
     create_model_config,
     update_model_config,
-    delete_model_config
+    delete_model_config,
+    read_tag,
+    list_tag_by_model,
+    create_tag,
+    update_tag,
+    delete_tag
 } from './resource/model.js';
 export {
     read_device,
@@ -199,6 +205,7 @@ export {
 } from './resource/set.js';
 export {
     read_data,
+    list_data_by_time,
     list_data_by_last_time,
     list_data_by_range_time,
     list_data_by_number_before,
@@ -214,6 +221,7 @@ export {
     list_data_by_set_number_before,
     list_data_by_set_number_after,
     read_data_set,
+    list_data_set_by_time,
     list_data_set_by_last_time,
     list_data_set_by_range_time,
     list_data_set_by_number_before,
@@ -243,6 +251,7 @@ export {
 export {
     read_buffer,
     read_buffer_by_time,
+    list_buffer_by_time,
     list_buffer_by_last_time,
     list_buffer_by_range_time,
     list_buffer_by_number_before,
@@ -309,6 +318,7 @@ export {
 } from './resource/slice.js';
 export {
     read_log,
+    read_log_by_time,
     list_log_by_time,
     list_log_by_last_time,
     list_log_by_range_time,

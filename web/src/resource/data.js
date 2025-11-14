@@ -1,4 +1,4 @@
-import { get_data_values, set_data_values } from './common.js';
+import { get_data_values, set_data_values, Tag } from './common.js';
 import { pb_data } from 'rmcs-resource-api';
 import {
     metadata,
@@ -22,6 +22,7 @@ import {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -29,6 +30,7 @@ import {
  * @property {Uuid} device_id
  * @property {Uuid} model_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -37,6 +39,7 @@ import {
  * @property {Uuid} model_id
  * @property {Date} begin
  * @property {Date} end
+ * @property {?number} tag
  */
 
 /**
@@ -45,6 +48,7 @@ import {
  * @property {Uuid} model_id
  * @property {Date} timestamp
  * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -53,6 +57,7 @@ import {
  * @property {Uuid} device_id
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
+ * @property {?number} tag
  */
 
 /**
@@ -61,6 +66,7 @@ import {
  * @property {Uuid[]} device_ids
  * @property {Date[]} timestamps
  * @property {(number|bigint|string|Uint8Array|boolean)[][]} data
+ * @property {?number[]} tags
  */
 
 /**
@@ -72,7 +78,8 @@ function get_data_schema(r) {
         device_id: base64_to_uuid_hex(r.deviceId),
         model_id: base64_to_uuid_hex(r.modelId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_values(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList),
+        tag: r.tag ?? Tag.DEFAULT
     };
 }
 
@@ -89,6 +96,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -96,6 +104,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -104,6 +113,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} begin
  * @property {Date} end
+ * @property {?number} tag
  */
 
 /**
@@ -112,6 +122,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
  * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -171,7 +182,7 @@ function get_data_set_schema_vec(r) {
 /**
  * Read a data by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<DataSchema>} data schema: device_id, model_id, timestamp, data
  */
 export async function read_data(server, request) {
@@ -180,14 +191,32 @@ export async function read_data(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.readData(dataId, metadata(server))
         .then(response => get_data_schema(response.toObject().result));
 }
 
 /**
+ * Read multiple data by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
+ * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_by_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const dataTime = new pb_data.DataTime();
+    dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    dataTime.setModelId(uuid_hex_to_base64(request.model_id));
+    dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
+    return client.listDataByTime(dataTime, metadata(server))
+        .then(response => get_data_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read multiple data by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data time: device_id, model_id, timestamp
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_last_time(server, request) {
@@ -196,6 +225,7 @@ export async function list_data_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.listDataByLastTime(dataTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -203,7 +233,7 @@ export async function list_data_by_last_time(server, request) {
 /**
  * Read multiple data by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_range_time(server, request) {
@@ -213,6 +243,7 @@ export async function list_data_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.listDataByRangeTime(dataRange, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -220,7 +251,7 @@ export async function list_data_by_range_time(server, request) {
 /**
  * Read multiple data by specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
+ * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_number_before(server, request) {
@@ -230,6 +261,7 @@ export async function list_data_by_number_before(server, request) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
+    dataNumber.setTag(request.tag);
     return client.listDataByNumberBefore(dataNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -237,7 +269,7 @@ export async function list_data_by_number_before(server, request) {
 /**
  * Read multiple data by specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number
+ * @param {DataNumber} request data time and number: device_id, model_id, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_number_after(server, request) {
@@ -247,6 +279,7 @@ export async function list_data_by_number_after(server, request) {
     dataNumber.setModelId(uuid_hex_to_base64(request.model_id));
     dataNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataNumber.setNumber(request.number);
+    dataNumber.setTag(request.tag);
     return client.listDataByNumberAfter(dataNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -254,7 +287,7 @@ export async function list_data_by_number_after(server, request) {
 /**
  * Read multiple data by uuid list and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_time(server, request) {
@@ -263,6 +296,7 @@ export async function list_data_by_ids_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataByIdsTime(dataIdsTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -270,7 +304,7 @@ export async function list_data_by_ids_time(server, request) {
 /**
  * Read multiple data by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_last_time(server, request) {
@@ -279,6 +313,7 @@ export async function list_data_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -286,7 +321,7 @@ export async function list_data_by_ids_last_time(server, request) {
 /**
  * Read multiple data by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_range_time(server, request) {
@@ -296,6 +331,7 @@ export async function list_data_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.listDataByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -303,7 +339,7 @@ export async function list_data_by_ids_range_time(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_number_before(server, request) {
@@ -313,6 +349,7 @@ export async function list_data_by_ids_number_before(server, request) {
     dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataIdsNumber.setNumber(request.number);
+    dataIdsNumber.setTag(request.tag);
     return client.listDataByIdsNumberBefore(dataIdsNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -320,7 +357,7 @@ export async function list_data_by_ids_number_before(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number
+ * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_number_after(server, request) {
@@ -330,6 +367,7 @@ export async function list_data_by_ids_number_after(server, request) {
     dataIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     dataIdsNumber.setNumber(request.number);
+    dataIdsNumber.setTag(request.tag);
     return client.listDataByIdsNumberAfter(dataIdsNumber, metadata(server))
         .then(response => get_data_schema_vec(response.toObject().resultsList));
 }
@@ -428,6 +466,21 @@ export async function read_data_set(server, request) {
 }
 
 /**
+ * Read multiple dataset by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
+ */
+export async function list_data_set_by_time(server, request) {
+    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
+    const datasetTime = new pb_data.DataSetTime();
+    datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
+    datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listDataSetByTime(datasetTime, metadata(server))
+        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
+}
+
+/**
  * Read multiple dataset by last time
  * @param {ServerConfig} server server configuration: address, token
  * @param {DataSetTime} request dataset time: set_id, timestamp
@@ -493,7 +546,7 @@ export async function list_data_set_by_number_after(server, request) {
 /**
  * Create a data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSchema} request data schema: device_id, model_id, timestamp, data
+ * @param {DataSchema} request data schema: device_id, model_id, timestamp, data, tag
  * @returns {Promise<{}>} create response
  */
 export async function create_data(server, request) {
@@ -504,6 +557,7 @@ export async function create_data(server, request) {
     dataSchema.setTimestamp(request.timestamp.valueOf() * 1000);
     const value = set_data_values(request.data);
     dataSchema.setDataBytes(value.bytes);
+    dataSchema.setTag(request.tag ?? Tag.DEFAULT);
     for (const type of value.types) {
         dataSchema.addDataType(type);
     }
@@ -514,13 +568,18 @@ export async function create_data(server, request) {
 /**
  * Create multiple data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataMultipleSchema} request data schema: device_ids, model_ids, timestamps, data
+ * @param {DataMultipleSchema} request data schema: device_ids, model_ids, timestamps, data, tags
  * @returns {Promise<{}>} create response
  */
 export async function create_data_multiple(server, request) {
     const client = new pb_data.DataServicePromiseClient(server.address, null, null);
     const dataMultiSchema = new pb_data.DataMultipleSchema();
-    const number = Math.min(request.device_ids.length, request.model_ids.length, request.timestamps.length, request.data.length);
+    const number = request.device_ids.length;
+    const tags = request.tags ?? Array(number).fill(Tag.DEFAULT);
+    const lengths = [request.model_ids.length, request.timestamps.length, request.data.length, tags.length];
+    if (lengths.some(length => length != number)) {
+        throw new Error("INVALID_ARGUMENT");
+    }
     for (let i=0; i<number; i++) {
         const dataSchema = new pb_data.DataSchema();
         dataSchema.setDeviceId(uuid_hex_to_base64(request.device_ids[i]));
@@ -531,6 +590,7 @@ export async function create_data_multiple(server, request) {
         for (const type of value.types) {
             dataSchema.addDataType(type);
         }
+        dataSchema.setTag(tags[i] ?? Tag.DEFAULT);
         dataMultiSchema.addSchemas(dataSchema);
     }
     return client.createDataMultiple(dataMultiSchema, metadata(server))
@@ -540,7 +600,7 @@ export async function create_data_multiple(server, request) {
 /**
  * Delete a data
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<{}>} delete response
  */
 export async function delete_data(server, request) {
@@ -549,6 +609,7 @@ export async function delete_data(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.deleteData(dataId, metadata(server))
         .then(response => response.toObject());
 }
@@ -556,7 +617,7 @@ export async function delete_data(server, request) {
 /**
  * Read a data timestamp by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataId} request data id: device_id, model_id, timestamp
+ * @param {DataId} request data id: device_id, model_id, timestamp, tag
  * @returns {Promise<Date>} data timestamp
  */
 export async function read_data_timestamp(server, request) {
@@ -565,6 +626,7 @@ export async function read_data_timestamp(server, request) {
     dataId.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataId.setModelId(uuid_hex_to_base64(request.model_id));
     dataId.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataId.setTag(request.tag);
     return client.readDataTimestamp(dataId, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -572,7 +634,7 @@ export async function read_data_timestamp(server, request) {
 /**
  * Read multiple data timestamp by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data time: device_id, model_id, timestamp
+ * @param {DataTime} request data time: device_id, model_id, timestamp, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 export async function list_data_timestamp_by_last_time(server, request) {
@@ -581,6 +643,7 @@ export async function list_data_timestamp_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.listDataTimestampByLastTime(dataTime, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -588,7 +651,7 @@ export async function list_data_timestamp_by_last_time(server, request) {
 /**
  * Read multiple data timestamp by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 export async function list_data_timestamp_by_range_time(server, request) {
@@ -598,6 +661,7 @@ export async function list_data_timestamp_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.listDataTimestampByRangeTime(dataRange, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -605,7 +669,7 @@ export async function list_data_timestamp_by_range_time(server, request) {
 /**
  * Read a data timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIds} request data id list: device_ids, model_ids, timestamp
+ * @param {DataIds} request data id list: device_ids, model_ids, timestamp, tag
  * @returns {Promise<Date>} data timestamp
  */
 export async function read_data_timestamp_by_ids(server, request) {
@@ -614,6 +678,7 @@ export async function read_data_timestamp_by_ids(server, request) {
     dataIds.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIds.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIds.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIds.setTag(request.tag);
     return client.readDataTimestampByIds(dataIds, metadata(server))
         .then(response => new Date(response.toObject().timestamp / 1000));
 }
@@ -621,7 +686,7 @@ export async function read_data_timestamp_by_ids(server, request) {
 /**
  * Read multiple data timestamp by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 export async function list_data_timestamp_by_ids_last_time(server, request) {
@@ -630,6 +695,7 @@ export async function list_data_timestamp_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.listDataTimestampByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -637,7 +703,7 @@ export async function list_data_timestamp_by_ids_last_time(server, request) {
 /**
  * Read multiple data timestamp by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<Date[]>} data timestamp
  */
 export async function list_data_timestamp_by_ids_range_time(server, request) {
@@ -647,6 +713,7 @@ export async function list_data_timestamp_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.listDataTimestampByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
@@ -715,7 +782,7 @@ export async function count_data(server, request) {
 /**
  * Count data by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataTime} request data count: device_id, model_id, timestamp
+ * @param {DataTime} request data count: device_id, model_id, timestamp, tag
  * @returns {Promise<number>} data count
  */
 export async function count_data_by_last_time(server, request) {
@@ -724,6 +791,7 @@ export async function count_data_by_last_time(server, request) {
     dataTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     dataTime.setModelId(uuid_hex_to_base64(request.model_id));
     dataTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataTime.setTag(request.tag);
     return client.countDataByLastTime(dataTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -731,7 +799,7 @@ export async function count_data_by_last_time(server, request) {
 /**
  * Count data by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataRange} request data range: device_id, model_id, begin, end
+ * @param {DataRange} request data range: device_id, model_id, begin, end, tag
  * @returns {Promise<number>} data count
  */
 export async function count_data_by_range_time(server, request) {
@@ -741,6 +809,7 @@ export async function count_data_by_range_time(server, request) {
     dataRange.setModelId(uuid_hex_to_base64(request.model_id));
     dataRange.setBegin(request.begin.valueOf() * 1000);
     dataRange.setEnd(request.end.valueOf() * 1000);
+    dataRange.setTag(request.tag);
     return client.countDataByRangeTime(dataRange, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -748,7 +817,7 @@ export async function count_data_by_range_time(server, request) {
 /**
  * Count data by id list
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<number>} data count
  */
 export async function count_data_by_ids(server, request) {
@@ -756,6 +825,7 @@ export async function count_data_by_ids(server, request) {
     const dataIdsTime = new pb_data.DataIdsTime();
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    dataIdsTime.setTag(request.tag);
     return client.countDataByIds(dataIdsTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -763,7 +833,7 @@ export async function count_data_by_ids(server, request) {
 /**
  * Count data by id list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp
+ * @param {DataIdsTime} request data id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<number>} data count
  */
 export async function count_data_by_ids_last_time(server, request) {
@@ -772,6 +842,7 @@ export async function count_data_by_ids_last_time(server, request) {
     dataIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    dataIdsTime.setTag(request.tag);
     return client.countDataByIdsLastTime(dataIdsTime, metadata(server))
         .then(response => response.toObject().count);
 }
@@ -779,7 +850,7 @@ export async function count_data_by_ids_last_time(server, request) {
 /**
  * Count data by id list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end
+ * @param {DataIdsRange} request data id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<number>} data count
  */
 export async function count_data_by_ids_range_time(server, request) {
@@ -789,6 +860,7 @@ export async function count_data_by_ids_range_time(server, request) {
     dataIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     dataIdsRange.setBegin(request.begin.valueOf() * 1000);
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
+    dataIdsRange.setTag(request.tag);
     return client.countDataByIdsRangeTime(dataIdsRange, metadata(server))
         .then(response => response.toObject().count);
 }

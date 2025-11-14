@@ -1,4 +1,4 @@
-import { resource, utility } from '../../build/bundle.js';
+import { resource, utility, Tag } from '../../build/bundle.js';
 
 let server = { address: "http://localhost:9002" };
 
@@ -323,7 +323,7 @@ describe("RMCS Resource test", function() {
             model_id: model_buf_id,
             timestamp: timestamp_1,
             data: raw_1,
-            status: "ANALYSIS_1"
+            tag: Tag.ANALYSIS_1
         });
         expect(bufferId1.id).toBeDefined();
         const bufferId2 = await resource.create_buffer(server, {
@@ -331,7 +331,7 @@ describe("RMCS Resource test", function() {
             model_id: model_buf_id,
             timestamp: timestamp_1,
             data: raw_2,
-            status: "ANALYSIS_1"
+            tag: Tag.ANALYSIS_1
         });
         expect(bufferId2.id).toBeDefined();
     });
@@ -342,7 +342,7 @@ describe("RMCS Resource test", function() {
             model_ids: [model_buf_id, model_buf_id],
             timestamps: [timestamp_2, timestamp_2],
             data: [raw_1, raw_2],
-            statuses: ["TRANSFER_LOCAL" ,"TRANSFER_LOCAL"]
+            tags: [Tag.TRANSFER_LOCAL, Tag.TRANSFER_LOCAL]
         });
         expect(bufferIds.ids.length).toEqual(2);
     });
@@ -427,6 +427,8 @@ describe("RMCS Resource test", function() {
         }
         expect(data.data[0]).toBeCloseTo(speed_1, 0.1);
         expect(data.data[1]).toBeCloseTo(direction_1, 0.1);
+        expect(data.timestamp).toEqual(timestamp_1)
+        expect(data.tag).toEqual(Tag.DEFAULT)
     });
 
     it("should read data from a device group", async function() {
@@ -480,10 +482,10 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a buffer", async function() {
-        await resource.update_buffer(server, { id: buffers[0].id, status: "DELETE" });
+        await resource.update_buffer(server, { id: buffers[0].id, tag: Tag.DELETE });
         const buffer = await resource.read_buffer(server, { id: buffers[0].id });
         expect(buffer.data).toEqual(buffers[0].data);
-        expect(buffer.status).toEqual("DELETE");
+        expect(buffer.tag).toEqual(Tag.DELETE);
     });
 
     it("should delete buffers", async function() {
@@ -535,14 +537,17 @@ describe("RMCS Resource test", function() {
         expect(slice).toBeNull();
     });
 
+    let log_id;
+
     it("should create a system log", async function() {
-        const createLog = await resource.create_log(server, {
-            device_id: device_id_1,
+        const logId = await resource.create_log(server, {
             timestamp: timestamp_1,
-            status: "UNKNOWN_ERROR",
-            value: "testing success"
+            device_id: device_id_1,
+            value: "testing success",
+            tag: Tag.ERROR_UNKNOWN
         });
-        expect(createLog).toEqual({});
+        log_id = logId.id;
+        expect(logId.id).toBeDefined();
     });
 
     it("should read system logs", async function() {
@@ -557,14 +562,14 @@ describe("RMCS Resource test", function() {
     });
 
     it("should update a system log", async function() {
-        await resource.update_log(server, { device_id: device_id_1, timestamp: timestamp_1, status: "SUCCESS" });
-        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp_1 });
-        expect(log.status).toEqual("SUCCESS");
+        await resource.update_log(server, { id: log_id, tag: Tag.SUCCESS });
+        const log = await resource.read_log(server, { id: log_id });
+        expect(log.tag).toEqual(Tag.SUCCESS);
     });
 
     it("should delete a system log", async function() {
-        await resource.delete_log(server, { device_id: device_id_1, timestamp: timestamp_1 });
-        const log = await resource.read_log(server, { device_id: device_id_1, timestamp: timestamp_1 })
+        await resource.delete_log(server, { id: log_id });
+        const log = await resource.read_log(server, { id: log_id })
             .catch(() => null);
         expect(log).toBeNull();
     });

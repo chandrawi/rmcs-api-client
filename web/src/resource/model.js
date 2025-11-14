@@ -157,6 +157,41 @@ function get_model_config_schema_vec(r) {
  * @property {?string} category
  */
 
+/**
+ * @typedef {Object} TagId
+ * @property {Uuid} model_id
+ * @property {number} tag
+ */
+
+/**
+ * @typedef {Object} TagSchema
+ * @property {Uuid} model_id
+ * @property {number} tag
+ * @property {string} name
+ * @property {number[]} members
+ */
+
+/**
+ * @param {*} r 
+ * @returns {ModelConfigSchema}
+ */
+function get_tag_schema(r) {
+    return {
+        model_id: base64_to_uuid_hex(r.modelId),
+        tag: r.tag,
+        name: r.name,
+        members: r.membersList
+    };
+}
+
+/**
+ * @typedef {Object} TagUpdate
+ * @property {Uuid} model_id
+ * @property {number} tag
+ * @property {?string} name
+ * @property {?number[]} members
+ */
+
 
 /**
  * Read a model by uuid
@@ -379,5 +414,83 @@ export async function delete_model_config(server, request) {
     const configId = new pb_model.ConfigId();
     configId.setId(request.id);
     return client.deleteModelConfig(configId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Read a tag by model uuid and tag number
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagId} request tag id: model_id, tag
+ * @returns {Promise<TagSchema>} tag schema: model_id, tag, name, members
+ */
+export async function read_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagId = new pb_model.TagId();
+    tagId.setModelId(uuid_hex_to_base64(request.model_id));
+    tagId.setTag(request.tag);
+    return client.readTag(tagId, metadata(server))
+        .then(response => get_tag_schema(response.toObject().result));
+}
+
+/**
+ * Read Tags by model uuid
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {ModelId} request model uuid: id
+ * @returns {Promise<TagSchema[]>} tag schema: model_id, tag, name, members
+ */
+export async function list_tag_by_model(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const modelId = new pb_model.ModelId();
+    modelId.setId(uuid_hex_to_base64(request.id));
+    return client.listTagByModel(modelId, metadata(server))
+        .then(response => get_tag_schema(response.toObject().resultsList));
+}
+
+/**
+ * Create a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagSchema} request tag schema: model_id, tag, name, members
+ * @returns {Promise<{}>} create response
+ */
+export async function create_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagSchema = new pb_model.TagSchema();
+    tagSchema.setModelId(uuid_hex_to_base64(request.model_id));
+    tagSchema.setTag(request.tag);
+    tagSchema.setName(request.name);
+    tagSchema.setMembersList(request.members);
+    return client.createTag(tagSchema, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Update a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagUpdate} request tag update: model_id, tag, name, members
+ * @returns {Promise<{}>} update response 
+ */
+export async function update_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagUpdate = new pb_model.TagUpdate();
+    tagUpdate.setModelId(uuid_hex_to_base64(request.model_id));
+    tagUpdate.setTag(request.tag);
+    tagUpdate.setName(request.name);
+    tagUpdate.setMembersList(request.members);
+    return client.updateTag(tagUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a tag
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {TagId} request tag id: model_id, tag
+ * @returns {Promise<{}>} delete response 
+ */
+export async function delete_tag(server, request) {
+    const client = new pb_model.ModelServicePromiseClient(server.address, null, null);
+    const tagId = new pb_model.TagId();
+    tagId.setModelId(uuid_hex_to_base64(request.model_id));
+    tagId.setTag(request.tag);
+    return client.deleteTag(tagId, metadata(server))
         .then(response => response.toObject());
 }
