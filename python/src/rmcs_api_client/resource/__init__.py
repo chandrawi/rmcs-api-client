@@ -480,6 +480,9 @@ class Resource:
     def read_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> BufferSchema:
         return _buffer.read_buffer_by_time(self, device_id, model_id, timestamp, tag)
 
+    def list_buffer(self, ids: List[int]) -> BufferSchema:
+        return _buffer.list_buffer(self, ids)
+
     def list_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_by_time(self, device_id, model_id, timestamp, tag)
 
@@ -576,8 +579,14 @@ class Resource:
     def update_buffer(self, id: int, data: Optional[List[Union[int, float, str, bool, None]]]=None, tag: Optional[Union[int]]=None):
         return _buffer.update_buffer(self, id, data, tag)
 
+    def update_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: Optional[List[Union[int, float, str, bool, None]]]=None, tag: Optional[Union[int]]=None):
+        return _buffer.update_buffer_by_time(self, device_id, model_id, timestamp, data, tag)
+
     def delete_buffer(self, id: int):
         return _buffer.delete_buffer(self, id)
+
+    def delete_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[Union[int]]=None):
+        return _buffer.delete_buffer_by_time(self, device_id, model_id, timestamp, tag)
 
     def read_buffer_timestamp_first(self, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None) -> datetime:
         return _buffer.read_buffer_timestamp_first(self, device_id, model_id, tag)
@@ -672,6 +681,9 @@ class Resource:
     def read_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> LogSchema:
         return _log.read_log_by_time(self, timestamp, device_id, model_id, tag)
 
+    def list_log(self, ids: List[int]) -> LogSchema:
+        return _log.list_log(self, ids)
+
     def list_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
         return _log.list_log_by_time(self, timestamp, device_id, model_id, tag)
 
@@ -687,5 +699,11 @@ class Resource:
     def update_log(self, id: int, value: List[Union[int, float, str, bool, None]]=None, tag: Optional[int]=None):
         return _log.update_log(self, id, value, tag)
 
+    def update_log_by_time(self, timestamp: datetime, device_id: Optional[UUID], model_id: Optional[UUID], value: List[Union[int, float, str, bool, None]]=None, tag: Optional[int]=None):
+        return _log.update_log_by_time(self, timestamp, device_id, model_id, value, tag)
+
     def delete_log(self, id: int):
         return _log.delete_log(self, id)
+
+    def delete_log_by_time(self, timestamp: datetime, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None):
+        return _log.delete_log_by_time(self, timestamp, device_id, model_id, tag)

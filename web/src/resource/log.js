@@ -104,6 +104,15 @@ function get_log_schema_vec(r) {
  * @property {?number} tag
  */
 
+/**
+ * @typedef {Object} LogUpdateTime
+ * @property {Date} timestamp
+ * @property {?Uuid} model_id
+ * @property {?Uuid} device_id
+ * @property {?number|bigint|string|Uint8Array|boolean} value
+ * @property {?number} tag
+ */
+
 
 /**
  * Read a system log by id
@@ -138,6 +147,20 @@ export async function read_log_by_time(server, request) {
     logTime.setTag(request.tag);
     return client.readLogByTime(logTime, metadata(server))
         .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read system logs by multiple id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogIds} request system log id: ids
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logIds = new pb_log.LogIds();
+    logIds.setIdsList(request.ids);
+    return client.listLog(logIds, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -247,6 +270,30 @@ export async function update_log(server, request) {
 }
 
 /**
+ * Update a system log by time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogUpdateTime} request system log update time: timestamp, model_id, device_id, value, tag
+ * @returns {Promise<{}>} update response
+ */
+export async function update_log_by_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logUpdateTime = new pb_log.LogUpdateTime();
+    logUpdateTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logUpdateTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logUpdateTime.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    const value = set_data_value(request.value);
+    logUpdateTime.setLogBytes(value.bytes);
+    logUpdateTime.setLogType(value.type);
+    logUpdateTime.setTag(request.tag);
+    return client.updateLogByTime(logUpdate, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
  * Delete a system log
  * @param {ServerConfig} server server configuration: address, token
  * @param {LogId} request system log id: id
@@ -257,5 +304,26 @@ export async function delete_log(server, request) {
     const logId = new pb_log.LogId();
     logId.setId(request.id);
     return client.deleteLog(logId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a system log by time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogTime} request system log id: timestamp, model_id, device_id, tag
+ * @returns {Promise<{}>} delete response
+ */
+export async function delete_log_by_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logTime = new pb_log.LogTime();
+    logTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logTime.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logTime.setTag(request.tag);
+    return client.deleteLogByTime(logTime, metadata(server))
         .then(response => response.toObject());
 }

@@ -1213,6 +1213,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_buffer(&self, ids: Vec<i32>)
+        -> Result<Vec<BufferSchema>, Status>
+    {
+        buffer::list_buffer(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
@@ -1466,11 +1474,24 @@ impl Resource {
         .await
     }
 
+    pub async fn update_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Option<Vec<DataValue>>, tag: Option<i16>)
+        -> Result<(), Status>
+    {
+        buffer::update_buffer_by_time(&self, device_id, model_id, timestamp, data, tag)
+        .await
+    }
+
     pub async fn delete_buffer(&self, id: i32)
         -> Result<(), Status>
     {
         buffer::delete_buffer(&self, id)
         .await
+    }
+
+    pub async fn delete_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, tag: Option<i16>)
+        -> Result<(), Status>
+    {
+        buffer::delete_buffer_by_time(&self, device_id, model_id, timestamp, tag).await
     }
 
     pub async fn read_buffer_timestamp_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
@@ -1690,6 +1711,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
+    pub async fn list_log(&self, ids: Vec<i32>)
+        -> Result<Vec<LogSchema>, Status>
+    {
+        log::list_log(&self, ids)
+        .await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn list_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
         -> Result<Vec<LogSchema>, Status>
     {
@@ -1714,17 +1743,24 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: i16, value: DataValue)
+    pub async fn create_log(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, value: DataValue, tag: Option<i16>)
         -> Result<i32, Status>
     {
-        log::create_log(&self, timestamp, device_id, model_id, tag, value)
+        log::create_log(&self, timestamp, device_id, model_id, value, tag)
         .await
     }
 
-    pub async fn update_log(&self, id: i32, tag: Option<i16>, value: Option<DataValue>)
+    pub async fn update_log(&self, id: i32, value: Option<DataValue>, tag: Option<i16>)
         -> Result<(), Status>
     {
-        log::update_log(&self, id, tag, value)
+        log::update_log(&self, id, value, tag)
+        .await
+    }
+
+    pub async fn update_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, value: Option<DataValue>, tag: Option<i16>)
+        -> Result<(), Status>
+    {
+        log::update_log_by_time(&self, timestamp, device_id, model_id, value, tag)
         .await
     }
 
@@ -1732,6 +1768,12 @@ impl Resource {
         -> Result<(), Status>
     {
         log::delete_log(&self, id).await
+    }
+
+    pub async fn delete_log_by_time(&self, timestamp: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+        -> Result<(), Status>
+    {
+        log::delete_log_by_time(&self, timestamp, device_id, model_id, tag).await
     }
 
 }

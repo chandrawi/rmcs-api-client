@@ -251,6 +251,7 @@ export {
 export {
     read_buffer,
     read_buffer_by_time,
+    list_buffer,
     list_buffer_by_time,
     list_buffer_by_last_time,
     list_buffer_by_range_time,
@@ -283,7 +284,9 @@ export {
     create_buffer,
     create_buffer_multiple,
     update_buffer,
+    update_buffer_by_time,
     delete_buffer,
+    delete_buffer_by_time,
     read_buffer_timestamp_first,
     read_buffer_timestamp_last,
     list_buffer_timestamp_first,
@@ -319,10 +322,13 @@ export {
 export {
     read_log,
     read_log_by_time,
+    list_log,
     list_log_by_time,
     list_log_by_last_time,
     list_log_by_range_time,
     create_log,
     update_log,
-    delete_log
+    update_log_by_time,
+    delete_log,
+    delete_log_by_time
 } from './resource/log.js';

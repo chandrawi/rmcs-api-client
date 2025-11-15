@@ -44,6 +44,17 @@ def read_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: da
         response = stub.ReadBufferByTime(request=request, metadata=resource.metadata)
         return BufferSchema.from_response(response.result)
 
+def list_buffer(resource, ids: List[int]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferIds(
+            ids=ids
+        )
+        response = stub.ListBuffer(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(BufferSchema.from_response(result))
+        return ls
+
 def list_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
@@ -530,7 +541,6 @@ def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, 
             data_list = data
         data_type = []
         for d in data_list: data_type.append(DataType.from_value(d).value)
-        stat = None
         request = buffer_pb2.BufferUpdate(
             id=id,
             data_bytes=data_bytes,
@@ -539,11 +549,42 @@ def update_buffer(resource, id: int, data: Optional[List[Union[int, float, str, 
         )
         stub.UpdateBuffer(request=request, metadata=resource.metadata)
 
+def update_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime, data: Optional[List[Union[int, float, str, bool, None]]]=None, tag: Optional[int]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        data_bytes = None
+        data_list = []
+        if data != None: 
+            data_bytes = pack_data_array(data)
+            data_list = data
+        data_type = []
+        for d in data_list: data_type.append(DataType.from_value(d).value)
+        request = buffer_pb2.BufferUpdateTime(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000),
+            data_bytes=data_bytes,
+            data_type=data_type,
+            tag=tag
+        )
+        stub.UpdateBufferByTime(request=request, metadata=resource.metadata)
+
 def delete_buffer(resource, id: int):
     with grpc.insecure_channel(resource.address) as channel:
         stub = buffer_pb2_grpc.BufferServiceStub(channel)
         request = buffer_pb2.BufferId(id=id)
         stub.DeleteBuffer(request=request, metadata=resource.metadata)
+
+def delete_buffer_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = buffer_pb2_grpc.BufferServiceStub(channel)
+        request = buffer_pb2.BufferTime(
+            device_id=device_id.bytes,
+            model_id=model_id.bytes,
+            timestamp=int(timestamp.timestamp()*1000000),
+            tag=tag
+        )
+        stub.DeleteBufferByTime(request=request, metadata=resource.metadata)
 
 def read_buffer_timestamp_first(resource, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None):
     with grpc.insecure_channel(resource.address) as channel:

@@ -38,7 +38,7 @@ pub(crate) async fn list_data_by_time(resource: &Resource, device_id: Uuid, mode
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(DataId {
+    let request = Request::new(DataTime {
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         timestamp: last.timestamp_micros(),
@@ -323,7 +323,7 @@ pub(crate) async fn list_data_set_by_time(resource: &Resource, set_id: Uuid, las
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(DataSetId {
+    let request = Request::new(DataSetTime {
         set_id: set_id.as_bytes().to_vec(),
         timestamp: last.timestamp_micros()
     });

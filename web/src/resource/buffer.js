@@ -213,6 +213,15 @@ function get_buffer_schema_vec(r) {
  * @property {?number} tag
  */
 
+/**
+ * @typedef {Object} BufferUpdateTime
+ * @property {Uuid} device_id
+ * @property {Uuid} model_id
+ * @property {Date} timestamp
+ * @property {?(number|bigint|string|Uint8Array|boolean)[]} data
+ * @property {?number} tag
+ */
+
 
 /**
  * Read a data buffer by id
@@ -243,6 +252,20 @@ export async function read_buffer_by_time(server, request) {
     bufferTime.setTag(request.tag);
     return client.readBufferByTime(bufferTime, metadata(server))
         .then(response => get_buffer_schema(response.toObject().result));
+}
+
+/**
+ * Read data buffers by multiple id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferIds} request data buffer id: ids
+ * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
+ */
+export async function list_buffer(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferIds = new pb_buffer.BufferIds();
+    bufferIds.setIdsList(request.ids);
+    return client.listBuffer(bufferIds, metadata(server))
+        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -850,6 +873,30 @@ export async function update_buffer(server, request) {
 }
 
 /**
+ * Update a data buffer by time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferUpdateTime} request data buffer update: device_id, model_id, timestamp, data, tag
+ * @returns {Promise<{}>} update response
+ */
+export async function update_buffer_by_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferUpdateTime = new pb_buffer.BufferUpdateTime();
+    bufferUpdateTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferUpdateTime.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferUpdateTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (typeof request.data == "object" && 'length' in request.data) {
+        const value = set_data_values(request.data);
+        BufferUpdateTime.setDataBytes(value.bytes);
+        for (const type of value.types) {
+            BufferUpdateTime.addDataType(type);
+        }
+    }
+    BufferUpdateTime.setTag(request.tag);
+    return client.updateBufferByTime(BufferUpdateTime, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
  * Delete a data buffer
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferId} request data buffer id: id
@@ -860,6 +907,23 @@ export async function delete_buffer(server, request) {
     const bufferId = new pb_buffer.BufferId();
     bufferId.setId(request.id);
     return client.deleteBuffer(bufferId, metadata(server))
+        .then(response => response.toObject());
+}
+
+/**
+ * Delete a data buffer by time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, tag
+ * @returns {Promise<{}>} delete response
+ */
+export async function delete_buffer_by_time(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferTime = new pb_buffer.BufferTime();
+    bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+    bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
+    bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferTime.setTag(request.tag);
+    return client.deleteBufferByTime(bufferTime, metadata(server))
         .then(response => response.toObject());
 }
 
