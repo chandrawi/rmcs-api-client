@@ -129,12 +129,14 @@ function get_data_schema_vec(r) {
  * @typedef {Object} DataSetId
  * @property {Uuid} set_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} DataSetTime
  * @property {Uuid} set_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -142,13 +144,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid} set_id
  * @property {Date} begin
  * @property {Date} end
- */
-
-/**
- * @typedef {Object} DataSetNumber
- * @property {Uuid} set_id
- * @property {Date} timestamp
- * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -156,6 +152,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid} set_id
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
+ * @property {?number} tag
  */
 
 /**
@@ -166,7 +163,8 @@ function get_data_set_schema(r) {
     return {
         set_id: base64_to_uuid_hex(r.setId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_values(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList),
+        tag: r.tag ?? Tag.DEFAULT
     };
 }
 
@@ -357,7 +355,7 @@ export async function list_data_by_ids_number_before(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_by_ids_number_after(server, request) {
@@ -373,87 +371,9 @@ export async function list_data_by_ids_number_after(server, request) {
 }
 
 /**
- * Read multiple data by set uuid and specific time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_by_set_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetTime(dataSetTime, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetLastTime(dataSetTime, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request dataset range: set_id, begin, end
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataBySetRangeTime(dataSetRange, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and specific time and number before
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_by_set_number_before(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetNumber = new pb_data.DataSetNumber();
-    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    dataSetNumber.setNumber(request.number);
-    return client.listDataBySetNumberBefore(dataSetNumber, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and specific time and number after
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_by_set_number_after(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetNumber = new pb_data.DataSetNumber();
-    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    dataSetNumber.setNumber(request.number);
-    return client.listDataBySetNumberAfter(dataSetNumber, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
  * Read a dataset by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetId} request dataset id: set_id, timestamp
+ * @param {DataSetId} request dataset id: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema>} data schema: set_id, timestamp, data
  */
 export async function read_data_set(server, request) {
@@ -461,6 +381,7 @@ export async function read_data_set(server, request) {
     const datasetId = new pb_data.DataSetId();
     datasetId.setSetId(uuid_hex_to_base64(request.set_id));
     datasetId.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetId.setTag(request.tag);
     return client.readDataSet(datasetId, metadata(server))
         .then(response => get_data_set_schema(response.toObject().result));
 }
@@ -468,7 +389,7 @@ export async function read_data_set(server, request) {
 /**
  * Read multiple dataset by specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @param {DataSetTime} request dataset time: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_set_by_time(server, request) {
@@ -476,6 +397,7 @@ export async function list_data_set_by_time(server, request) {
     const datasetTime = new pb_data.DataSetTime();
     datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
     datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetTime.setTag(request.tag);
     return client.listDataSetByTime(datasetTime, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
@@ -483,7 +405,7 @@ export async function list_data_set_by_time(server, request) {
 /**
  * Read multiple dataset by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @param {DataSetTime} request dataset time: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_set_by_last_time(server, request) {
@@ -491,6 +413,7 @@ export async function list_data_set_by_last_time(server, request) {
     const datasetTime = new pb_data.DataSetTime();
     datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
     datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetTime.setTag(request.tag);
     return client.listDataSetByLastTime(datasetTime, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
@@ -498,7 +421,7 @@ export async function list_data_set_by_last_time(server, request) {
 /**
  * Read multiple dataset by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request dataset range: set_id, begin, end
+ * @param {DataSetRange} request dataset range: set_id, begin, end, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 export async function list_data_set_by_range_time(server, request) {
@@ -507,39 +430,8 @@ export async function list_data_set_by_range_time(server, request) {
     datasetRange.setSetId(uuid_hex_to_base64(request.set_id));
     datasetRange.setBegin(request.begin.valueOf() * 1000);
     datasetRange.setEnd(request.end.valueOf() * 1000);
+    datasetRange.setTag(request.tag);
     return client.listDataSetByRangeTime(datasetRange, metadata(server))
-        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple dataset by specific time and number before
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_set_by_number_before(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataSetByNumberBefore(datasetNumber, metadata(server))
-        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple dataset by specific time and number after
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-export async function list_data_set_by_number_after(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataSetByNumberAfter(datasetNumber, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
 
@@ -719,52 +611,6 @@ export async function list_data_timestamp_by_ids_range_time(server, request) {
 }
 
 /**
- * Read a data set timestamp by id
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetId} request data set id: set_id, timestamp
- * @returns {Promise<Date>} data set timestamp
- */
-export async function read_data_timestamp_by_set(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetId = new pb_data.DataSetId();
-    dataSetId.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetId.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.readDataTimestampBySet(dataSetId, metadata(server))
-        .then(response => new Date(response.toObject().timestamp / 1000));
-}
-
-/**
- * Read multiple data set timestamp by last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<Date[]>} data set timestamp
- */
-export async function list_data_timestamp_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataTimestampBySetLastTime(dataSetTime, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
- * Read multiple data set timestamp by range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request data set range: set_id, begin, end
- * @returns {Promise<Date[]>} data set timestamp
- */
-export async function list_data_timestamp_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataTimestampBySetRangeTime(dataSetRange, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
  * Count data
  * @param {ServerConfig} server server configuration: address, token
  * @param {DataTime} request data count: device_id, model_id
@@ -862,50 +708,5 @@ export async function count_data_by_ids_range_time(server, request) {
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
     dataIdsRange.setTag(request.tag);
     return client.countDataByIdsRangeTime(dataIdsRange, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<number>} data count
- */
-export async function count_data_by_set(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
-    return client.countDataBySet(dataSetTime, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id and last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<number>} data count
- */
-export async function count_data_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.countDataBySetLastTime(dataSetTime, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id and range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request data set range: set_id, begin, end
- * @returns {Promise<number>} data count
- */
-export async function count_data_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.device_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.countDataBySetRangeTime(dataSetRange, metadata(server))
         .then(response => response.toObject().count);
 }

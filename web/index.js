@@ -5158,12 +5158,14 @@ function get_data_schema_vec(r) {
  * @typedef {Object} DataSetId
  * @property {Uuid} set_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
  * @typedef {Object} DataSetTime
  * @property {Uuid} set_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -5171,13 +5173,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid} set_id
  * @property {Date} begin
  * @property {Date} end
- */
-
-/**
- * @typedef {Object} DataSetNumber
- * @property {Uuid} set_id
- * @property {Date} timestamp
- * @property {number} number
+ * @property {?number} tag
  */
 
 /**
@@ -5185,6 +5181,7 @@ function get_data_schema_vec(r) {
  * @property {Uuid} set_id
  * @property {Date} timestamp
  * @property {(number|bigint|string|Uint8Array|boolean)[]} data
+ * @property {?number} tag
  */
 
 /**
@@ -5195,7 +5192,8 @@ function get_data_set_schema(r) {
     return {
         set_id: base64_to_uuid_hex(r.setId),
         timestamp: new Date(r.timestamp / 1000),
-        data: get_data_values(r.dataBytes, r.dataTypeList)
+        data: get_data_values(r.dataBytes, r.dataTypeList),
+        tag: r.tag ?? Tag.DEFAULT
     };
 }
 
@@ -5386,7 +5384,7 @@ async function list_data_by_ids_number_before(server, request) {
 /**
  * Read multiple data by uuid list and specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @param {DataIdsNumber} request data id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_by_ids_number_after(server, request) {
@@ -5402,87 +5400,9 @@ async function list_data_by_ids_number_after(server, request) {
 }
 
 /**
- * Read multiple data by set uuid and specific time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_by_set_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetTime(dataSetTime, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataBySetLastTime(dataSetTime, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request dataset range: set_id, begin, end
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataBySetRangeTime(dataSetRange, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and specific time and number before
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_by_set_number_before(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetNumber = new pb_data.DataSetNumber();
-    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    dataSetNumber.setNumber(request.number);
-    return client.listDataBySetNumberBefore(dataSetNumber, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple data by set uuid and specific time and number after
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_by_set_number_after(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetNumber = new pb_data.DataSetNumber();
-    dataSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    dataSetNumber.setNumber(request.number);
-    return client.listDataBySetNumberAfter(dataSetNumber, metadata(server))
-        .then(response => get_data_schema_vec(response.toObject().resultsList));
-}
-
-/**
  * Read a dataset by id
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetId} request dataset id: set_id, timestamp
+ * @param {DataSetId} request dataset id: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema>} data schema: set_id, timestamp, data
  */
 async function read_data_set(server, request) {
@@ -5490,6 +5410,7 @@ async function read_data_set(server, request) {
     const datasetId = new pb_data.DataSetId();
     datasetId.setSetId(uuid_hex_to_base64(request.set_id));
     datasetId.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetId.setTag(request.tag);
     return client.readDataSet(datasetId, metadata(server))
         .then(response => get_data_set_schema(response.toObject().result));
 }
@@ -5497,7 +5418,7 @@ async function read_data_set(server, request) {
 /**
  * Read multiple dataset by specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @param {DataSetTime} request dataset time: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_set_by_time(server, request) {
@@ -5505,6 +5426,7 @@ async function list_data_set_by_time(server, request) {
     const datasetTime = new pb_data.DataSetTime();
     datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
     datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetTime.setTag(request.tag);
     return client.listDataSetByTime(datasetTime, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
@@ -5512,7 +5434,7 @@ async function list_data_set_by_time(server, request) {
 /**
  * Read multiple dataset by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request dataset time: set_id, timestamp
+ * @param {DataSetTime} request dataset time: set_id, timestamp, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_set_by_last_time(server, request) {
@@ -5520,6 +5442,7 @@ async function list_data_set_by_last_time(server, request) {
     const datasetTime = new pb_data.DataSetTime();
     datasetTime.setSetId(uuid_hex_to_base64(request.set_id));
     datasetTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    datasetTime.setTag(request.tag);
     return client.listDataSetByLastTime(datasetTime, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
@@ -5527,7 +5450,7 @@ async function list_data_set_by_last_time(server, request) {
 /**
  * Read multiple dataset by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request dataset range: set_id, begin, end
+ * @param {DataSetRange} request dataset range: set_id, begin, end, tag
  * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
  */
 async function list_data_set_by_range_time(server, request) {
@@ -5536,39 +5459,8 @@ async function list_data_set_by_range_time(server, request) {
     datasetRange.setSetId(uuid_hex_to_base64(request.set_id));
     datasetRange.setBegin(request.begin.valueOf() * 1000);
     datasetRange.setEnd(request.end.valueOf() * 1000);
+    datasetRange.setTag(request.tag);
     return client.listDataSetByRangeTime(datasetRange, metadata(server))
-        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple dataset by specific time and number before
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_set_by_number_before(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataSetByNumberBefore(datasetNumber, metadata(server))
-        .then(response => get_data_set_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read multiple dataset by specific time and number after
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetNumber} request dataset time and number: set_id, timestamp, number
- * @returns {Promise<DataSetSchema[]>} data schema: device_id, model_id, timestamp, data
- */
-async function list_data_set_by_number_after(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const datasetNumber = new pb_data.DataSetNumber();
-    datasetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    datasetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    datasetNumber.setNumber(request.number);
-    return client.listDataSetByNumberAfter(datasetNumber, metadata(server))
         .then(response => get_data_set_schema_vec(response.toObject().resultsList));
 }
 
@@ -5748,52 +5640,6 @@ async function list_data_timestamp_by_ids_range_time(server, request) {
 }
 
 /**
- * Read a data set timestamp by id
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetId} request data set id: set_id, timestamp
- * @returns {Promise<Date>} data set timestamp
- */
-async function read_data_timestamp_by_set(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetId = new pb_data.DataSetId();
-    dataSetId.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetId.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.readDataTimestampBySet(dataSetId, metadata(server))
-        .then(response => new Date(response.toObject().timestamp / 1000));
-}
-
-/**
- * Read multiple data set timestamp by last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<Date[]>} data set timestamp
- */
-async function list_data_timestamp_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listDataTimestampBySetLastTime(dataSetTime, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
- * Read multiple data set timestamp by range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request data set range: set_id, begin, end
- * @returns {Promise<Date[]>} data set timestamp
- */
-async function list_data_timestamp_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.set_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listDataTimestampBySetRangeTime(dataSetRange, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
  * Count data
  * @param {ServerConfig} server server configuration: address, token
  * @param {DataTime} request data count: device_id, model_id
@@ -5891,51 +5737,6 @@ async function count_data_by_ids_range_time(server, request) {
     dataIdsRange.setEnd(request.end.valueOf() * 1000);
     dataIdsRange.setTag(request.tag);
     return client.countDataByIdsRangeTime(dataIdsRange, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<number>} data count
- */
-async function count_data_by_set(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
-    return client.countDataBySet(dataSetTime, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id and last time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetTime} request data set time: set_id, timestamp
- * @returns {Promise<number>} data count
- */
-async function count_data_by_set_last_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetTime = new pb_data.DataSetTime();
-    dataSetTime.setSetId(uuid_hex_to_base64(request.device_id));
-    dataSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.countDataBySetLastTime(dataSetTime, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data by set id and range time
- * @param {ServerConfig} server server configuration: address, token
- * @param {DataSetRange} request data set range: set_id, begin, end
- * @returns {Promise<number>} data count
- */
-async function count_data_by_set_range_time(server, request) {
-    const client = new pb_data.DataServicePromiseClient(server.address, null, null);
-    const dataSetRange = new pb_data.DataSetRange();
-    dataSetRange.setSetId(uuid_hex_to_base64(request.device_id));
-    dataSetRange.setBegin(request.begin.valueOf() * 1000);
-    dataSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.countDataBySetRangeTime(dataSetRange, metadata(server))
         .then(response => response.toObject().count);
 }
 
@@ -6064,9 +5865,17 @@ function get_buffer_ids(r) {
  */
 
 /**
+ * @typedef {Object} BufferSetId
+ * @property {Uuid} set_id
+ * @property {Date} timestamp
+ * @property {?number} tag
+ */
+
+/**
  * @typedef {Object} BufferSetTime
  * @property {Uuid} set_id
  * @property {Date} timestamp
+ * @property {?number} tag
  */
 
 /**
@@ -6074,25 +5883,7 @@ function get_buffer_ids(r) {
  * @property {Uuid} set_id
  * @property {Date} begin
  * @property {Date} end
- */
-
-/**
- * @typedef {Object} BufferSetNumber
- * @property {Uuid} set_id
- * @property {Date} timestamp
- * @property {number} number
- */
-
-/**
- * @typedef {Object} BufferSetSelector
- * @property {Uuid} set_id
- */
-
-/**
- * @typedef {Object} BuffersSetSelector
- * @property {Uuid} set_id
- * @property {number} number
- * @property {number} offset
+ * @property {?number} tag
  */
 
 /**
@@ -6589,142 +6380,67 @@ async function list_buffer_last_offset_by_ids(server, request) {
 }
 
 /**
- * Read data buffers by set uuid and specific time
+ * Read a data buffer set by time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetTime} request data buffer set time: set_id, timestamp
+ * @param {BufferSetId} request data buffer set id: set_id, timestamp, tag
+ * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag
+ */
+async function read_buffer_set(server, request) {
+    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
+    const bufferSetId = new pb_buffer.BufferSetId();
+    bufferSetId.setSetId(uuid_hex_to_base64(request.set_id));
+    bufferSetId.setTimestamp(request.timestamp.valueOf() * 1000);
+    bufferSetId.setTag(request.tag);
+    return client.readBufferSet(bufferSetId, metadata(server))
+        .then(response => get_buffer_schema(response.toObject().result));
+}
+
+/**
+ * Read data buffer sets by specific time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {BufferSetTime} request data buffer set id: set_id, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-async function list_buffer_by_set_time(server, request) {
+async function list_buffer_set_by_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetTime = new pb_buffer.BufferSetTime();
     bufferSetTime.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listBufferBySetTime(bufferSetTime, metadata(server))
+    bufferSetTime.setTag(request.tag);
+    return client.listBufferSetByTime(bufferSetTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
- * Read data buffers by set uuid and last time
+ * Read data buffer sets by last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetTime} request data buffer set time: set_id, timestamp
+ * @param {BufferSetTime} request data buffer set id: set_id, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-async function list_buffer_by_set_last_time(server, request) {
+async function list_buffer_set_by_last_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetTime = new pb_buffer.BufferSetTime();
     bufferSetTime.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
-    return client.listBufferBySetLastTime(bufferSetTime, metadata(server))
+    bufferSetTime.setTag(request.tag);
+    return client.listBufferSetByLastTime(bufferSetTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
- * Read data buffers by set uuid and range time
+ * Read data buffer sets by range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetRange} request data buffer set range: set_id, begin, end
+ * @param {BufferSetRange} request data buffer set range: set_id, begin, end, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-async function list_buffer_by_set_range_time(server, request) {
+async function list_buffer_set_by_range_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetRange = new pb_buffer.BufferSetRange();
     bufferSetRange.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetRange.setBegin(request.begin.valueOf() * 1000);
     bufferSetRange.setEnd(request.end.valueOf() * 1000);
-    return client.listBufferBySetRangeTime(bufferSetRange, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read data buffers by set uuid, specific time and number before
- * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_by_set_number_before(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferSetNumber = new pb_buffer.BufferSetNumber();
-    bufferSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    bufferSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    bufferSetNumber.setNumber(request.number);
-    return client.listBufferBySetNumberBefore(bufferSetNumber, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read data buffers by set uuid, specific time and number after
- * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetNumber} request data buffer set time and number: set_id, timestamp, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_by_set_number_after(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferSetNumber = new pb_buffer.BufferSetNumber();
-    bufferSetNumber.setSetId(uuid_hex_to_base64(request.set_id));
-    bufferSetNumber.setTimestamp(request.timestamp.valueOf() * 1000);
-    bufferSetNumber.setNumber(request.number);
-    return client.listBufferBySetNumberAfter(bufferSetNumber, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read first of data buffers by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_first_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setNumber(request.number);
-    return client.listBufferFirstBySet(buffersSetSelector, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read first of data buffers with offset by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_first_offset_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setNumber(request.number);
-    buffersSetSelector.setOffset(request.offset);
-    return client.listBufferFirstOffsetBySet(buffersSetSelector, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read last of data buffers by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, number
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_last_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setNumber(request.number);
-    return client.listBufferLastBySet(buffersSetSelector, metadata(server))
-        .then(response => get_buffer_schema_vec(response.toObject().resultsList));
-}
-
-/**
- * Read last of data buffers with offset by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, number, offset
- * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
- */
-async function list_buffer_last_offset_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setNumber(request.number);
-    buffersSetSelector.setOffset(request.offset);
-    return client.listBufferLastOffsetBySet(buffersSetSelector, metadata(server))
+    bufferSetRange.setTag(request.tag);
+    return client.listBufferSetByRangeTime(bufferSetRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -6984,38 +6700,6 @@ async function list_buffer_timestamp_last_by_ids(server, request) {
 }
 
 /**
- * Read first of data buffers timestamp by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, tag, number
- * @returns {Promise<Date>} data buffer timestamp
- */
-async function list_buffer_timestamp_first_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setTag(request.tag);
-    buffersSetSelector.setNumber(request.number);
-    return client.listBufferTimestampFirstBySet(buffersSetSelector, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
- * Read last of data buffers timestamp by set uuid
- * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersSetSelector} request data buffer set selector: set_id, tag, number
- * @returns {Promise<Date>} data buffer timestamp
- */
-async function list_buffer_timestamp_last_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersSetSelector = new pb_buffer.BuffersSetSelector();
-    buffersSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    buffersSetSelector.setTag(request.tag);
-    buffersSetSelector.setNumber(request.number);
-    return client.listBufferTimestampLastBySet(buffersSetSelector, metadata(server))
-        .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
-}
-
-/**
  * Count data buffers
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferSelector} request data buffer selector: device_id, model_id, tag
@@ -7052,21 +6736,6 @@ async function count_buffer_by_ids(server, request) {
     }
     bufferIdsSelector.setTag(request.tag);
     return client.countBufferByIds(bufferIdsSelector, metadata(server))
-        .then(response => response.toObject().count);
-}
-
-/**
- * Count data buffers by set id
- * @param {ServerConfig} server server configuration: address, token
- * @param {BufferSetSelector} request data buffer set selector: set_id, tag
- * @returns {Promise<number>} data buffer count
- */
-async function count_buffer_by_set(server, request) {
-    const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferSetSelector = new pb_buffer.BufferSetSelector();
-    bufferSetSelector.setSetId(uuid_hex_to_base64(request.set_id));
-    bufferSetSelector.setTag(request.tag);
-    return client.countBufferBySet(bufferSetSelector, metadata(server))
         .then(response => response.toObject().count);
 }
 
@@ -7861,16 +7530,12 @@ var index = /*#__PURE__*/Object.freeze({
     add_type_model: add_type_model,
     count_buffer: count_buffer,
     count_buffer_by_ids: count_buffer_by_ids,
-    count_buffer_by_set: count_buffer_by_set,
     count_data: count_data,
     count_data_by_ids: count_data_by_ids,
     count_data_by_ids_last_time: count_data_by_ids_last_time,
     count_data_by_ids_range_time: count_data_by_ids_range_time,
     count_data_by_last_time: count_data_by_last_time,
     count_data_by_range_time: count_data_by_range_time,
-    count_data_by_set: count_data_by_set,
-    count_data_by_set_last_time: count_data_by_set_last_time,
-    count_data_by_set_range_time: count_data_by_set_range_time,
     create_buffer: create_buffer,
     create_buffer_multiple: create_buffer_multiple,
     create_data: create_data,
@@ -7921,30 +7586,22 @@ var index = /*#__PURE__*/Object.freeze({
     list_buffer_by_number_after: list_buffer_by_number_after,
     list_buffer_by_number_before: list_buffer_by_number_before,
     list_buffer_by_range_time: list_buffer_by_range_time,
-    list_buffer_by_set_last_time: list_buffer_by_set_last_time,
-    list_buffer_by_set_number_after: list_buffer_by_set_number_after,
-    list_buffer_by_set_number_before: list_buffer_by_set_number_before,
-    list_buffer_by_set_range_time: list_buffer_by_set_range_time,
-    list_buffer_by_set_time: list_buffer_by_set_time,
     list_buffer_by_time: list_buffer_by_time,
     list_buffer_first: list_buffer_first,
     list_buffer_first_by_ids: list_buffer_first_by_ids,
-    list_buffer_first_by_set: list_buffer_first_by_set,
     list_buffer_first_offset: list_buffer_first_offset,
     list_buffer_first_offset_by_ids: list_buffer_first_offset_by_ids,
-    list_buffer_first_offset_by_set: list_buffer_first_offset_by_set,
     list_buffer_last: list_buffer_last,
     list_buffer_last_by_ids: list_buffer_last_by_ids,
-    list_buffer_last_by_set: list_buffer_last_by_set,
     list_buffer_last_offset: list_buffer_last_offset,
     list_buffer_last_offset_by_ids: list_buffer_last_offset_by_ids,
-    list_buffer_last_offset_by_set: list_buffer_last_offset_by_set,
+    list_buffer_set_by_last_time: list_buffer_set_by_last_time,
+    list_buffer_set_by_range_time: list_buffer_set_by_range_time,
+    list_buffer_set_by_time: list_buffer_set_by_time,
     list_buffer_timestamp_first: list_buffer_timestamp_first,
     list_buffer_timestamp_first_by_ids: list_buffer_timestamp_first_by_ids,
-    list_buffer_timestamp_first_by_set: list_buffer_timestamp_first_by_set,
     list_buffer_timestamp_last: list_buffer_timestamp_last,
     list_buffer_timestamp_last_by_ids: list_buffer_timestamp_last_by_ids,
-    list_buffer_timestamp_last_by_set: list_buffer_timestamp_last_by_set,
     list_data_by_ids_last_time: list_data_by_ids_last_time,
     list_data_by_ids_number_after: list_data_by_ids_number_after,
     list_data_by_ids_number_before: list_data_by_ids_number_before,
@@ -7954,23 +7611,14 @@ var index = /*#__PURE__*/Object.freeze({
     list_data_by_number_after: list_data_by_number_after,
     list_data_by_number_before: list_data_by_number_before,
     list_data_by_range_time: list_data_by_range_time,
-    list_data_by_set_last_time: list_data_by_set_last_time,
-    list_data_by_set_number_after: list_data_by_set_number_after,
-    list_data_by_set_number_before: list_data_by_set_number_before,
-    list_data_by_set_range_time: list_data_by_set_range_time,
-    list_data_by_set_time: list_data_by_set_time,
     list_data_by_time: list_data_by_time,
     list_data_set_by_last_time: list_data_set_by_last_time,
-    list_data_set_by_number_after: list_data_set_by_number_after,
-    list_data_set_by_number_before: list_data_set_by_number_before,
     list_data_set_by_range_time: list_data_set_by_range_time,
     list_data_set_by_time: list_data_set_by_time,
     list_data_timestamp_by_ids_last_time: list_data_timestamp_by_ids_last_time,
     list_data_timestamp_by_ids_range_time: list_data_timestamp_by_ids_range_time,
     list_data_timestamp_by_last_time: list_data_timestamp_by_last_time,
     list_data_timestamp_by_range_time: list_data_timestamp_by_range_time,
-    list_data_timestamp_by_set_last_time: list_data_timestamp_by_set_last_time,
-    list_data_timestamp_by_set_range_time: list_data_timestamp_by_set_range_time,
     list_device_by_gateway: list_device_by_gateway,
     list_device_by_ids: list_device_by_ids,
     list_device_by_name: list_device_by_name,
@@ -8029,13 +7677,13 @@ var index = /*#__PURE__*/Object.freeze({
     read_buffer_by_time: read_buffer_by_time,
     read_buffer_first: read_buffer_first,
     read_buffer_last: read_buffer_last,
+    read_buffer_set: read_buffer_set,
     read_buffer_timestamp_first: read_buffer_timestamp_first,
     read_buffer_timestamp_last: read_buffer_timestamp_last,
     read_data: read_data,
     read_data_set: read_data_set,
     read_data_timestamp: read_data_timestamp,
     read_data_timestamp_by_ids: read_data_timestamp_by_ids,
-    read_data_timestamp_by_set: read_data_timestamp_by_set,
     read_device: read_device,
     read_device_by_sn: read_device_by_sn,
     read_device_config: read_device_config,
@@ -8084,4 +7732,4 @@ var index = /*#__PURE__*/Object.freeze({
     update_type: update_type
 });
 
-export { DataType, Tag, add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_buffer_by_set, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, count_data_by_set, count_data_by_set_last_time, count_data_by_set_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_buffer_multiple, create_data, create_data_multiple, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_role_profile, create_set, create_set_template, create_slice, create_slice_set, create_tag, create_type, create_user, create_user_profile, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_buffer_by_time, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_log_by_time, delete_model, delete_model_config, delete_procedure, delete_role, delete_role_profile, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_tag, delete_token_by_user, delete_type, delete_user, delete_user_profile, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_set_last_time, list_buffer_by_set_number_after, list_buffer_by_set_number_before, list_buffer_by_set_range_time, list_buffer_by_set_time, list_buffer_by_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_by_set, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_first_offset_by_set, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_by_set, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_last_offset_by_set, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_first_by_set, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_buffer_timestamp_last_by_set, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_set_last_time, list_data_by_set_number_after, list_data_by_set_number_before, list_data_by_set_range_time, list_data_by_set_time, list_data_by_time, list_data_set_by_last_time, list_data_set_by_number_after, list_data_set_by_number_before, list_data_set_by_range_time, list_data_set_by_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_data_timestamp_by_set_last_time, list_data_timestamp_by_set_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_role_profile_by_role, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_tag_by_model, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, list_user_profile_by_user, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_data_timestamp_by_set, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_log_by_time, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_role_profile, read_set, read_set_template, read_slice, read_slice_set, read_tag, read_type, read_user, read_user_by_name, read_user_profile, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, swap_user_profile, update_access_token, update_api, update_auth_token, update_buffer, update_buffer_by_time, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_log_by_time, update_model, update_model_config, update_procedure, update_role, update_role_profile, update_set, update_set_template, update_slice, update_slice_set, update_tag, update_type, update_user, update_user_profile, user_login, user_login_key, user_logout, user_refresh, utility };
+export { DataType, Tag, add_group_device_member, add_group_gateway_member, add_group_model_member, add_role_access, add_set_member, add_set_template_member, add_type_model, add_user_role, index$1 as auth, count_buffer, count_buffer_by_ids, count_data, count_data_by_ids, count_data_by_ids_last_time, count_data_by_ids_range_time, count_data_by_last_time, count_data_by_range_time, create_access_token, create_api, create_auth_token, create_buffer, create_buffer_multiple, create_data, create_data_multiple, create_device, create_device_config, create_gateway, create_gateway_config, create_group_device, create_group_gateway, create_group_model, create_log, create_model, create_model_config, create_procedure, create_role, create_role_profile, create_set, create_set_template, create_slice, create_slice_set, create_tag, create_type, create_user, create_user_profile, delete_access_token, delete_api, delete_auth_token, delete_buffer, delete_buffer_by_time, delete_data, delete_device, delete_device_config, delete_gateway, delete_gateway_config, delete_group_device, delete_group_gateway, delete_group_model, delete_log, delete_log_by_time, delete_model, delete_model_config, delete_procedure, delete_role, delete_role_profile, delete_set, delete_set_template, delete_slice, delete_slice_set, delete_tag, delete_token_by_user, delete_type, delete_user, delete_user_profile, list_api_by_category, list_api_by_ids, list_api_by_name, list_api_option, list_auth_token, list_buffer, list_buffer_by_ids_last_time, list_buffer_by_ids_number_after, list_buffer_by_ids_number_before, list_buffer_by_ids_range_time, list_buffer_by_ids_time, list_buffer_by_last_time, list_buffer_by_number_after, list_buffer_by_number_before, list_buffer_by_range_time, list_buffer_by_time, list_buffer_first, list_buffer_first_by_ids, list_buffer_first_offset, list_buffer_first_offset_by_ids, list_buffer_last, list_buffer_last_by_ids, list_buffer_last_offset, list_buffer_last_offset_by_ids, list_buffer_set_by_last_time, list_buffer_set_by_range_time, list_buffer_set_by_time, list_buffer_timestamp_first, list_buffer_timestamp_first_by_ids, list_buffer_timestamp_last, list_buffer_timestamp_last_by_ids, list_data_by_ids_last_time, list_data_by_ids_number_after, list_data_by_ids_number_before, list_data_by_ids_range_time, list_data_by_ids_time, list_data_by_last_time, list_data_by_number_after, list_data_by_number_before, list_data_by_range_time, list_data_by_time, list_data_set_by_last_time, list_data_set_by_range_time, list_data_set_by_time, list_data_timestamp_by_ids_last_time, list_data_timestamp_by_ids_range_time, list_data_timestamp_by_last_time, list_data_timestamp_by_range_time, list_device_by_gateway, list_device_by_ids, list_device_by_name, list_device_by_type, list_device_config_by_device, list_device_option, list_gateway_by_ids, list_gateway_by_name, list_gateway_by_type, list_gateway_config_by_gateway, list_gateway_option, list_group_device_by_category, list_group_device_by_ids, list_group_device_by_name, list_group_device_option, list_group_gateway_by_category, list_group_gateway_by_ids, list_group_gateway_by_name, list_group_gateway_option, list_group_model_by_category, list_group_model_by_ids, list_group_model_by_name, list_group_model_option, list_log, list_log_by_last_time, list_log_by_range_time, list_log_by_time, list_model_by_category, list_model_by_ids, list_model_by_name, list_model_by_type, list_model_config_by_model, list_model_option, list_procedure_by_api, list_procedure_by_ids, list_procedure_by_name, list_procedure_option, list_role_by_api, list_role_by_ids, list_role_by_name, list_role_by_user, list_role_option, list_role_profile_by_role, list_set_by_ids, list_set_by_name, list_set_by_option, list_set_by_template, list_set_template_by_ids, list_set_template_by_name, list_set_template_by_option, list_slice_by_name_range_time, list_slice_by_name_time, list_slice_by_range_time, list_slice_by_time, list_slice_option, list_slice_set_by_name_range_time, list_slice_set_by_name_time, list_slice_set_by_range_time, list_slice_set_by_time, list_slice_set_option, list_tag_by_model, list_token_by_user, list_type_by_ids, list_type_by_name, list_type_option, list_user_by_api, list_user_by_ids, list_user_by_name, list_user_by_role, list_user_option, list_user_profile_by_user, read_access_token, read_api, read_api_by_name, read_buffer, read_buffer_by_time, read_buffer_first, read_buffer_last, read_buffer_set, read_buffer_timestamp_first, read_buffer_timestamp_last, read_data, read_data_set, read_data_timestamp, read_data_timestamp_by_ids, read_device, read_device_by_sn, read_device_config, read_gateway, read_gateway_by_sn, read_gateway_config, read_group_device, read_group_gateway, read_group_model, read_log, read_log_by_time, read_model, read_model_config, read_procedure, read_procedure_by_name, read_role, read_role_by_name, read_role_profile, read_set, read_set_template, read_slice, read_slice_set, read_tag, read_type, read_user, read_user_by_name, read_user_profile, remove_group_device_member, remove_group_gateway_member, remove_group_model_member, remove_role_access, remove_set_member, remove_set_template_member, remove_type_model, remove_user_role, index as resource, swap_set_member, swap_set_template_member, swap_user_profile, update_access_token, update_api, update_auth_token, update_buffer, update_buffer_by_time, update_device, update_device_config, update_gateway, update_gateway_config, update_group_device, update_group_gateway, update_group_model, update_log, update_log_by_time, update_model, update_model_config, update_procedure, update_role, update_role_profile, update_set, update_set_template, update_slice, update_slice_set, update_tag, update_type, update_user, update_user_profile, user_login, user_login_key, user_logout, user_refresh, utility };

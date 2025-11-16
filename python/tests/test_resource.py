@@ -219,13 +219,8 @@ def test_resource():
 
     # read data set and data using set
     data_set = resource.read_data_set(set_id, timestamp_1)
-    data_by_set = resource.list_data_by_set_time(set_id, timestamp_1)
-    data_by_set_values = []
-    for data in data_by_set: data_by_set_values.append(data.data)
     assert data_set.data[0] == direction1
     assert data_set.data[1] == direction2
-    assert [speed1, direction1] in data_by_set_values
-    assert [speed2, direction2] in data_by_set_values
 
     # delete data
     resource.delete_data(device_id1, model_id, timestamp_1)

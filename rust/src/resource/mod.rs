@@ -17,7 +17,7 @@ pub use rmcs_resource_db::schema::device::{DeviceSchema, DeviceConfigSchema, Gat
 pub use rmcs_resource_db::schema::group::{GroupModelSchema, GroupDeviceSchema, GroupGatewaySchema};
 pub use rmcs_resource_db::schema::set::{SetSchema, SetTemplateSchema, SetMember, SetTemplateMember};
 pub use rmcs_resource_db::schema::data::{DataSchema, DataSetSchema};
-pub use rmcs_resource_db::schema::buffer::BufferSchema;
+pub use rmcs_resource_db::schema::buffer::{BufferSchema, BufferSetSchema};
 pub use rmcs_resource_db::schema::slice::{SliceSchema, SliceSetSchema};
 pub use rmcs_resource_db::schema::log::LogSchema;
 pub use rmcs_resource_db::utility::tag;
@@ -959,90 +959,34 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_set_time(&self, set_id, timestamp)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_set_last_time(&self, set_id, last)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_set_range_time(&self, set_id, begin, end)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_by_set_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_set_number_before(&self, set_id, before, number)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_by_set_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize)
-        -> Result<Vec<DataSchema>, Status>
-    {
-        data::list_data_by_set_number_after(&self, set_id, after, number)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn read_data_set(&self, set_id: Uuid, timestamp: DateTime<Utc>)
+    pub async fn read_data_set(&self, set_id: Uuid, timestamp: DateTime<Utc>, tag: Option<i16>)
         -> Result<DataSetSchema, Status>
     {
-        data::read_data_set(&self, set_id, timestamp)
+        data::read_data_set(&self, set_id, timestamp, tag)
         .await
         .map(|s| s.into())
     }
 
-    pub async fn list_data_set_by_time(&self, set_id: Uuid, last: DateTime<Utc>)
+    pub async fn list_data_set_by_time(&self, set_id: Uuid, last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSetSchema>, Status>
     {
-        data::list_data_set_by_time(&self, set_id, last)
+        data::list_data_set_by_time(&self, set_id, last, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_set_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
+    pub async fn list_data_set_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSetSchema>, Status>
     {
-        data::list_data_set_by_last_time(&self, set_id, last)
+        data::list_data_set_by_last_time(&self, set_id, last, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_set_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+    pub async fn list_data_set_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSetSchema>, Status>
     {
-        data::list_data_set_by_range_time(&self, set_id, begin, end)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_set_by_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize)
-        -> Result<Vec<DataSetSchema>, Status>
-    {
-        data::list_data_set_by_number_before(&self, set_id, before, number)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_data_set_by_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize)
-        -> Result<Vec<DataSetSchema>, Status>
-    {
-        data::list_data_set_by_number_after(&self, set_id, after, number)
+        data::list_data_set_by_range_time(&self, set_id, begin, end, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -1112,28 +1056,6 @@ impl Resource {
         .await
     }
 
-    pub async fn read_data_timestamp_by_set(&self, set_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<DateTime<Utc>, Status>
-    {
-        data::read_data_timestamp_by_set(&self, set_id, timestamp)
-        .await
-        .map(|s| s.into())
-    }
-
-    pub async fn list_data_timestamp_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        data::list_data_timestamp_by_set_last_time(&self, set_id, last)
-        .await
-    }
-
-    pub async fn list_data_timestamp_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        data::list_data_timestamp_by_set_range_time(&self, set_id, begin, end)
-        .await
-    }
-
     pub async fn count_data(&self, device_id: Uuid, model_id: Uuid, tag: Option<i16>)
         -> Result<usize, Status>
     {
@@ -1173,27 +1095,6 @@ impl Resource {
         -> Result<usize, Status>
     {
         data::count_data_by_ids_range_time(&self, device_ids, model_ids, begin, end, tag)
-        .await
-    }
-
-    pub async fn count_data_by_set(&self, set_id: Uuid)
-        -> Result<usize, Status>
-    {
-        data::count_data_by_set(&self, set_id)
-        .await
-    }
-
-    pub async fn count_data_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
-        -> Result<usize, Status>
-    {
-        data::count_data_by_set_last_time(&self, set_id, last)
-        .await
-    }
-
-    pub async fn count_data_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<usize, Status>
-    {
-        data::count_data_by_set_range_time(&self, set_id, begin, end)
         .await
     }
 
@@ -1381,74 +1282,34 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_set_time(&self, set_id: Uuid, timestamp: DateTime<Utc>)
-        -> Result<Vec<BufferSchema>, Status>
+    pub async fn read_buffer_set(&self, set_id: Uuid, timestamp: DateTime<Utc>, tag: Option<i16>)
+        -> Result<BufferSetSchema, Status>
     {
-        buffer::list_buffer_by_set_time(&self, set_id, timestamp)
+        buffer::read_buffer_set(&self, set_id, timestamp, tag)
+        .await
+        .map(|s| s.into())
+    }
+
+    pub async fn list_buffer_set_by_time(&self, set_id: Uuid, last: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<BufferSetSchema>, Status>
+    {
+        buffer::list_buffer_set_by_time(&self, set_id, last, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_set_last_time(&self, set_id: Uuid, last: DateTime<Utc>)
-        -> Result<Vec<BufferSchema>, Status>
+    pub async fn list_buffer_set_by_last_time(&self, set_id: Uuid, last: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<BufferSetSchema>, Status>
     {
-        buffer::list_buffer_by_set_last_time(&self, set_id, last)
+        buffer::list_buffer_set_by_last_time(&self, set_id, last, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_set_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
-        -> Result<Vec<BufferSchema>, Status>
+    pub async fn list_buffer_set_by_range_time(&self, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<BufferSetSchema>, Status>
     {
-        buffer::list_buffer_by_set_range_time(&self, set_id, begin, end)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_by_set_number_before(&self, set_id: Uuid, before: DateTime<Utc>, number: usize)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_by_set_number_before(&self, set_id, before, number)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_by_set_number_after(&self, set_id: Uuid, after: DateTime<Utc>, number: usize)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_by_set_number_after(&self, set_id, after, number)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_first_by_set(&self, number: usize, set_id: Uuid)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_first_by_set(&self, number, set_id)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_first_offset_by_set(&self, number: usize, offset: usize, set_id: Uuid)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_first_offset_by_set(&self, number, offset, set_id)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_last_by_set(&self, number: usize, set_id: Uuid)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_last_by_set(&self, number, set_id)
-        .await
-        .map(|v| v.into_iter().map(|s| s.into()).collect())
-    }
-
-    pub async fn list_buffer_last_offset_by_set(&self, number: usize, offset: usize, set_id: Uuid)
-        -> Result<Vec<BufferSchema>, Status>
-    {
-        buffer::list_buffer_last_offset_by_set(&self, number, offset, set_id)
+        buffer::list_buffer_set_by_range_time(&self, set_id, begin, end, tag)
         .await
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
@@ -1536,20 +1397,6 @@ impl Resource {
         .await
     }
 
-    pub async fn list_buffer_timestamp_first_by_set(&self, number: usize, set_id: Uuid)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        buffer::list_buffer_timestamp_first_by_set(&self, number, set_id)
-        .await
-    }
-
-    pub async fn list_buffer_timestamp_last_by_set(&self, number: usize, set_id: Uuid)
-        -> Result<Vec<DateTime<Utc>>, Status>
-    {
-        buffer::list_buffer_timestamp_last_by_set(&self, number, set_id)
-        .await
-    }
-
     pub async fn count_buffer(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
         -> Result<usize, Status>
     {
@@ -1561,13 +1408,6 @@ impl Resource {
         -> Result<usize, Status>
     {
         buffer::count_buffer_by_ids(&self, device_ids, model_ids, tag)
-        .await
-    }
-
-    pub async fn count_buffer_by_set(&self, set_id: Uuid)
-        -> Result<usize, Status>
-    {
-        buffer::count_buffer_by_set(&self, set_id)
         .await
     }
 

@@ -448,27 +448,13 @@ describe("RMCS Resource test", function() {
         expect(dataValues).toContain(Math.round(speed_2 * 10) / 10);
     });
 
-    it("should read data set and data using set", async function() {
+    it("should read data set", async function() {
         let dataSet = await resource.read_data_set(server, {
             set_id: set_id,
             timestamp: timestamp_1
         });
-        let dataBySet = await resource.list_data_by_set_time(server, {
-            set_id: set_id,
-            timestamp: timestamp_1
-        });
-        let dataBySetValues = [];
-        for (const dataSchema of dataBySet) {
-            let dataVals = [];
-            for (const value of dataSchema.data) {
-                dataVals.push(Math.round(value * 10) / 10);
-            }
-            dataBySetValues.push(dataVals);
-        }
         expect(dataSet.data[0]).toBeCloseTo(direction_1, 0.1);
         expect(dataSet.data[1]).toBeCloseTo(direction_2, 0.1);
-        expect(dataBySetValues).toContain([Math.round(speed_1 * 10) / 10, Math.round(direction_1 * 10) / 10]);
-        expect(dataBySetValues).toContain([Math.round(speed_2 * 10) / 10, Math.round(direction_2 * 10) / 10]);
     });
 
     it("should delete a data", async function() {

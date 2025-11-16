@@ -378,38 +378,17 @@ class Resource:
     def list_data_by_ids_number_after(self, device_ids: List[UUID], model_ids: List[UUID], after: datetime, number: int, tag: Optional[int]=None) -> List[DataSchema]:
         return _data.list_data_by_ids_number_after(self, device_ids, model_ids, after, number, tag)
 
-    def list_data_by_set_time(self, set_id: UUID, timestamp: datetime) -> List[DataSchema]:
-        return _data.list_data_by_set_time(self, set_id, timestamp)
+    def read_data_set(self, set_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> DataSetSchema:
+        return _data.read_data_set(self, set_id, timestamp, tag)
 
-    def list_data_by_set_last_time(self, set_id: UUID, last: datetime) -> List[DataSchema]:
-        return _data.list_data_by_set_last_time(self, set_id, last)
+    def list_data_set_by_time(self, set_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> List[DataSetSchema]:
+        return _data.list_data_set_by_time(self, set_id, timestamp, tag)
 
-    def list_data_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DataSchema]:
-        return _data.list_data_by_set_range_time(self, set_id, begin, end)
+    def list_data_set_by_last_time(self, set_id: UUID, last: datetime, tag: Optional[int]=None) -> List[DataSetSchema]:
+        return _data.list_data_set_by_last_time(self, set_id, last, tag)
 
-    def list_data_by_set_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DataSchema]:
-        return _data.list_data_by_set_number_before(self, set_id, before, number)
-
-    def list_data_by_set_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSchema]:
-        return _data.list_data_by_set_number_after(self, set_id, after, number)
-
-    def read_data_set(self, set_id: UUID, timestamp: datetime) -> DataSetSchema:
-        return _data.read_data_set(self, set_id, timestamp)
-
-    def list_data_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[DataSetSchema]:
-        return _data.list_data_set_by_time(self, set_id, timestamp)
-
-    def list_data_set_by_last_time(self, set_id: UUID, last: datetime) -> List[DataSetSchema]:
-        return _data.list_data_set_by_last_time(self, set_id, last)
-
-    def list_data_set_by_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[DataSetSchema]:
-        return _data.list_data_set_by_range_time(self, set_id, begin, end)
-
-    def list_data_set_by_number_before(self, set_id: UUID, before: datetime, number: int) -> List[DataSetSchema]:
-        return _data.list_data_set_by_number_before(self, set_id, before, number)
-
-    def list_data_set_by_number_after(self, set_id: UUID, after: datetime, number: int) -> List[DataSetSchema]:
-        return _data.list_data_set_by_number_after(self, set_id, after, number)
+    def list_data_set_by_range_time(self, set_id: UUID, begin: datetime, end: datetime, tag: Optional[int]=None) -> List[DataSetSchema]:
+        return _data.list_data_set_by_range_time(self, set_id, begin, end, tag)
 
     def create_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], tag: Optional[int]=None):
         return _data.create_data(self, device_id, model_id, timestamp, data, tag)
@@ -438,15 +417,6 @@ class Resource:
     def list_data_timestamp_by_ids_range_time(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime, tag: Optional[int]=None) -> List[datetime]:
         return _data.list_data_timestamp_by_ids_range_time(self, device_ids, model_ids, begin, end, tag)
 
-    def read_data_timestamp_by_set(self, set_id: UUID, timestamp: datetime) -> datetime:
-        return _data.read_data_timestamp_by_set(self, set_id, timestamp)
-
-    def list_data_timestamp_by_set_last_time(self, set_id: UUID, last: datetime) -> List[datetime]:
-        return _data.list_data_timestamp_by_set_last_time(self, set_id, last)
-
-    def list_data_timestamp_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[datetime]:
-        return _data.list_data_timestamp_by_set_range_time(self, set_id, begin, end)
-
     def count_data(self, device_id: UUID, model_id: UUID, tag: Optional[int]=None) -> int:
         return _data.count_data(self, device_id, model_id, tag)
 
@@ -464,15 +434,6 @@ class Resource:
 
     def count_data_by_ids_range_time(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime, tag: Optional[int]=None) -> int:
         return _data.count_data_by_ids_range_time(self, device_ids, model_ids, begin, end, tag)
-
-    def count_data_by_set(self, set_id: UUID) -> int:
-        return _data.count_data_by_set(self, set_id)
-
-    def count_data_by_set_last_time(self, set_id: UUID, last: datetime) -> int:
-        return _data.count_data_by_set_last_time(self, set_id, last)
-
-    def count_data_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> int:
-        return _data.count_data_by_set_range_time(self, set_id, begin, end)
 
     def read_buffer(self, id: int) -> BufferSchema:
         return _buffer.read_buffer(self, id)
@@ -543,32 +504,17 @@ class Resource:
     def list_buffer_last_offset_by_ids(self, number: int, offset: int, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_last_offset_by_ids(self, number, offset, device_ids, model_ids, tag)
 
-    def list_buffer_by_set_time(self, set_id: UUID, timestamp: datetime) -> List[BufferSchema]:
-        return _buffer.list_buffer_by_set_time(self, set_id, timestamp)
+    def read_buffer_set(self, set_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> BufferSchema:
+        return _buffer.read_buffer_set(self, set_id, timestamp, tag)
 
-    def list_buffer_by_set_last_time(self, set_id: UUID, last: datetime) -> List[BufferSchema]:
-        return _buffer.list_buffer_by_set_last_time(self, set_id, last)
+    def list_buffer_set_by_time(self, set_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_set_by_time(self, set_id, timestamp, tag)
 
-    def list_buffer_by_set_range_time(self, set_id: UUID, begin: datetime, end: datetime) -> List[BufferSchema]:
-        return _buffer.list_buffer_by_set_range_time(self, set_id, begin, end)
+    def list_buffer_set_by_last_time(self, set_id: UUID, last: datetime, tag: Optional[int]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_set_by_last_time(self, set_id, last, tag)
 
-    def list_buffer_by_set_number_before(self, set_id: UUID, before: datetime, number: int) -> List[BufferSchema]:
-        return _buffer.list_buffer_by_set_number_before(self, set_id, before, number)
-
-    def list_buffer_by_set_number_after(self, set_id: UUID, after: datetime, number: int) -> List[BufferSchema]:
-        return _buffer.list_buffer_by_set_number_after(self, set_id, after, number)
-
-    def list_buffer_first_by_set(self, number: int, set_id: UUID) -> List[BufferSchema]:
-        return _buffer.list_buffer_first_by_set(self, number, set_id)
-
-    def list_buffer_first_offset_by_set(self, number: int, offset: int, set_id: UUID) -> List[BufferSchema]:
-        return _buffer.list_buffer_first_offset_by_set(self, number, offset, set_id)
-
-    def list_buffer_last_by_set(self, number: int, set_id: UUID) -> List[BufferSchema]:
-        return _buffer.list_buffer_last_by_set(self, number, set_id)
-
-    def list_buffer_last_offset_by_set(self, number: int, offset: int, set_id: UUID) -> List[BufferSchema]:
-        return _buffer.list_buffer_last_offset_by_set(self, number, offset, set_id)
+    def list_buffer_set_by_range_time(self, set_id: UUID, begin: datetime, end: datetime, tag: Optional[int]=None) -> List[BufferSchema]:
+        return _buffer.list_buffer_set_by_range_time(self, set_id, begin, end, tag)
 
     def create_buffer(self, device_id: UUID, model_id: UUID, timestamp: datetime, data: List[Union[int, float, str, bool, None]], tag: Optional[int]=None) -> int:
         return _buffer.create_buffer(self, device_id, model_id, timestamp, data, tag)
@@ -606,20 +552,11 @@ class Resource:
     def list_buffer_timestamp_last_by_ids(self, number: int, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[datetime]:
         return _buffer.list_buffer_timestamp_last_by_ids(self, number, device_ids, model_ids, tag)
 
-    def list_buffer_timestamp_first_by_set(self, number: int, set_id: UUID) -> List[datetime]:
-        return _buffer.list_buffer_timestamp_first_by_set(self, number, set_id)
-
-    def list_buffer_timestamp_last_by_set(self, number: int, set_id: UUID) -> List[datetime]:
-        return _buffer.list_buffer_timestamp_last_by_set(self, number, set_id)
-
     def count_buffer(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> int:
         return _buffer.count_buffer(self, device_id, model_id, tag)
 
     def count_buffer_by_ids(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> int:
         return _buffer.count_buffer_by_ids(self, device_ids, model_ids, tag)
-
-    def count_buffer_by_set(self, set_id: UUID) -> int:
-        return _buffer.count_buffer_by_set(self, set_id)
 
     def read_slice(self, id: int) -> SliceSchema:
         return _slice.read_slice(self, id)
