@@ -43,7 +43,7 @@ pub(crate) async fn read_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log(resource: &Resource, ids: &[i32])
+pub(crate) async fn list_log_by_ids(resource: &Resource, ids: &[i32])
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -52,7 +52,7 @@ pub(crate) async fn list_log(resource: &Resource, ids: &[i32])
     let request = Request::new(LogIds {
         ids: ids.to_vec()
     });
-    let response = client.list_log(request)
+    let response = client.list_log_by_ids(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -76,7 +76,7 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+pub(crate) async fn list_log_by_latest(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -88,13 +88,13 @@ pub(crate) async fn list_log_by_last_time(resource: &Resource, last: DateTime<Ut
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         tag: tag.map(|i| i as i32)
     });
-    let response = client.list_log_by_last_time(request)
+    let response = client.list_log_by_latest(request)
         .await?
         .into_inner();
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+pub(crate) async fn list_log_by_range(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -107,7 +107,7 @@ pub(crate) async fn list_log_by_range_time(resource: &Resource, begin: DateTime<
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         tag: tag.map(|i| i as i32)
     });
-    let response = client.list_log_by_range_time(request)
+    let response = client.list_log_by_range(request)
         .await?
         .into_inner();
     Ok(response.results)

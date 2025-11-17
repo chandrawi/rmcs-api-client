@@ -46,13 +46,13 @@ def read_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=No
         response = stub.ReadLogByTime(request=request, metadata=resource.metadata)
         return LogSchema.from_response(response.result)
 
-def list_log(resource, ids: List[int]):
+def list_log_by_ids(resource, ids: List[int]):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         request = log_pb2.LogIds(
             ids=ids
         )
-        response = stub.ListLog(request=request, metadata=resource.metadata)
+        response = stub.ListLogByIds(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
@@ -73,7 +73,7 @@ def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=No
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
+def list_log_by_latest(resource, last: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None if device_id is None else device_id.bytes
@@ -84,12 +84,12 @@ def list_log_by_last_time(resource, last: datetime, device_id: Optional[UUID]=No
             model_id=model_bytes,
             tag=tag
         )
-        response = stub.ListLogByLastTime(request=request, metadata=resource.metadata)
+        response = stub.ListLogByLatest(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
+def list_log_by_range(resource, begin: datetime, end: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None if device_id is None else device_id.bytes
@@ -101,7 +101,7 @@ def list_log_by_range_time(resource, begin: datetime, end: datetime, device_id: 
             model_id=model_bytes,
             tag=tag
         )
-        response = stub.ListLogByRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListLogByRange(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls

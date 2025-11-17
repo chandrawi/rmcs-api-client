@@ -43,7 +43,7 @@ pub(crate) async fn list_slice_by_time(resource: &Resource, device_id: Uuid, mod
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_range_time(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_slice_by_range(resource: &Resource, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -55,7 +55,7 @@ pub(crate) async fn list_slice_by_range_time(resource: &Resource, device_id: Uui
         begin: begin.timestamp_micros(),
         end: end.timestamp_micros()
     });
-    let response = client.list_slice_by_range_time(request)
+    let response = client.list_slice_by_range(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -77,7 +77,7 @@ pub(crate) async fn list_slice_by_name_time(resource: &Resource, name: &str, tim
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_by_name_range_time(resource: &Resource, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_slice_by_name_range(resource: &Resource, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<SliceSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -88,7 +88,7 @@ pub(crate) async fn list_slice_by_name_range_time(resource: &Resource, name: &st
         begin: begin.timestamp_micros(),
         end: end.timestamp_micros()
     });
-    let response = client.list_slice_by_name_range_time(request)
+    let response = client.list_slice_by_name_range(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -197,7 +197,7 @@ pub(crate) async fn list_slice_set_by_time(resource: &Resource, set_id: Uuid, ti
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_set_by_range_time(resource: &Resource, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_slice_set_by_range(resource: &Resource, set_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<SliceSetSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -208,7 +208,7 @@ pub(crate) async fn list_slice_set_by_range_time(resource: &Resource, set_id: Uu
         begin: begin.timestamp_micros(),
         end: end.timestamp_micros()
     });
-    let response = client.list_slice_set_by_range_time(request)
+    let response = client.list_slice_set_by_range(request)
         .await?
         .into_inner();
     Ok(response.results)
@@ -230,7 +230,7 @@ pub(crate) async fn list_slice_set_by_name_time(resource: &Resource, name: &str,
     Ok(response.results)
 }
 
-pub(crate) async fn list_slice_set_by_name_range_time(resource: &Resource, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
+pub(crate) async fn list_slice_set_by_name_range(resource: &Resource, name: &str, begin: DateTime<Utc>, end: DateTime<Utc>)
     -> Result<Vec<SliceSetSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -241,7 +241,7 @@ pub(crate) async fn list_slice_set_by_name_range_time(resource: &Resource, name:
         begin: begin.timestamp_micros(),
         end: end.timestamp_micros()
     });
-    let response = client.list_slice_set_by_name_range_time(request)
+    let response = client.list_slice_set_by_name_range(request)
         .await?
         .into_inner();
     Ok(response.results)

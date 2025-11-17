@@ -56,7 +56,7 @@ def list_slice_by_time(resource, device_id: UUID, model_id: UUID, timestamp: dat
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
 
-def list_slice_by_range_time(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime):
+def list_slice_by_range(resource, device_id: UUID, model_id: UUID, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceRange(
@@ -65,7 +65,7 @@ def list_slice_by_range_time(resource, device_id: UUID, model_id: UUID, begin: d
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListSliceByRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListSliceByRange(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -82,7 +82,7 @@ def list_slice_by_name_time(resource, name: str, timestamp: datetime):
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
 
-def list_slice_by_name_range_time(resource, name: str, begin: datetime, end: datetime):
+def list_slice_by_name_range(resource, name: str, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceNameRange(
@@ -90,7 +90,7 @@ def list_slice_by_name_range_time(resource, name: str, begin: datetime, end: dat
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListSliceByNameRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListSliceByNameRange(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSchema.from_response(result))
         return ls
@@ -173,7 +173,7 @@ def list_slice_set_by_time(resource, set_id: UUID, timestamp: datetime):
         for result in response.results: ls.append(SliceSetSchema.from_response(result))
         return ls
 
-def list_slice_set_by_range_time(resource, set_id: UUID, begin: datetime, end: datetime):
+def list_slice_set_by_range(resource, set_id: UUID, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceSetRange(
@@ -181,7 +181,7 @@ def list_slice_set_by_range_time(resource, set_id: UUID, begin: datetime, end: d
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListSliceSetByRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListSliceSetByRange(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSetSchema.from_response(result))
         return ls
@@ -198,7 +198,7 @@ def list_slice_set_by_name_time(resource, name: str, timestamp: datetime):
         for result in response.results: ls.append(SliceSetSchema.from_response(result))
         return ls
 
-def list_slice_set_by_name_range_time(resource, name: str, begin: datetime, end: datetime):
+def list_slice_set_by_name_range(resource, name: str, begin: datetime, end: datetime):
     with grpc.insecure_channel(resource.address) as channel:
         stub = slice_pb2_grpc.SliceServiceStub(channel)
         request = slice_pb2.SliceNameRange(
@@ -206,7 +206,7 @@ def list_slice_set_by_name_range_time(resource, name: str, begin: datetime, end:
             begin=int(begin.timestamp()*1000000),
             end=int(end.timestamp()*1000000)
         )
-        response = stub.ListSliceSetByNameRangeTime(request=request, metadata=resource.metadata)
+        response = stub.ListSliceSetByNameRange(request=request, metadata=resource.metadata)
         ls = []
         for result in response.results: ls.append(SliceSetSchema.from_response(result))
         return ls

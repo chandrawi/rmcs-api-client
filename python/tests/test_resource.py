@@ -179,7 +179,7 @@ def test_resource():
     assert len(ids) == 2
 
     # read buffers from a device group
-    buffers_group = resource.list_buffer_first_by_ids(100, group_device.devices, None, None)
+    buffers_group = resource.list_buffer_group_first(100, group_device.devices, None, None)
     assert buffers_group[0].data == raw_1
     assert buffers_group[1].data == raw_2
 
@@ -210,7 +210,7 @@ def test_resource():
     assert Tag.DEFAULT == data.tag
 
     # read data from a device group
-    data_group = resource.list_data_by_ids_time(group_device.devices, [model_id,], timestamp_1)
+    data_group = resource.list_data_group_by_time(group_device.devices, [model_id,], timestamp_1)
     data_values = []
     for data in data_group:
         for value in data.data: data_values.append(value)
@@ -266,7 +266,7 @@ def test_resource():
     # create system log
     log_id = resource.create_log(timestamp_1, device_id1, None, "testing success", Tag.ERROR_UNKNOWN)
     # read log
-    logs = resource.list_log_by_range_time(timestamp_1, datetime.now(), None, None, None)
+    logs = resource.list_log_by_range(timestamp_1, datetime.now(), None, None, None)
     log_filter = filter(lambda x: x.device_id == device_id1 and x.timestamp == timestamp_1, logs)
     log = list(log_filter)[0]
     assert log.value == "testing success"

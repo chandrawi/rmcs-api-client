@@ -203,14 +203,14 @@ export async function list_slice_by_time(server, request) {
  * @param {SliceRange} request data slice range: device_id, model_id, begin, end
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_range_time(server, request) {
+export async function list_slice_by_range(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceRange = new pb_slice.SliceRange();
     sliceRange.setDeviceId(uuid_hex_to_base64(request.device_id));
     sliceRange.setModelId(uuid_hex_to_base64(request.model_id));
     sliceRange.setBegin(request.begin.valueOf() * 1000);
     sliceRange.setEnd(request.end.valueOf() * 1000);
-    return client.listSliceByRangeTime(sliceRange, metadata(server))
+    return client.listSliceByRange(sliceRange, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
@@ -235,13 +235,13 @@ export async function list_slice_by_name_time(server, request) {
  * @param {SliceNameRange} request data slice name and range: name, begin, end
  * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_by_name_range_time(server, request) {
+export async function list_slice_by_name_range(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceNameRange = new pb_slice.SliceNameRange();
     sliceNameRange.setName(request.name);
     sliceNameRange.setBegin(request.begin.valueOf() * 1000);
     sliceNameRange.setEnd(request.end.valueOf() * 1000);
-    return client.listSliceByNameRangeTime(sliceNameRange, metadata(server))
+    return client.listSliceByNameRange(sliceNameRange, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
@@ -361,13 +361,13 @@ export async function list_slice_set_by_time(server, request) {
  * @param {SliceSetRange} request data set slice range: set_id, begin, end
  * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_set_by_range_time(server, request) {
+export async function list_slice_set_by_range(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceRange = new pb_slice.SliceSetRange();
     sliceRange.setSetId(uuid_hex_to_base64(request.set_id));
     sliceRange.setBegin(request.begin.valueOf() * 1000);
     sliceRange.setEnd(request.end.valueOf() * 1000);
-    return client.listSliceSetByRangeTime(sliceRange, metadata(server))
+    return client.listSliceSetByRange(sliceRange, metadata(server))
         .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
 }
 
@@ -392,13 +392,13 @@ export async function list_slice_set_by_name_time(server, request) {
  * @param {SliceNameRange} request data set slice name and range: name, begin, end
  * @returns {Promise<SliceSetSchema[]>} data set slice schema: set_id, timestamp_begin, timestamp_end, name, description
  */
-export async function list_slice_set_by_name_range_time(server, request) {
+export async function list_slice_set_by_name_range(server, request) {
     const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
     const sliceNameRange = new pb_slice.SliceNameRange();
     sliceNameRange.setName(request.name);
     sliceNameRange.setBegin(request.begin.valueOf() * 1000);
     sliceNameRange.setEnd(request.end.valueOf() * 1000);
-    return client.listSliceSetByNameRangeTime(sliceNameRange, metadata(server))
+    return client.listSliceSetByNameRange(sliceNameRange, metadata(server))
         .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
 }
 

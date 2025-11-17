@@ -355,7 +355,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read buffers from a device group", async function() {
-        const buffers_group = await resource.list_buffer_first_by_ids(server, { number: 100, device_ids: group_device.devices });
+        const buffers_group = await resource.list_buffer_group_first(server, { number: 100, device_ids: group_device.devices });
         expect(buffers_group[0].data).toEqual(raw_1);
         expect(buffers_group[1].data).toEqual(raw_2);
     });
@@ -432,7 +432,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read data from a device group", async function() {
-        let dataGroup = await resource.list_data_by_ids_time(server, {
+        let dataGroup = await resource.list_data_group_by_time(server, {
             device_ids: group_device.devices,
             model_ids: [model_id],
             timestamp: timestamp_1,
@@ -537,7 +537,7 @@ describe("RMCS Resource test", function() {
     });
 
     it("should read system logs", async function() {
-        const logs = await resource.list_log_by_range_time(server, { begin: timestamp_1, end: new Date() });
+        const logs = await resource.list_log_by_range(server, { begin: timestamp_1, end: new Date() });
         let log;
         for (const logSchema of logs) {
             if (logSchema.timestamp.valueOf() == timestamp_1.valueOf() && logSchema.device_id == device_id_1) {

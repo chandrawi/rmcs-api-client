@@ -155,11 +155,11 @@ export async function read_log_by_time(server, request) {
  * @param {LogIds} request system log id: ids
  * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
-export async function list_log(server, request) {
+export async function list_log_by_ids(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logIds = new pb_log.LogIds();
     logIds.setIdsList(request.ids);
-    return client.listLog(logIds, metadata(server))
+    return client.listLogByIds(logIds, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
@@ -190,7 +190,7 @@ export async function list_log_by_time(server, request) {
  * @param {LogTime} request system log last time: timestamp, device_id, model_id, tag
  * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
-export async function list_log_by_last_time(server, request) {
+export async function list_log_by_latest(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logTime = new pb_log.LogTime();
     logTime.setTimestamp(request.timestamp.valueOf() * 1000);
@@ -201,7 +201,7 @@ export async function list_log_by_last_time(server, request) {
         logTime.setModelId(uuid_hex_to_base64(request.model_id));
     }
     logTime.setTag(request.tag);
-    return client.listLogByLastTime(logTime, metadata(server))
+    return client.listLogByLatest(logTime, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
@@ -211,7 +211,7 @@ export async function list_log_by_last_time(server, request) {
  * @param {LogRange} request system log time: begin, end, device_id, model_id, tag
  * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
-export async function list_log_by_range_time(server, request) {
+export async function list_log_by_range(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
     const logRange = new pb_log.LogRange();
     logRange.setBegin(request.begin.valueOf() * 1000);
@@ -223,7 +223,7 @@ export async function list_log_by_range_time(server, request) {
         logRange.setModelId(uuid_hex_to_base64(request.model_id));
     }
     logRange.setTag(request.tag);
-    return client.listLogByRangeTime(logRange, metadata(server))
+    return client.listLogByRange(logRange, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 

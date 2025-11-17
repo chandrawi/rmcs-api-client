@@ -90,7 +90,7 @@ function get_buffer_ids(r) {
  */
 
 /**
- * @typedef {Object} BufferIdsTime
+ * @typedef {Object} BufferGroupTime
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
@@ -98,7 +98,7 @@ function get_buffer_ids(r) {
  */
 
 /**
- * @typedef {Object} BufferIdsRange
+ * @typedef {Object} BufferGroupRange
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} begin
@@ -107,7 +107,7 @@ function get_buffer_ids(r) {
  */
 
 /**
- * @typedef {Object} BufferIdsNumber
+ * @typedef {Object} BufferGroupNumber
  * @property {Uuid[]} device_ids
  * @property {Uuid[]} model_ids
  * @property {Date} timestamp
@@ -116,14 +116,14 @@ function get_buffer_ids(r) {
  */
 
 /**
- * @typedef {Object} BufferIdsSelector
+ * @typedef {Object} BufferGroupSelector
  * @property {?Uuid[]} device_ids
  * @property {?Uuid[]} model_ids
  * @property {?number} tag
  */
 
 /**
- * @typedef {Object} BuffersIdsSelector
+ * @typedef {Object} BuffersGroupSelector
  * @property {number} number
  * @property {number} offset
  * @property {?Uuid[]} device_ids
@@ -250,11 +250,11 @@ export async function read_buffer_by_time(server, request) {
  * @param {BufferIds} request data buffer id: ids
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer(server, request) {
+export async function list_buffer_by_ids(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferIds = new pb_buffer.BufferIds();
     bufferIds.setIdsList(request.ids);
-    return client.listBuffer(bufferIds, metadata(server))
+    return client.listBufferByIds(bufferIds, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -281,14 +281,14 @@ export async function list_buffer_by_time(server, request) {
  * @param {BufferTime} request data buffer time: device_id, model_id, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_last_time(server, request) {
+export async function list_buffer_by_latest(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferTime = new pb_buffer.BufferTime();
     bufferTime.setDeviceId(uuid_hex_to_base64(request.device_id));
     bufferTime.setModelId(uuid_hex_to_base64(request.model_id));
     bufferTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferTime.setTag(request.tag);
-    return client.listBufferByLastTime(bufferTime, metadata(server))
+    return client.listBufferByLatest(bufferTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -298,7 +298,7 @@ export async function list_buffer_by_last_time(server, request) {
  * @param {BufferRange} request data buffer range: device_id, model_id, begin, end, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_range_time(server, request) {
+export async function list_buffer_by_range(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferRange = new pb_buffer.BufferRange();
     bufferRange.setDeviceId(uuid_hex_to_base64(request.device_id));
@@ -306,7 +306,7 @@ export async function list_buffer_by_range_time(server, request) {
     bufferRange.setBegin(request.begin.valueOf() * 1000);
     bufferRange.setEnd(request.end.valueOf() * 1000);
     bufferRange.setTag(request.tag);
-    return client.listBufferByRangeTime(bufferRange, metadata(server))
+    return client.listBufferByRange(bufferRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -475,100 +475,100 @@ export async function list_buffer_last_offset(server, request) {
 /**
  * Read data buffers by uuid list and specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
+ * @param {BufferGroupTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_ids_time(server, request) {
+export async function list_buffer_group_by_time(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsTime = new pb_buffer.BufferIdsTime();
+    const bufferIdsTime = new pb_buffer.BufferGroupTime();
     bufferIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsTime.setTag(request.tag);
-    return client.listBufferByIdsTime(bufferIdsTime, metadata(server))
+    return client.listBufferGroupByTime(bufferIdsTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data buffers by uuid list and last time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
+ * @param {BufferGroupTime} request data buffer id list and time: device_ids, model_ids, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_ids_last_time(server, request) {
+export async function list_buffer_group_by_latest(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsTime = new pb_buffer.BufferIdsTime();
+    const bufferIdsTime = new pb_buffer.BufferGroupTime();
     bufferIdsTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsTime.setTag(request.tag);
-    return client.listBufferByIdsLastTime(bufferIdsTime, metadata(server))
+    return client.listBufferGroupByLatest(bufferIdsTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data buffers by uuid list and range time
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsRange} request data buffer id list and range: device_ids, model_ids, begin, end, tag
+ * @param {BufferGroupRange} request data buffer id list and range: device_ids, model_ids, begin, end, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_ids_range_time(server, request) {
+export async function list_buffer_group_by_range(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsRange = new pb_buffer.BufferIdsRange();
+    const bufferIdsRange = new pb_buffer.BufferGroupRange();
     bufferIdsRange.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsRange.setBegin(request.begin.valueOf() * 1000);
     bufferIdsRange.setEnd(request.end.valueOf() * 1000);
     bufferIdsRange.setTag(request.tag);
-    return client.listBufferByIdsRangeTime(bufferIdsRange, metadata(server))
+    return client.listBufferGroupByRange(bufferIdsRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data buffers by uuid list, specific time and number before
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @param {BufferGroupNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_ids_number_before(server, request) {
+export async function list_buffer_group_by_number_before(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsNumber = new pb_buffer.BufferIdsNumber();
+    const bufferIdsNumber = new pb_buffer.BufferGroupNumber();
     bufferIdsNumber.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsNumber.setNumber(request.number);
     bufferIdsNumber.setTag(request.tag);
-    return client.listBufferByIdsNumberBefore(bufferIdsNumber, metadata(server))
+    return client.listBufferGroupByNumberBefore(bufferIdsNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read data buffers by uuid list, specific time and number after
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
+ * @param {BufferGroupNumber} request data buffer id list, time and number: device_ids, model_ids, timestamp, number, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_by_ids_number_after(server, request) {
+export async function list_buffer_group_by_number_after(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsNumber = new pb_buffer.BufferIdsNumber();
+    const bufferIdsNumber = new pb_buffer.BufferGroupNumber();
     bufferIdsNumber.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     bufferIdsNumber.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferIdsNumber.setNumber(request.number);
     bufferIdsNumber.setTag(request.tag);
-    return client.listBufferByIdsNumberAfter(bufferIdsNumber, metadata(server))
+    return client.listBufferGroupByNumberAfter(bufferIdsNumber, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read first of data buffers by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_first_by_ids(server, request) {
+export async function list_buffer_group_first(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -577,19 +577,19 @@ export async function list_buffer_first_by_ids(server, request) {
     }
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
-    return client.listBufferFirstByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupFirst(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read first of data buffers with offset by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_first_offset_by_ids(server, request) {
+export async function list_buffer_group_first_offset(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -599,19 +599,19 @@ export async function list_buffer_first_offset_by_ids(server, request) {
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     buffersIdsSelector.setOffset(request.offset);
-    return client.listBufferFirstOffsetByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupFirstOffset(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read last of data buffers by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_last_by_ids(server, request) {
+export async function list_buffer_group_last(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -620,19 +620,19 @@ export async function list_buffer_last_by_ids(server, request) {
     }
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
-    return client.listBufferLastByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupLast(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
 /**
  * Read last of data buffers with offset by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, offset, device_ids, model_ids, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_last_offset_by_ids(server, request) {
+export async function list_buffer_group_last_offset(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -642,7 +642,7 @@ export async function list_buffer_last_offset_by_ids(server, request) {
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
     buffersIdsSelector.setOffset(request.offset);
-    return client.listBufferLastOffsetByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupLastOffset(buffersIdsSelector, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -684,13 +684,13 @@ export async function list_buffer_set_by_time(server, request) {
  * @param {BufferSetTime} request data buffer set id: set_id, timestamp, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_set_by_last_time(server, request) {
+export async function list_buffer_set_by_latest(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetTime = new pb_buffer.BufferSetTime();
     bufferSetTime.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetTime.setTimestamp(request.timestamp.valueOf() * 1000);
     bufferSetTime.setTag(request.tag);
-    return client.listBufferSetByLastTime(bufferSetTime, metadata(server))
+    return client.listBufferSetByLatest(bufferSetTime, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -700,14 +700,14 @@ export async function list_buffer_set_by_last_time(server, request) {
  * @param {BufferSetRange} request data buffer set range: set_id, begin, end, tag
  * @returns {Promise<BufferSchema[]>} data buffer schema: id, device_id, model_id, timestamp, data, tag
  */
-export async function list_buffer_set_by_range_time(server, request) {
+export async function list_buffer_set_by_range(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
     const bufferSetRange = new pb_buffer.BufferSetRange();
     bufferSetRange.setSetId(uuid_hex_to_base64(request.set_id));
     bufferSetRange.setBegin(request.begin.valueOf() * 1000);
     bufferSetRange.setEnd(request.end.valueOf() * 1000);
     bufferSetRange.setTag(request.tag);
-    return client.listBufferSetByRangeTime(bufferSetRange, metadata(server))
+    return client.listBufferSetByRange(bufferSetRange, metadata(server))
         .then(response => get_buffer_schema_vec(response.toObject().resultsList));
 }
 
@@ -927,12 +927,12 @@ export async function list_buffer_timestamp_last(server, request) {
 /**
  * Read first of data buffers timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
-export async function list_buffer_timestamp_first_by_ids(server, request) {
+export async function list_buffer_group_timestamp_first(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -941,19 +941,19 @@ export async function list_buffer_timestamp_first_by_ids(server, request) {
     }
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
-    return client.listBufferTimestampFirstByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupTimestampFirst(buffersIdsSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
 
 /**
  * Read last of data buffers timestamp by uuid list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BuffersIdsSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
+ * @param {BuffersGroupSelector} request data buffer selector with id list: number, device_ids, model_ids, tag
  * @returns {Promise<Date>} data buffer timestamp
  */
-export async function list_buffer_timestamp_last_by_ids(server, request) {
+export async function list_buffer_group_timestamp_last(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const buffersIdsSelector = new pb_buffer.BuffersIdsSelector();
+    const buffersIdsSelector = new pb_buffer.BuffersGroupSelector();
     if (request.device_ids) {
         buffersIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -962,7 +962,7 @@ export async function list_buffer_timestamp_last_by_ids(server, request) {
     }
     buffersIdsSelector.setTag(request.tag);
     buffersIdsSelector.setNumber(request.number);
-    return client.listBufferTimestampLastByIds(buffersIdsSelector, metadata(server))
+    return client.listBufferGroupTimestampLast(buffersIdsSelector, metadata(server))
         .then(response => response.toObject().timestampsList.map((v) => new Date(v / 1000)));
 }
 
@@ -989,12 +989,12 @@ export async function count_buffer(server, request) {
 /**
  * Count data buffers by id list
  * @param {ServerConfig} server server configuration: address, token
- * @param {BufferIdsSelector} request data buffer selector with id list: device_ids, model_ids, tag
+ * @param {BufferGroupSelector} request data buffer selector with id list: device_ids, model_ids, tag
  * @returns {Promise<number>} data buffer count
  */
-export async function count_buffer_by_ids(server, request) {
+export async function count_buffer_group(server, request) {
     const client = new pb_buffer.BufferServicePromiseClient(server.address, null, null);
-    const bufferIdsSelector = new pb_buffer.BufferIdsSelector();
+    const bufferIdsSelector = new pb_buffer.BufferGroupSelector();
     if (request.device_ids) {
         bufferIdsSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
     }
@@ -1002,6 +1002,6 @@ export async function count_buffer_by_ids(server, request) {
         bufferIdsSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
     }
     bufferIdsSelector.setTag(request.tag);
-    return client.countBufferByIds(bufferIdsSelector, metadata(server))
+    return client.countBufferGroup(bufferIdsSelector, metadata(server))
         .then(response => response.toObject().count);
 }
