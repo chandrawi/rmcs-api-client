@@ -43,13 +43,15 @@ pub(crate) async fn read_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
 }
 
-pub(crate) async fn list_log(resource: &Resource, ids: Vec<i32>)
+pub(crate) async fn list_log(resource: &Resource, ids: &[i32])
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(LogIds { ids });
+    let request = Request::new(LogIds {
+        ids: ids.to_vec()
+    });
     let response = client.list_log(request)
         .await?
         .into_inner();

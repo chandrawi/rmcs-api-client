@@ -126,7 +126,7 @@ pub(crate) async fn list_data_by_number_after(resource: &Resource, device_id: Uu
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_ids_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn list_data_by_ids_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -144,7 +144,7 @@ pub(crate) async fn list_data_by_ids_time(resource: &Resource, device_ids: Vec<U
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_ids_last_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn list_data_by_ids_last_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -162,7 +162,7 @@ pub(crate) async fn list_data_by_ids_last_time(resource: &Resource, device_ids: 
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_ids_range_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn list_data_by_ids_range_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -181,7 +181,7 @@ pub(crate) async fn list_data_by_ids_range_time(resource: &Resource, device_ids:
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_ids_number_before(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize, tag: Option<i16>)
+pub(crate) async fn list_data_by_ids_number_before(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], before: DateTime<Utc>, number: usize, tag: Option<i16>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -200,7 +200,7 @@ pub(crate) async fn list_data_by_ids_number_before(resource: &Resource, device_i
     Ok(response.results)
 }
 
-pub(crate) async fn list_data_by_ids_number_after(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize, tag: Option<i16>)
+pub(crate) async fn list_data_by_ids_number_after(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], after: DateTime<Utc>, number: usize, tag: Option<i16>)
     -> Result<Vec<DataSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -288,7 +288,7 @@ pub(crate) async fn list_data_set_by_range_time(resource: &Resource, set_id: Uui
     Ok(response.results)
 }
 
-pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, tag: Option<i16>)
+pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: &[DataValue], tag: Option<i16>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -298,8 +298,8 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
         device_id: device_id.as_bytes().to_vec(),
         model_id: model_id.as_bytes().to_vec(),
         timestamp: timestamp.timestamp_micros(),
-        data_bytes: ArrayDataValue::from_vec(&data).to_bytes(),
-        data_type: ArrayDataValue::from_vec(&data).get_types().into_iter().map(|el| el.into()).collect(),
+        data_bytes: ArrayDataValue::from_vec(data).to_bytes(),
+        data_type: ArrayDataValue::from_vec(data).get_types().into_iter().map(|el| el.into()).collect(),
         tag: tag.unwrap_or(Tag::DEFAULT) as i32
     });
     client.create_data(request)
@@ -307,7 +307,7 @@ pub(crate) async fn create_data(resource: &Resource, device_id: Uuid, model_id: 
     Ok(())
 }
 
-pub(crate) async fn create_data_multiple(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>, tags: Option<Vec<i16>>)
+pub(crate) async fn create_data_multiple(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], timestamps: &[DateTime<Utc>], data: &[&[DataValue]], tags: Option<&[i16]>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -315,7 +315,7 @@ pub(crate) async fn create_data_multiple(resource: &Resource, device_ids: Vec<Uu
         DataServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
     let number = device_ids.len();
     let tags = match tags {
-        Some(value) => value,
+        Some(value) => value.to_vec(),
         None => (0..number).map(|_| Tag::DEFAULT).collect()
     };
     let numbers = vec![model_ids.len(), timestamps.len(), data.len(), tags.len()];
@@ -326,8 +326,8 @@ pub(crate) async fn create_data_multiple(resource: &Resource, device_ids: Vec<Uu
         device_id: device_ids[i].as_bytes().to_vec(),
         model_id: model_ids[i].as_bytes().to_vec(),
         timestamp: timestamps[i].timestamp_micros(),
-        data_bytes: ArrayDataValue::from_vec(&data[i]).to_bytes(),
-        data_type: ArrayDataValue::from_vec(&data[i]).get_types().into_iter().map(|el| el.into()).collect(),
+        data_bytes: ArrayDataValue::from_vec(data[i]).to_bytes(),
+        data_type: ArrayDataValue::from_vec(data[i]).get_types().into_iter().map(|el| el.into()).collect(),
         tag: tags[i] as i32
     }).collect();
     let request = Request::new(DataMultipleSchema { schemas });
@@ -408,7 +408,7 @@ pub(crate) async fn list_data_timestamp_by_range_time(resource: &Resource, devic
     Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
 }
 
-pub(crate) async fn read_data_timestamp_by_ids(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn read_data_timestamp_by_ids(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
     -> Result<DateTime<Utc>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -426,7 +426,7 @@ pub(crate) async fn read_data_timestamp_by_ids(resource: &Resource, device_ids: 
     Ok(Utc.timestamp_nanos(response.timestamp * 1000))
 }
 
-pub(crate) async fn list_data_timestamp_by_ids_last_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn list_data_timestamp_by_ids_last_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
     -> Result<Vec<DateTime<Utc>>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -444,7 +444,7 @@ pub(crate) async fn list_data_timestamp_by_ids_last_time(resource: &Resource, de
     Ok(response.timestamps.into_iter().map(|t| Utc.timestamp_nanos(t * 1000)).collect())
 }
 
-pub(crate) async fn list_data_timestamp_by_ids_range_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn list_data_timestamp_by_ids_range_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
     -> Result<Vec<DateTime<Utc>>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -518,7 +518,7 @@ pub(crate) async fn count_data_by_range_time(resource: &Resource, device_id: Uui
     Ok(response.count as usize)
 }
 
-pub(crate) async fn count_data_by_ids(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, tag: Option<i16>)
+pub(crate) async fn count_data_by_ids(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
     -> Result<usize, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -536,7 +536,7 @@ pub(crate) async fn count_data_by_ids(resource: &Resource, device_ids: Vec<Uuid>
     Ok(response.count as usize)
 }
 
-pub(crate) async fn count_data_by_ids_last_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn count_data_by_ids_last_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
     -> Result<usize, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -554,7 +554,7 @@ pub(crate) async fn count_data_by_ids_last_time(resource: &Resource, device_ids:
     Ok(response.count as usize)
 }
 
-pub(crate) async fn count_data_by_ids_range_time(resource: &Resource, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+pub(crate) async fn count_data_by_ids_range_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
     -> Result<usize, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());

@@ -276,7 +276,7 @@ pub(crate) async fn list_tag_by_model(resource: &Resource, model_id: Uuid)
     Ok(response.results)
 }
 
-pub(crate) async fn create_tag(resource: &Resource, model_id: Uuid, tag: i16, name: &str, members: Vec<i16>)
+pub(crate) async fn create_tag(resource: &Resource, model_id: Uuid, tag: i16, name: &str, members: &[i16])
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -286,7 +286,7 @@ pub(crate) async fn create_tag(resource: &Resource, model_id: Uuid, tag: i16, na
         model_id: model_id.as_bytes().to_vec(),
         tag: tag as i32,
         name: name.to_owned(),
-        members: members.into_iter().map(|t| t as i32).collect()
+        members: members.into_iter().map(|&t| t as i32).collect()
     });
     client.create_tag(request)
         .await?
@@ -294,7 +294,7 @@ pub(crate) async fn create_tag(resource: &Resource, model_id: Uuid, tag: i16, na
     Ok(())
 }
 
-pub(crate) async fn update_tag(resource: &Resource, model_id: Uuid, tag: i16, name: Option<&str>, members: Option<Vec<i16>>)
+pub(crate) async fn update_tag(resource: &Resource, model_id: Uuid, tag: i16, name: Option<&str>, members: Option<&[i16]>)
     -> Result<(), Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
@@ -304,7 +304,7 @@ pub(crate) async fn update_tag(resource: &Resource, model_id: Uuid, tag: i16, na
         model_id: model_id.as_bytes().to_vec(),
         tag: tag as i32,
         name: name.map(|s| s.to_owned()),
-        members: members.clone().unwrap_or_default().into_iter().map(|t| t as i32).collect(),
+        members: members.clone().unwrap_or_default().into_iter().map(|&t| t as i32).collect(),
         members_flag: members.is_some()
     });
     client.update_tag(request)

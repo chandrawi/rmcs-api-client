@@ -180,14 +180,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_tag(&self, model_id: Uuid, tag: i16, name: &str, members: Vec<i16>)
+    pub async fn create_tag(&self, model_id: Uuid, tag: i16, name: &str, members: &[i16])
         -> Result<(), Status>
     {
         model::create_tag(&self, model_id, tag, name, members)
         .await
     }
 
-    pub async fn update_tag(&self, model_id: Uuid, tag: i16, name: Option<&str>, members: Option<Vec<i16>>)
+    pub async fn update_tag(&self, model_id: Uuid, tag: i16, name: Option<&str>, members: Option<&[i16]>)
         -> Result<(), Status>
     {
         model::update_tag(&self, model_id, tag, name, members)
@@ -919,7 +919,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_ids_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_data_by_ids_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_ids_time(&self, device_ids, model_ids, timestamp, tag)
@@ -927,7 +927,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_data_by_ids_last_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_ids_last_time(&self, device_ids, model_ids, last, tag)
@@ -935,7 +935,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_data_by_ids_range_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_ids_range_time(&self, device_ids, model_ids, begin, end, tag)
@@ -943,7 +943,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_ids_number_before(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize, tag: Option<i16>)
+    pub async fn list_data_by_ids_number_before(&self, device_ids: &[Uuid], model_ids: &[Uuid], before: DateTime<Utc>, number: usize, tag: Option<i16>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_ids_number_before(&self, device_ids, model_ids, before, number, tag)
@@ -951,7 +951,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_data_by_ids_number_after(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize, tag: Option<i16>)
+    pub async fn list_data_by_ids_number_after(&self, device_ids: &[Uuid], model_ids: &[Uuid], after: DateTime<Utc>, number: usize, tag: Option<i16>)
         -> Result<Vec<DataSchema>, Status>
     {
         data::list_data_by_ids_number_after(&self, device_ids, model_ids, after, number, tag)
@@ -991,14 +991,14 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, tag: Option<i16>)
+    pub async fn create_data(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: &[DataValue], tag: Option<i16>)
         -> Result<(), Status>
     {
         data::create_data(&self, device_id, model_id, timestamp, data, tag)
         .await
     }
 
-    pub async fn create_data_multiple(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>, tags: Option<Vec<i16>>)
+    pub async fn create_data_multiple(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamps: &[DateTime<Utc>], data: &[&[DataValue]], tags: Option<&[i16]>)
         -> Result<(), Status>
     {
         data::create_data_multiple(&self, device_ids, model_ids, timestamps, data, tags)
@@ -1034,7 +1034,7 @@ impl Resource {
         .await
     }
 
-    pub async fn read_data_timestamp_by_ids(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, tag: Option<i16>)
+    pub async fn read_data_timestamp_by_ids(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
         -> Result<DateTime<Utc>, Status>
     {
         data::read_data_timestamp_by_ids(&self, device_ids, model_ids, timestamp, tag)
@@ -1042,14 +1042,14 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_data_timestamp_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_data_timestamp_by_ids_last_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
         data::list_data_timestamp_by_ids_last_time(&self, device_ids, model_ids, last, tag)
         .await
     }
 
-    pub async fn list_data_timestamp_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_data_timestamp_by_ids_range_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
         data::list_data_timestamp_by_ids_range_time(&self, device_ids, model_ids, begin, end, tag)
@@ -1077,21 +1077,21 @@ impl Resource {
         .await
     }
 
-    pub async fn count_data_by_ids(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, tag: Option<i16>)
+    pub async fn count_data_by_ids(&self, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
         -> Result<usize, Status>
     {
         data::count_data_by_ids(&self, device_ids, model_ids, tag)
         .await
     }
 
-    pub async fn count_data_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+    pub async fn count_data_by_ids_last_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
         -> Result<usize, Status>
     {
         data::count_data_by_ids_last_time(&self, device_ids, model_ids, last, tag)
         .await
     }
 
-    pub async fn count_data_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+    pub async fn count_data_by_ids_range_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
         -> Result<usize, Status>
     {
         data::count_data_by_ids_range_time(&self, device_ids, model_ids, begin, end, tag)
@@ -1114,7 +1114,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_buffer(&self, ids: Vec<i32>)
+    pub async fn list_buffer(&self, ids: &[i32])
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer(&self, ids)
@@ -1210,7 +1210,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_ids_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamp: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_buffer_by_ids_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_by_ids_time(&self, device_ids, model_ids, timestamp, tag)
@@ -1218,7 +1218,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_ids_last_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, last: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_buffer_by_ids_last_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], last: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_by_ids_last_time(&self, device_ids, model_ids, last, tag)
@@ -1226,7 +1226,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_ids_range_time(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+    pub async fn list_buffer_by_ids_range_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_by_ids_range_time(&self, device_ids, model_ids, begin, end, tag)
@@ -1234,7 +1234,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_ids_number_before(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, before: DateTime<Utc>, number: usize, tag: Option<i16>)
+    pub async fn list_buffer_by_ids_number_before(&self, device_ids: &[Uuid], model_ids: &[Uuid], before: DateTime<Utc>, number: usize, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_by_ids_number_before(&self, device_ids, model_ids, before, number, tag)
@@ -1242,7 +1242,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_by_ids_number_after(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, after: DateTime<Utc>, number: usize, tag: Option<i16>)
+    pub async fn list_buffer_by_ids_number_after(&self, device_ids: &[Uuid], model_ids: &[Uuid], after: DateTime<Utc>, number: usize, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_by_ids_number_after(&self, device_ids, model_ids, after, number, tag)
@@ -1250,7 +1250,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_first_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_first_by_ids(&self, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_first_by_ids(&self, number, device_ids, model_ids, tag)
@@ -1258,7 +1258,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_first_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_first_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_first_offset_by_ids(&self, number, offset, device_ids, model_ids, tag)
@@ -1266,7 +1266,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_last_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_last_by_ids(&self, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_last_by_ids(&self, number, device_ids, model_ids, tag)
@@ -1274,7 +1274,7 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn list_buffer_last_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_last_offset_by_ids(&self, number: usize, offset: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<BufferSchema>, Status>
     {
         buffer::list_buffer_last_offset_by_ids(&self, number, offset, device_ids, model_ids, tag)
@@ -1314,28 +1314,28 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Vec<DataValue>, tag: Option<i16>)
+    pub async fn create_buffer(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: &[DataValue], tag: Option<i16>)
         -> Result<i32, Status>
     {
         buffer::create_buffer(&self, device_id, model_id, timestamp, data, tag)
         .await
     }
 
-    pub async fn create_buffer_multiple(&self, device_ids: Vec<Uuid>, model_ids: Vec<Uuid>, timestamps: Vec<DateTime<Utc>>, data: Vec<Vec<DataValue>>, tags: Option<Vec<i16>>)
+    pub async fn create_buffer_multiple(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamps: &[DateTime<Utc>], data: &[&[DataValue]], tags: Option<&[i16]>)
         -> Result<Vec<i32>, Status>
     {
         buffer::create_buffer_multiple(&self, device_ids, model_ids, timestamps, data, tags)
         .await
     }
 
-    pub async fn update_buffer(&self, id: i32, data: Option<Vec<DataValue>>, tag: Option<i16>)
+    pub async fn update_buffer(&self, id: i32, data: Option<&[DataValue]>, tag: Option<i16>)
         -> Result<(), Status>
     {
         buffer::update_buffer(&self, id, data, tag.map(|s| s.into()))
         .await
     }
 
-    pub async fn update_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Option<Vec<DataValue>>, tag: Option<i16>)
+    pub async fn update_buffer_by_time(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, data: Option<&[DataValue]>, tag: Option<i16>)
         -> Result<(), Status>
     {
         buffer::update_buffer_by_time(&self, device_id, model_id, timestamp, data, tag)
@@ -1383,14 +1383,14 @@ impl Resource {
         .await
     }
 
-    pub async fn list_buffer_timestamp_first_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_timestamp_first_by_ids(&self, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
         buffer::list_buffer_timestamp_first_by_ids(&self, number, device_ids, model_ids, tag)
         .await
     }
 
-    pub async fn list_buffer_timestamp_last_by_ids(&self, number: usize, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn list_buffer_timestamp_last_by_ids(&self, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
         buffer::list_buffer_timestamp_last_by_ids(&self, number, device_ids, model_ids, tag)
@@ -1404,7 +1404,7 @@ impl Resource {
         .await
     }
 
-    pub async fn count_buffer_by_ids(&self, device_ids: Option<Vec<Uuid>>, model_ids: Option<Vec<Uuid>>, tag: Option<i16>)
+    pub async fn count_buffer_by_ids(&self, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<usize, Status>
     {
         buffer::count_buffer_by_ids(&self, device_ids, model_ids, tag)
@@ -1551,7 +1551,7 @@ impl Resource {
         .map(|s| s.into())
     }
 
-    pub async fn list_log(&self, ids: Vec<i32>)
+    pub async fn list_log(&self, ids: &[i32])
         -> Result<Vec<LogSchema>, Status>
     {
         log::list_log(&self, ids)
