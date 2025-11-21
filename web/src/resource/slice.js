@@ -32,6 +32,11 @@ function get_slice_id(r) {
 }
 
 /**
+ * @typedef {Object} SliceIds
+ * @property {number[]} ids
+ */
+
+/**
  * @typedef {Object} SliceTime
  * @property {Uuid} device_id
  * @property {Uuid} model_id
@@ -179,6 +184,20 @@ export async function read_slice(server, request) {
     sliceId.setId(request.id);
     return client.readSlice(sliceId, metadata(server))
         .then(response => get_slice_schema(response.toObject().result));
+}
+
+/**
+ * Read data slices by multiple id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceIds} request data slice multiple id: ids
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_by_ids(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceIds = new pb_slice.SliceIds();
+    sliceIds.setIdsList(request.ids);
+    return client.listSliceByIds(sliceIds, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 
 /**
@@ -338,6 +357,20 @@ export async function read_slice_set(server, request) {
     sliceId.setId(request.id);
     return client.readSliceSet(sliceId, metadata(server))
         .then(response => get_slice_set_schema(response.toObject().result));
+}
+
+/**
+ * Read data set slices by multiple id
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceIds} request data slice multiple id: ids
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_set_by_ids(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceIds = new pb_slice.SliceIds();
+    sliceIds.setIdsList(request.ids);
+    return client.listSliceSetByIds(sliceIds, metadata(server))
+        .then(response => get_slice_set_schema_vec(response.toObject().resultsList));
 }
 
 /**

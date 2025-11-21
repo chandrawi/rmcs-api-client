@@ -56,6 +56,14 @@ function get_log_ids(r) {
  */
 
 /**
+ * @typedef {Object} LogLatest
+ * @property {Date} latest
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?number} tag
+ */
+
+/**
  * @typedef {Object} LogRange
  * @property {Date} begin
  * @property {Date} end
@@ -185,23 +193,23 @@ export async function list_log_by_time(server, request) {
 }
 
 /**
- * Read system logs by last time
+ * Read system logs by latest time
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogTime} request system log last time: timestamp, device_id, model_id, tag
+ * @param {LogLatest} request system log latest: latest, device_id, model_id, tag
  * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 export async function list_log_by_latest(server, request) {
     const client = new pb_log.LogServicePromiseClient(server.address, null, null);
-    const logTime = new pb_log.LogTime();
-    logTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    const logLatest = new pb_log.LogLatest();
+    logLatest.setLatest(request.latest.valueOf() * 1000);
     if (request.device_id) {
-        logTime.setDeviceId(uuid_hex_to_base64(request.device_id));
+        logLatest.setDeviceId(uuid_hex_to_base64(request.device_id));
     }
     if (request.model_id) {
-        logTime.setModelId(uuid_hex_to_base64(request.model_id));
+        logLatest.setModelId(uuid_hex_to_base64(request.model_id));
     }
-    logTime.setTag(request.tag);
-    return client.listLogByLatest(logTime, metadata(server))
+    logLatest.setTag(request.tag);
+    return client.listLogByLatest(logLatest, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 

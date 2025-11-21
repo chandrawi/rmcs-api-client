@@ -298,7 +298,7 @@ export async function list_set_by_name(server, request) {
  * @param {SetOption} request set option: template_id, name
  * @returns {Promise<SetSchema[]>} set schema: id, template_id, name, description, members
  */
-export async function list_set_by_option(server, request) {
+export async function list_set_option(server, request) {
     const client = new pb_set.SetServicePromiseClient(server.address, null, null);
     const setOption = new pb_set.SetOption();
     if (request.template_id) {
@@ -456,7 +456,7 @@ export async function list_set_template_by_name(server, request) {
  * @param {SetTemplateOption} request set template option: name
  * @returns {Promise<SetTemplateSchema[]>} set schema: id, template_id, name, description, members
  */
-export async function list_set_template_by_option(server, request) {
+export async function list_set_template_option(server, request) {
     const client = new pb_set.SetServicePromiseClient(server.address, null, null);
     const setOption = new pb_set.SetTemplateOption();
     setOption.setName(request.name);

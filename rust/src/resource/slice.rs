@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use rmcs_resource_api::slice::slice_service_client::SliceServiceClient;
 use rmcs_resource_api::slice::{
-    SliceSchema, SliceId, SliceTime, SliceRange, SliceNameTime, SliceNameRange, SliceUpdate, SliceOption,
+    SliceSchema, SliceId, SliceIds, SliceTime, SliceRange, SliceNameTime, SliceNameRange, SliceUpdate, SliceOption,
     SliceSetSchema, SliceSetTime, SliceSetRange, SliceSetOption
 };
 use crate::resource::Resource;
@@ -24,6 +24,21 @@ pub(crate) async fn read_slice(resource: &Resource, id: i32)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(SLICE_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_slice_by_ids(resource: &Resource, ids: &[i32])
+    -> Result<Vec<SliceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SliceIds {
+        ids: ids.to_vec()
+    });
+    let response = client.list_slice_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_slice_by_time(resource: &Resource, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>)
@@ -179,6 +194,21 @@ pub(crate) async fn read_slice_set(resource: &Resource, id: i32)
         .await?
         .into_inner();
     Ok(response.result.ok_or(Status::not_found(SLICE_NOT_FOUND))?)
+}
+
+pub(crate) async fn list_slice_set_by_ids(resource: &Resource, ids: &[i32])
+    -> Result<Vec<SliceSetSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SliceIds {
+        ids: ids.to_vec()
+    });
+    let response = client.list_slice_set_by_ids(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
 }
 
 pub(crate) async fn list_slice_set_by_time(resource: &Resource, set_id: Uuid, timestamp: DateTime<Utc>)

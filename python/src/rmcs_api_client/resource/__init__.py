@@ -492,6 +492,12 @@ class Resource:
     def list_buffer_group_by_number_after(self, device_ids: List[UUID], model_ids: List[UUID], after: datetime, number: int, tag: Optional[int]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_group_by_number_after(self, device_ids, model_ids, after, number, tag)
 
+    def read_buffer_group_first(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[BufferSchema]:
+        return _buffer.read_buffer_group_first(self, device_ids, model_ids, tag)
+
+    def read_buffer_group_last(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[BufferSchema]:
+        return _buffer.read_buffer_group_last(self, device_ids, model_ids, tag)
+
     def list_buffer_group_first(self, number: int, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[BufferSchema]:
         return _buffer.list_buffer_group_first(self, number, device_ids, model_ids, tag)
 
@@ -561,6 +567,9 @@ class Resource:
     def read_slice(self, id: int) -> SliceSchema:
         return _slice.read_slice(self, id)
 
+    def list_slice_by_ids(self, ids: List[int]) -> List[SliceSchema]:
+        return _slice.list_slice_by_ids(self, ids)
+
     def list_slice_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[SliceSchema]:
         return _slice.list_slice_by_time(self, device_id, model_id, timestamp)
 
@@ -587,6 +596,9 @@ class Resource:
 
     def read_slice_set(self, id: int) -> SliceSetSchema:
         return _slice.read_slice_set(self, id)
+
+    def list_slice_set_by_ids(self, ids: List[int]) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_ids(self, ids)
 
     def list_slice_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[SliceSetSchema]:
         return _slice.list_slice_set_by_time(self, set_id, timestamp)

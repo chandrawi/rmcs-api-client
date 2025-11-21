@@ -5,7 +5,7 @@ use rmcs_resource_db::schema::value::DataValue;
 use rmcs_resource_db::tag as Tag;
 use rmcs_resource_api::log::log_service_client::LogServiceClient;
 use rmcs_resource_api::log::{
-    LogId, LogIds, LogRange, LogSchema, LogTime, LogUpdate, LogUpdateTime
+    LogId, LogIds, LogLatest, LogRange, LogSchema, LogTime, LogUpdate, LogUpdateTime
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -76,14 +76,14 @@ pub(crate) async fn list_log_by_time(resource: &Resource, timestamp: DateTime<Ut
     Ok(response.results)
 }
 
-pub(crate) async fn list_log_by_latest(resource: &Resource, last: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+pub(crate) async fn list_log_by_latest(resource: &Resource, latest: DateTime<Utc>, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
     -> Result<Vec<LogSchema>, Status>
 {
     let interceptor = TokenInterceptor(resource.access_token.clone());
     let mut client = 
         LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
-    let request = Request::new(LogTime {
-        timestamp: last.timestamp_micros(),
+    let request = Request::new(LogLatest {
+        latest: latest.timestamp_micros(),
         device_id: device_id.map(|x| x.as_bytes().to_vec()),
         model_id: model_id.map(|x| x.as_bytes().to_vec()),
         tag: tag.map(|i| i as i32)

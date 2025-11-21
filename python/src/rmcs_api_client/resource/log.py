@@ -73,13 +73,13 @@ def list_log_by_time(resource, timestamp: datetime, device_id: Optional[UUID]=No
         for result in response.results: ls.append(LogSchema.from_response(result))
         return ls
 
-def list_log_by_latest(resource, last: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
+def list_log_by_latest(resource, latest: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None):
     with grpc.insecure_channel(resource.address) as channel:
         stub = log_pb2_grpc.LogServiceStub(channel)
         device_bytes = None if device_id is None else device_id.bytes
         model_bytes = None if model_id is None else model_id.bytes
-        request = log_pb2.LogTime(
-            timestamp=int(last.timestamp()*1000000),
+        request = log_pb2.LogLatest(
+            latest=int(latest.timestamp()*1000000),
             device_id=device_bytes,
             model_id=model_bytes,
             tag=tag

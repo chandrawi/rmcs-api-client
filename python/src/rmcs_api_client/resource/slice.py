@@ -1,5 +1,5 @@
 from rmcs_resource_api import slice_pb2, slice_pb2_grpc
-from typing import Optional
+from typing import Optional, List
 from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
@@ -42,6 +42,15 @@ def read_slice(resource, id: int):
         request = slice_pb2.SliceId(id=id)
         response = stub.ReadSlice(request=request, metadata=resource.metadata)
         return SliceSchema.from_response(response.result)
+
+def list_slice_by_ids(resource, ids: List[int]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = slice_pb2_grpc.SliceServiceStub(channel)
+        request = slice_pb2.SliceIds(ids=ids)
+        response = stub.ListSliceByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(SliceSchema.from_response(result))
+        return ls
 
 def list_slice_by_time(resource, device_id: UUID, model_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
@@ -160,6 +169,15 @@ def read_slice_set(resource, id: int):
         request = slice_pb2.SliceId(id=id)
         response = stub.ReadSliceSet(request=request, metadata=resource.metadata)
         return SliceSetSchema.from_response(response.result)
+
+def list_slice_set_by_ids(resource, ids: List[int]):
+    with grpc.insecure_channel(resource.address) as channel:
+        stub = slice_pb2_grpc.SliceServiceStub(channel)
+        request = slice_pb2.SliceIds(ids=ids)
+        response = stub.ListSliceSetByIds(request=request, metadata=resource.metadata)
+        ls = []
+        for result in response.results: ls.append(SliceSchema.from_response(result))
+        return ls
 
 def list_slice_set_by_time(resource, set_id: UUID, timestamp: datetime):
     with grpc.insecure_channel(resource.address) as channel:
