@@ -345,6 +345,66 @@ class Resource:
     def swap_set_template_member(self, id: UUID, index_1: int, index_2: int):
         return _set.swap_set_template_member(self, id, index_1, index_2)
 
+    def read_slice(self, id: int) -> SliceSchema:
+        return _slice.read_slice(self, id)
+
+    def list_slice_by_ids(self, ids: List[int]) -> List[SliceSchema]:
+        return _slice.list_slice_by_ids(self, ids)
+
+    def list_slice_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_time(self, device_id, model_id, timestamp)
+
+    def list_slice_by_range(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_range(self, device_id, model_id, begin, end)
+
+    def list_slice_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_name_time(self, name, timestamp)
+
+    def list_slice_by_name_range(self, name: str, begin: datetime, end: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_by_name_range(self, name, begin, end)
+
+    def list_slice_option(self, device_id: Optional[UUID], model_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSchema]:
+        return _slice.list_slice_option(self, device_id, model_id, name, begin_or_timestamp, end)
+
+    def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
+        return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
+
+    def update_slice(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
+        return _slice.update_slice(self, id, timestamp_begin, timestamp_end, name, description)
+
+    def delete_slice(self, id: int):
+        return _slice.delete_slice(self, id)
+
+    def read_slice_set(self, id: int) -> SliceSetSchema:
+        return _slice.read_slice_set(self, id)
+
+    def list_slice_set_by_ids(self, ids: List[int]) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_ids(self, ids)
+
+    def list_slice_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_time(self, set_id, timestamp)
+
+    def list_slice_set_by_range(self, set_id: UUID, begin: datetime, end: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_range(self, set_id, begin, end)
+
+    def list_slice_set_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_name_time(self, name, timestamp)
+
+    def list_slice_set_by_name_range(self, name: str, begin: datetime, end: datetime) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_by_name_range(self, name, begin, end)
+
+    def list_slice_set_option(self, set_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSetSchema]:
+        return _slice.list_slice_set_option(self, set_id, name, begin_or_timestamp, end)
+
+    def create_slice_set(self, set_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
+        return _slice.create_slice_set(self, set_id, timestamp_begin, timestamp_end, name, description)
+
+    def update_slice_set(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
+        return _slice.update_slice_set(self, id, timestamp_begin, timestamp_end, name, description)
+
+    def delete_slice_set(self, id: int):
+        return _slice.delete_slice_set(self, id)
+
     def read_data(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> DataSchema:
         return _data.read_data(self, device_id, model_id, timestamp, tag)
 
@@ -564,73 +624,13 @@ class Resource:
     def count_buffer_group(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> int:
         return _buffer.count_buffer_group(self, device_ids, model_ids, tag)
 
-    def read_slice(self, id: int) -> SliceSchema:
-        return _slice.read_slice(self, id)
-
-    def list_slice_by_ids(self, ids: List[int]) -> List[SliceSchema]:
-        return _slice.list_slice_by_ids(self, ids)
-
-    def list_slice_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime) -> List[SliceSchema]:
-        return _slice.list_slice_by_time(self, device_id, model_id, timestamp)
-
-    def list_slice_by_range(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime) -> List[SliceSchema]:
-        return _slice.list_slice_by_range(self, device_id, model_id, begin, end)
-
-    def list_slice_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSchema]:
-        return _slice.list_slice_by_name_time(self, name, timestamp)
-
-    def list_slice_by_name_range(self, name: str, begin: datetime, end: datetime) -> List[SliceSchema]:
-        return _slice.list_slice_by_name_range(self, name, begin, end)
-
-    def list_slice_option(self, device_id: Optional[UUID], model_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSchema]:
-        return _slice.list_slice_option(self, device_id, model_id, name, begin_or_timestamp, end)
-
-    def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
-        return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
-
-    def update_slice(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
-        return _slice.update_slice(self, id, timestamp_begin, timestamp_end, name, description)
-
-    def delete_slice(self, id: int):
-        return _slice.delete_slice(self, id)
-
-    def read_slice_set(self, id: int) -> SliceSetSchema:
-        return _slice.read_slice_set(self, id)
-
-    def list_slice_set_by_ids(self, ids: List[int]) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_by_ids(self, ids)
-
-    def list_slice_set_by_time(self, set_id: UUID, timestamp: datetime) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_by_time(self, set_id, timestamp)
-
-    def list_slice_set_by_range(self, set_id: UUID, begin: datetime, end: datetime) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_by_range(self, set_id, begin, end)
-
-    def list_slice_set_by_name_time(self, name: str, timestamp: datetime) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_by_name_time(self, name, timestamp)
-
-    def list_slice_set_by_name_range(self, name: str, begin: datetime, end: datetime) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_by_name_range(self, name, begin, end)
-
-    def list_slice_set_option(self, set_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSetSchema]:
-        return _slice.list_slice_set_option(self, set_id, name, begin_or_timestamp, end)
-
-    def create_slice_set(self, set_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
-        return _slice.create_slice_set(self, set_id, timestamp_begin, timestamp_end, name, description)
-
-    def update_slice_set(self, id: int, timestamp_begin: Optional[datetime], timestamp_end: Optional[datetime], name: Optional[str], description: Optional[str]):
-        return _slice.update_slice_set(self, id, timestamp_begin, timestamp_end, name, description)
-
-    def delete_slice_set(self, id: int):
-        return _slice.delete_slice_set(self, id)
-
     def read_log(self, id: int) -> LogSchema:
         return _log.read_log(self, id)
 
     def read_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> LogSchema:
         return _log.read_log_by_time(self, timestamp, device_id, model_id, tag)
 
-    def list_log_by_ids(self, ids: List[int]) -> LogSchema:
+    def list_log_by_ids(self, ids: List[int]) -> List[LogSchema]:
         return _log.list_log_by_ids(self, ids)
 
     def list_log_by_time(self, timestamp: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
@@ -641,6 +641,51 @@ class Resource:
 
     def list_log_by_range(self, begin: datetime, end: datetime, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
         return _log.list_log_by_range(self, begin, end, device_id, model_id, tag)
+
+    def read_log_first(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> LogSchema:
+        return _log.read_log_first(self, device_id, model_id, tag)
+
+    def read_log_last(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> LogSchema:
+        return _log.read_log_last(self, device_id, model_id, tag)
+
+    def list_log_first(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_first(self, number, device_id, model_id, tag)
+
+    def list_log_first_offset(self, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_first_offset(self, number, offset, device_id, model_id, tag)
+
+    def list_log_last(self, number: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_last(self, number, device_id, model_id, tag)
+
+    def list_log_last_offset(self, number: int, offset: int, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_last_offset(self, number, offset, device_id, model_id, tag)
+
+    def list_log_group_by_time(self, timestamp: datetime, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_by_time(self, timestamp, device_ids, model_ids, tag)
+
+    def list_log_group_by_latest(self, last: datetime, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_by_latest(self, last, device_ids, model_ids, tag)
+
+    def list_log_group_by_range(self, begin: datetime, end: datetime, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_by_range(self, begin, end, device_ids, model_ids, tag)
+
+    def read_log_group_first(self, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> LogSchema:
+        return _log.read_log_group_first(self, device_ids, model_ids, tag)
+
+    def read_log_group_last(self, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> LogSchema:
+        return _log.read_log_group_last(self, device_ids, model_ids, tag)
+
+    def list_log_group_first(self, number: int, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_first(self, number, device_ids, model_ids, tag)
+
+    def list_log_group_first_offset(self, number: int, offset: int, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_first_offset(self, number, offset, device_ids, model_ids, tag)
+
+    def list_log_group_last(self, number: int, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_last(self, number, device_ids, model_ids, tag)
+
+    def list_log_group_last_offset(self, number: int, offset: int, device_ids: Optional[List[UUID]]=None, model_ids: Optional[List[UUID]]=None, tag: Optional[int]=None) -> List[LogSchema]:
+        return _log.list_log_group_last_offset(self, number, offset, device_ids, model_ids, tag)
 
     def create_log(self, timestamp: datetime, device_id: Optional[UUID], model_id: Optional[UUID], value: List[Union[int, float, str, bool, None]], tag: Optional[int]=None) -> int:
         return _log.create_log(self, timestamp, device_id, model_id, value, tag)

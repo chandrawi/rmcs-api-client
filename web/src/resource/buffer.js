@@ -628,7 +628,7 @@ export async function read_buffer_group_first(server, request) {
 }
 
 /**
- * Read last of a data bufferby uuid list
+ * Read last of a data buffer by uuid list
  * @param {ServerConfig} server server configuration: address, token
  * @param {BufferGroupSelector} request data buffer group selector: device_ids, model_ids, tag
  * @returns {Promise<BufferSchema>} data buffer schema: id, device_id, model_id, timestamp, data, tag

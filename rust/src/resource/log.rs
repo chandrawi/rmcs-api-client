@@ -5,7 +5,9 @@ use rmcs_resource_db::schema::value::DataValue;
 use rmcs_resource_db::tag as Tag;
 use rmcs_resource_api::log::log_service_client::LogServiceClient;
 use rmcs_resource_api::log::{
-    LogId, LogIds, LogLatest, LogRange, LogSchema, LogTime, LogUpdate, LogUpdateTime
+    LogId, LogIds, LogTime, LogLatest, LogRange, LogSelector, LogsSelector, LogSchema,
+    LogGroupTime, LogGroupLatest, LogGroupRange, LogGroupSelector, LogsGroupSelector,
+    LogUpdate, LogUpdateTime
 };
 use crate::resource::Resource;
 use rmcs_api_server::utility::interceptor::TokenInterceptor;
@@ -108,6 +110,281 @@ pub(crate) async fn list_log_by_range(resource: &Resource, begin: DateTime<Utc>,
         tag: tag.map(|i| i as i32)
     });
     let response = client.list_log_by_range(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn read_log_first(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<LogSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.read_log_first(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
+}
+
+pub async fn read_log_last(resource: &Resource, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<LogSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogSelector {
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.read_log_last(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
+}
+
+pub async fn list_log_first(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsSelector {
+        number: number as u32,
+        offset: 0,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_first(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_first_offset(resource: &Resource, number: usize, offset: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsSelector {
+        number: number as u32,
+        offset: offset as u32,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_first_offset(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_last(resource: &Resource, number: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsSelector {
+        number: number as u32,
+        offset: 0,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_last(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_last_offset(resource: &Resource, number: usize, offset: usize, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsSelector {
+        number: number as u32,
+        offset: offset as u32,
+        device_id: device_id.map(|x| x.as_bytes().to_vec()),
+        model_id: model_id.map(|x| x.as_bytes().to_vec()),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_last_offset(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_by_time(resource: &Resource, timestamp: DateTime<Utc>, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogGroupTime {
+        timestamp: timestamp.timestamp_micros(),
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_by_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_by_latest(resource: &Resource, latest: DateTime<Utc>, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogGroupLatest {
+        latest: latest.timestamp_micros(),
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_by_latest(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_by_range(resource: &Resource, begin: DateTime<Utc>, end: DateTime<Utc>, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogGroupRange {
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros(),
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_by_range(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn read_log_group_first(resource: &Resource, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<LogSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogGroupSelector {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.read_log_group_first(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
+}
+
+pub async fn read_log_group_last(resource: &Resource, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<LogSchema, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogGroupSelector {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.read_log_group_last(request)
+        .await?
+        .into_inner();
+    Ok(response.result.ok_or(Status::not_found(LOG_NOT_FOUND))?)
+}
+
+pub async fn list_log_group_first(resource: &Resource, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsGroupSelector {
+        number: number as u32,
+        offset: 0,
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_first(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_first_offset(resource: &Resource, number: usize, offset: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsGroupSelector {
+        number: number as u32,
+        offset: offset as u32,
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_first_offset(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_last(resource: &Resource, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsGroupSelector {
+        number: number as u32,
+        offset: 0,
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_last(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub async fn list_log_group_last_offset(resource: &Resource, number: usize, offset: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    -> Result<Vec<LogSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        LogServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(LogsGroupSelector {
+        number: number as u32,
+        offset: offset as u32,
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        tag: tag.map(|i| i as i32)
+    });
+    let response = client.list_log_group_last_offset(request)
         .await?
         .into_inner();
     Ok(response.results)

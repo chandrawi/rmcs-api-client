@@ -73,6 +73,22 @@ function get_log_ids(r) {
  */
 
 /**
+ * @typedef {Object} LogSelector
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?number} tag
+ */
+
+/**
+ * @typedef {Object} LogsSelector
+ * @property {number} number
+ * @property {number} offset
+ * @property {?Uuid} device_id
+ * @property {?Uuid} model_id
+ * @property {?number} tag
+ */
+
+/**
  * @typedef {Object} LogSchema
  * @property {number} id
  * @property {Date} timestamp
@@ -121,6 +137,47 @@ function get_log_schema_vec(r) {
  * @property {?number} tag
  */
 
+/**
+ * @typedef {Object} LogGroupTime
+ * @property {Date} timestamp
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
+ */
+
+/**
+ * @typedef {Object} LogGroupLatest
+ * @property {Date} latest
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
+ */
+
+/**
+ * @typedef {Object} LogGroupRange
+ * @property {Date} begin
+ * @property {Date} end
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
+ */
+
+/**
+ * @typedef {Object} LogGroupSelector
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
+ */
+
+/**
+ * @typedef {Object} LogsGroupSelector
+ * @property {number} number
+ * @property {number} offset
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?number} tag
+ */
+
 
 /**
  * Read a system log by id
@@ -139,7 +196,7 @@ export async function read_log(server, request) {
 /**
  * Read a system log by specific time
  * @param {ServerConfig} server server configuration: address, token
- * @param {LogId} request system log time: timestamp, device_id, model_id, tag
+ * @param {LogTime} request system log time: timestamp, device_id, model_id, tag
  * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
  */
 export async function read_log_by_time(server, request) {
@@ -232,6 +289,334 @@ export async function list_log_by_range(server, request) {
     }
     logRange.setTag(request.tag);
     return client.listLogByRange(logRange, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read first of a system log
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogSelector} request system log selector: device_id, model_id, tag
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function read_log_first(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logSelector = new pb_log.LogSelector();
+    logSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logSelector.setTag(request.tag);
+    return client.readLogFirst(logSelector, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read last of a system log
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogSelector} request system log selector: device_id, model_id, tag
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function read_log_last(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logSelector = new pb_log.LogSelector();
+    logSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logSelector.setTag(request.tag);
+    return client.readLogLast(logSelector, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read first of system logs
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsSelector} request system log selector: number, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_first(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsSelector = new pb_log.LogsSelector();
+    logsSelector.setNumber(request.number);
+    logsSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logsSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logsSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logsSelector.setTag(request.tag);
+    return client.listLogFirst(logsSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read first of system logs with offset
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsSelector} request system log selector: number, offset, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_first_offset(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsSelector = new pb_log.LogsSelector();
+    logsSelector.setNumber(request.number);
+    logsSelector.setOffset(request.offset);
+    logsSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logsSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logsSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logsSelector.setTag(request.tag);
+    return client.listLogFirstOffset(logsSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read last of system logs
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsSelector} request system log selector: number, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_last(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsSelector = new pb_log.LogsSelector();
+    logsSelector.setNumber(request.number);
+    logsSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logsSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logsSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logsSelector.setTag(request.tag);
+    return client.listLogLast(logsSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read last of system logs with offset
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsSelector} request system log selector: number, offset, device_id, model_id, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_last_offset(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsSelector = new pb_log.LogsSelector();
+    logsSelector.setNumber(request.number);
+    logsSelector.setOffset(request.offset);
+    logsSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_id) {
+        logsSelector.setDeviceId(uuid_hex_to_base64(request.device_id));
+    }
+    if (request.model_id) {
+        logsSelector.setModelId(uuid_hex_to_base64(request.model_id));
+    }
+    logsSelector.setTag(request.tag);
+    return client.listLogLastOffset(logsSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read system logs with device or model group by time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogGroupTime} request system log time: timestamp, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_by_time(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logGroupTime = new pb_log.LogGroupTime();
+    logGroupTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logGroupTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logGroupTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logGroupTime.setTag(request.tag);
+    return client.listLogGroupByTime(logGroupTime, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read system logs with device or model group by latest time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogGroupLatest} request system log latest: latest, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_by_latest(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logGroupLatest = new pb_log.LogGroupLatest();
+    logGroupLatest.setLatest(request.latest.valueOf() * 1000);
+    if (request.device_ids) {
+        logGroupLatest.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logGroupLatest.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logGroupLatest.setTag(request.tag);
+    return client.listLogGroupByLatest(logGroupLatest, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read system logs with device or model group by range time
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogGroupRange} request system log time: begin, end, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_by_range(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logGroupRange = new pb_log.LogGroupRange();
+    logGroupRange.setBegin(request.begin.valueOf() * 1000);
+    logGroupRange.setEnd(request.end.valueOf() * 1000);
+    if (request.device_ids) {
+        logGroupRange.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logGroupRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logGroupRange.setTag(request.tag);
+    return client.listLogGroupByRange(logGroupRange, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read first of a system log with device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogGroupSelector} request system log selector: device_ids, model_ids, tag
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function read_log_group_first(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logGroupSelector = new pb_log.LogGroupSelector();
+    logGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logGroupSelector.setTag(request.tag);
+    return client.readLogGroupFirst(logGroupSelector, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read last of a system log with device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogGroupSelector} request system log selector: device_ids, model_ids, tag
+ * @returns {Promise<LogSchema>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function read_log_group_last(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logGroupSelector = new pb_log.LogGroupSelector();
+    logGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logGroupSelector.setTag(request.tag);
+    return client.readLogGroupLast(logGroupSelector, metadata(server))
+        .then(response => get_log_schema(response.toObject().result));
+}
+
+/**
+ * Read first of system logs with device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsGroupSelector} request system log selector: number, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_first(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsGroupSelector = new pb_log.LogsGroupSelector();
+    logsGroupSelector.setNumber(request.number);
+    logsGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logsGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logsGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logsGroupSelector.setTag(request.tag);
+    return client.listLogGroupFirst(logsGroupSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read first of system logs with offset and device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsGroupSelector} request system log selector: number, offset, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_first_offset(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsGroupSelector = new pb_log.LogsGroupSelector();
+    logsGroupSelector.setNumber(request.number);
+    logsGroupSelector.setOffset(request.offset);
+    logsGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logsGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logsGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logsGroupSelector.setTag(request.tag);
+    return client.listLogGroupFirstOffset(logsGroupSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read last of system logs with device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsGroupSelector} request system log selector: number, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_last(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsGroupSelector = new pb_log.LogsGroupSelector();
+    logsGroupSelector.setNumber(request.number);
+    logsGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logsGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logsGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logsGroupSelector.setTag(request.tag);
+    return client.listLogGroupLast(logsGroupSelector, metadata(server))
+        .then(response => get_log_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read last of system logs with offset and device or model group
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {LogsGroupSelector} request system log selector: number, offset, device_ids, model_ids, tag
+ * @returns {Promise<LogSchema[]>} system log schema: id, timestamp, device_id, model_id, value, tag
+ */
+export async function list_log_group_last_offset(server, request) {
+    const client = new pb_log.LogServicePromiseClient(server.address, null, null);
+    const logsGroupSelector = new pb_log.LogsGroupSelector();
+    logsGroupSelector.setNumber(request.number);
+    logsGroupSelector.setOffset(request.offset);
+    logsGroupSelector.setTimestamp(request.timestamp.valueOf() * 1000);
+    if (request.device_ids) {
+        logsGroupSelector.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        logsGroupSelector.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    logsGroupSelector.setTag(request.tag);
+    return client.listLogGroupLastOffset(logsGroupSelector, metadata(server))
         .then(response => get_log_schema_vec(response.toObject().resultsList));
 }
 
