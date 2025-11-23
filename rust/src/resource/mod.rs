@@ -1511,17 +1511,24 @@ impl Resource {
         buffer::delete_buffer_by_time(&self, device_id, model_id, timestamp, tag).await
     }
 
-    pub async fn read_buffer_timestamp_first(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    pub async fn read_buffer_timestamp(&self, device_id: Uuid, model_id: Uuid, timestamp: DateTime<Utc>, tag: Option<i16>)
         -> Result<DateTime<Utc>, Status>
     {
-        buffer::read_buffer_timestamp_first(&self, device_id, model_id, tag)
+        buffer::read_buffer_timestamp(&self, device_id, model_id, timestamp, tag)
         .await
     }
 
-    pub async fn read_buffer_timestamp_last(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
-        -> Result<DateTime<Utc>, Status>
+    pub async fn list_buffer_timestamp_by_latest(&self, device_id: Uuid, model_id: Uuid, latest: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<DateTime<Utc>>, Status>
     {
-        buffer::read_buffer_timestamp_last(&self, device_id, model_id, tag)
+        buffer::list_buffer_timestamp_by_latest(&self, device_id, model_id, latest, tag)
+        .await
+    }
+
+    pub async fn list_buffer_timestamp_by_range(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_timestamp_by_range(&self, device_id, model_id, begin, end, tag)
         .await
     }
 
@@ -1539,6 +1546,27 @@ impl Resource {
         .await
     }
 
+    pub async fn read_buffer_group_timestamp(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>, tag: Option<i16>)
+        -> Result<DateTime<Utc>, Status>
+    {
+        buffer::read_buffer_group_timestamp(&self, device_ids, model_ids, timestamp, tag)
+        .await
+    }
+
+    pub async fn list_buffer_group_timestamp_by_latest(&self, device_ids: &[Uuid], model_ids: &[Uuid], latest: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_group_timestamp_by_latest(&self, device_ids, model_ids, latest, tag)
+        .await
+    }
+
+    pub async fn list_buffer_group_timestamp_by_range(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+        -> Result<Vec<DateTime<Utc>>, Status>
+    {
+        buffer::list_buffer_group_timestamp_by_range(&self, device_ids, model_ids, begin, end, tag)
+        .await
+    }
+
     pub async fn list_buffer_group_timestamp_first(&self, number: usize, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
         -> Result<Vec<DateTime<Utc>>, Status>
     {
@@ -1553,17 +1581,45 @@ impl Resource {
         .await
     }
 
-    pub async fn count_buffer(&self, device_id: Option<Uuid>, model_id: Option<Uuid>, tag: Option<i16>)
+    pub async fn count_buffer(&self, device_id: Uuid, model_id: Uuid, tag: Option<i16>)
         -> Result<usize, Status>
     {
         buffer::count_buffer(&self, device_id, model_id, tag)
         .await
     }
 
-    pub async fn count_buffer_group(&self, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, tag: Option<i16>)
+    pub async fn count_buffer_by_latest(&self, device_id: Uuid, model_id: Uuid, latest: DateTime<Utc>, tag: Option<i16>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_by_latest(&self, device_id, model_id, latest, tag)
+        .await
+    }
+
+    pub async fn count_buffer_by_range(&self, device_id: Uuid, model_id: Uuid, begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_by_range(&self, device_id, model_id, begin, end, tag)
+        .await
+    }
+
+    pub async fn count_buffer_group(&self, device_ids: &[Uuid], model_ids: &[Uuid], tag: Option<i16>)
         -> Result<usize, Status>
     {
         buffer::count_buffer_group(&self, device_ids, model_ids, tag)
+        .await
+    }
+
+    pub async fn count_buffer_group_by_latest(&self, device_ids: &[Uuid], model_ids: &[Uuid], latest: DateTime<Utc>, tag: Option<i16>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_group_by_latest(&self, device_ids, model_ids, latest, tag)
+        .await
+    }
+
+    pub async fn count_buffer_group_by_range(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>, tag: Option<i16>)
+        -> Result<usize, Status>
+    {
+        buffer::count_buffer_group_by_range(&self, device_ids, model_ids, begin, end, tag)
         .await
     }
 

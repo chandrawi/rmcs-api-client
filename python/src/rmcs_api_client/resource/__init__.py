@@ -600,11 +600,14 @@ class Resource:
     def delete_buffer_by_time(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[Union[int]]=None):
         return _buffer.delete_buffer_by_time(self, device_id, model_id, timestamp, tag)
 
-    def read_buffer_timestamp_first(self, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None) -> datetime:
-        return _buffer.read_buffer_timestamp_first(self, device_id, model_id, tag)
+    def read_buffer_timestamp(self, device_id: UUID, model_id: UUID, timestamp: datetime, tag: Optional[int]=None) -> datetime:
+        return _buffer.read_buffer_timestamp(self, device_id, model_id, timestamp, tag)
 
-    def read_buffer_timestamp_last(self, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None) -> datetime:
-        return _buffer.read_buffer_timestamp_last(self, device_id, model_id, tag)
+    def list_buffer_timestamp_by_latest(self, device_id: UUID, model_id: UUID, latest: datetime, tag: Optional[int]=None) -> List[datetime]:
+        return _buffer.list_buffer_timestamp_by_latest(self, device_id, model_id, latest, tag)
+
+    def list_buffer_timestamp_by_range(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime, tag: Optional[int]=None) -> List[datetime]:
+        return _buffer.list_buffer_timestamp_by_range(self, device_id, model_id, begin, end, tag)
 
     def list_buffer_timestamp_first(self, number: int, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None) -> List[datetime]:
         return _buffer.list_buffer_timestamp_first(self, number, device_id, model_id, tag)
@@ -612,17 +615,38 @@ class Resource:
     def list_buffer_timestamp_last(self, number: int, device_id: Optional[UUID], model_id: Optional[UUID], tag: Optional[int]=None) -> List[datetime]:
         return _buffer.list_buffer_timestamp_last(self, number, device_id, model_id, tag)
 
+    def read_buffer_group_timestamp(self, device_ids: List[UUID], model_ids: List[UUID], timestamp: datetime, tag: Optional[int]=None) -> datetime:
+        return _buffer.read_buffer_group_timestamp(self, device_ids, model_ids, timestamp, tag)
+
+    def list_buffer_group_timestamp_by_latest(self, device_ids: List[UUID], model_ids: List[UUID], latest: datetime, tag: Optional[int]=None) -> List[datetime]:
+        return _buffer.list_buffer_group_timestamp_by_latest(self, device_ids, model_ids, latest, tag)
+
+    def list_buffer_group_timestamp_by_range(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime, tag: Optional[int]=None) -> List[datetime]:
+        return _buffer.list_buffer_group_timestamp_by_range(self, device_ids, model_ids, begin, end, tag)
+
     def list_buffer_group_timestamp_first(self, number: int, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[datetime]:
         return _buffer.list_buffer_group_timestamp_first(self, number, device_ids, model_ids, tag)
 
     def list_buffer_group_timestamp_last(self, number: int, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> List[datetime]:
         return _buffer.list_buffer_group_timestamp_last(self, number, device_ids, model_ids, tag)
 
-    def count_buffer(self, device_id: Optional[UUID]=None, model_id: Optional[UUID]=None, tag: Optional[int]=None) -> int:
+    def count_buffer(self, device_id: UUID, model_id: UUID, tag: Optional[int]=None) -> int:
         return _buffer.count_buffer(self, device_id, model_id, tag)
 
-    def count_buffer_group(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], tag: Optional[int]=None) -> int:
+    def count_buffer_by_latest(self, device_id: UUID, model_id: UUID, latest: datetime, tag: Optional[int]=None) -> int:
+        return _buffer.count_buffer_by_latest(self, device_id, model_id, latest, tag)
+
+    def count_buffer_by_range(self, device_id: UUID, model_id: UUID, begin: datetime, end: datetime, tag: Optional[int]=None) -> int:
+        return _buffer.count_buffer_by_latest(self, device_id, model_id, begin, end, tag)
+
+    def count_buffer_group(self, device_ids: List[UUID], model_ids: List[UUID], tag: Optional[int]=None) -> int:
         return _buffer.count_buffer_group(self, device_ids, model_ids, tag)
+
+    def count_buffer_by_latest(self, device_ids: List[UUID], model_ids: List[UUID], latest: datetime, tag: Optional[int]=None) -> int:
+        return _buffer.count_buffer_group_by_latest(self, device_ids, model_ids, latest, tag)
+
+    def count_buffer_by_range(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime, tag: Optional[int]=None) -> int:
+        return _buffer.count_buffer_group_by_latest(self, device_ids, model_ids, begin, end, tag)
 
     def read_log(self, id: int) -> LogSchema:
         return _log.read_log(self, id)

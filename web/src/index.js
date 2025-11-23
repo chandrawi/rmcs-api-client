@@ -293,14 +293,22 @@ export {
     update_buffer_by_time,
     delete_buffer,
     delete_buffer_by_time,
-    read_buffer_timestamp_first,
-    read_buffer_timestamp_last,
+    read_buffer_timestamp,
+    list_buffer_timestamp_by_latest,
+    list_buffer_timestamp_by_range,
     list_buffer_timestamp_first,
     list_buffer_timestamp_last,
+    read_buffer_group_timestamp,
+    list_buffer_group_timestamp_by_latest,
+    list_buffer_group_timestamp_by_range,
     list_buffer_group_timestamp_first,
     list_buffer_group_timestamp_last,
     count_buffer,
-    count_buffer_group
+    count_buffer_by_latest,
+    count_buffer_by_range,
+    count_buffer_group,
+    count_buffer_group_by_latest,
+    count_buffer_group_by_range
 } from './resource/buffer.js';
 export {
     read_log,
