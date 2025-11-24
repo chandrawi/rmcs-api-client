@@ -4,6 +4,7 @@ use uuid::Uuid;
 use rmcs_resource_api::slice::slice_service_client::SliceServiceClient;
 use rmcs_resource_api::slice::{
     SliceSchema, SliceId, SliceIds, SliceTime, SliceRange, SliceNameTime, SliceNameRange, SliceUpdate, SliceOption,
+    SliceGroupTime, SliceGroupRange, SliceGroupOption,
     SliceSetSchema, SliceSetTime, SliceSetRange, SliceSetOption
 };
 use crate::resource::Resource;
@@ -123,6 +124,60 @@ pub(crate) async fn list_slice_option(resource: &Resource, device_id: Option<Uui
         end: end.map(|t| t.timestamp_micros())
     });
     let response = client.list_slice_option(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_slice_group_by_time(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>)
+    -> Result<Vec<SliceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SliceGroupTime {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        timestamp: timestamp.timestamp_micros()
+    });
+    let response = client.list_slice_group_by_time(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_slice_group_by_range(resource: &Resource, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>)
+    -> Result<Vec<SliceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SliceGroupRange {
+        device_ids: device_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        begin: begin.timestamp_micros(),
+        end: end.timestamp_micros()
+    });
+    let response = client.list_slice_group_by_range(request)
+        .await?
+        .into_inner();
+    Ok(response.results)
+}
+
+pub(crate) async fn list_slice_group_option(resource: &Resource, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, name: Option<&str>, begin_or_timestamp: Option<DateTime<Utc>>, end: Option<DateTime<Utc>>)
+    -> Result<Vec<SliceSchema>, Status>
+{
+    let interceptor = TokenInterceptor(resource.access_token.clone());
+    let mut client = 
+        SliceServiceClient::with_interceptor(resource.channel.to_owned(), interceptor);
+    let request = Request::new(SliceGroupOption {
+        device_ids: device_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        model_ids: model_ids.unwrap_or_default().into_iter().map(|id| id.as_bytes().to_vec()).collect(),
+        name: name.map(|s| s.to_owned()),
+        begin: begin_or_timestamp.map(|t| t.timestamp_micros()),
+        end: end.map(|t| t.timestamp_micros())
+    });
+    let response = client.list_slice_group_option(request)
         .await?
         .into_inner();
     Ok(response.results)

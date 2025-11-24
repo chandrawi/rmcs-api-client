@@ -215,7 +215,7 @@ describe("RMCS Resource test", function() {
                 group_model = group;
             }
         }
-        expect(group_model.models).toContain(model_id);
+        expect(group_model.model_ids).toContain(model_id);
         expect(group_model.name).toEqual("data");
         expect(group_model.category).toEqual("APPLICATION");
     });
@@ -227,8 +227,8 @@ describe("RMCS Resource test", function() {
                 group_device = group;
             }
         }
-        expect(group_device.devices).toContain(device_id_1);
-        expect(group_device.devices).toContain(device_id_2);
+        expect(group_device.device_ids).toContain(device_id_1);
+        expect(group_device.device_ids).toContain(device_id_2);
         expect(group_device.name).toEqual("sensor");
         expect(group_device.category).toEqual("APPLICATION");
     });
@@ -433,7 +433,7 @@ describe("RMCS Resource test", function() {
 
     it("should read data from a device group", async function() {
         let dataGroup = await resource.list_data_group_by_time(server, {
-            device_ids: group_device.devices,
+            device_ids: group_device.device_ids,
             model_ids: [model_id],
             timestamp: timestamp_1,
             number: 100

@@ -11,11 +11,11 @@ class GroupModelSchema:
     name: str
     category: str
     description: str
-    models: List[UUID]
+    model_ids: List[UUID]
 
     def from_response(r):
         models = []
-        for model in r.models: models.append(UUID(bytes=model))
+        for model in r.model_ids: models.append(UUID(bytes=model))
         return GroupModelSchema(UUID(bytes=r.id), r.name, r.category, r.description, models)
 
 
@@ -25,11 +25,11 @@ class GroupDeviceSchema:
     name: str
     category: str
     description: str
-    devices: List[UUID]
+    device_ids: List[UUID]
 
     def from_response(r):
         devices = []
-        for device in r.devices: devices.append(UUID(bytes=device))
+        for device in r.device_ids: devices.append(UUID(bytes=device))
         return GroupDeviceSchema(UUID(bytes=r.id), r.name, r.category, r.description, devices)
 
 
@@ -39,11 +39,11 @@ class GroupGatewaySchema:
     name: str
     category: str
     description: str
-    gateways: List[UUID]
+    gateway_ids: List[UUID]
 
     def from_response(r):
         gateways = []
-        for gateway in r.gateways: gateways.append(UUID(bytes=gateway))
+        for gateway in r.device_ids: gateways.append(UUID(bytes=gateway))
         return GroupGatewaySchema(UUID(bytes=r.id), r.name, r.category, r.description, gateways)
 
 def read_group_model(resource, id: UUID):

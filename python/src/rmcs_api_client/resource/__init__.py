@@ -366,6 +366,15 @@ class Resource:
     def list_slice_option(self, device_id: Optional[UUID], model_id: Optional[UUID], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSchema]:
         return _slice.list_slice_option(self, device_id, model_id, name, begin_or_timestamp, end)
 
+    def list_slice_group_by_time(self, device_ids: List[UUID], model_ids: List[UUID], timestamp: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_group_by_time(self, device_ids, model_ids, timestamp)
+
+    def list_slice_group_by_range(self, device_ids: List[UUID], model_ids: List[UUID], begin: datetime, end: datetime) -> List[SliceSchema]:
+        return _slice.list_slice_group_by_range(self, device_ids, model_ids, begin, end)
+
+    def list_slice_group_option(self, device_ids: Optional[List[UUID]], model_ids: Optional[List[UUID]], name: Optional[str], begin_or_timestamp: Optional[datetime], end: Optional[datetime]) -> List[SliceSchema]:
+        return _slice.list_slice_group_option(self, device_ids, model_ids, name, begin_or_timestamp, end)
+
     def create_slice(self, device_id: UUID, model_id: UUID, timestamp_begin: datetime, timestamp_end: datetime, name: str, description: str) -> int:
         return _slice.create_slice(self, device_id, model_id, timestamp_begin, timestamp_end, name, description)
 

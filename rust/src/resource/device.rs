@@ -138,7 +138,7 @@ pub(crate) async fn create_device(resource: &Resource, id: Uuid, gateway_id: Uui
             id: type_id.as_bytes().to_vec(),
             name: String::new(),
             description: String::new(),
-            models: Vec::new()
+            model_ids: Vec::new()
         }),
         configs: Vec::new()
     });
@@ -286,7 +286,7 @@ pub(crate) async fn create_gateway(resource: &Resource, id: Uuid, type_id: Uuid,
             id: type_id.as_bytes().to_vec(),
             name: String::new(),
             description: String::new(),
-            models: Vec::new()
+            model_ids: Vec::new()
         }),
         configs: Vec::new()
     });

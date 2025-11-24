@@ -74,6 +74,30 @@ function get_slice_id(r) {
  */
 
 /**
+ * @typedef {Object} SliceGroupTime
+ * @property {Uuid[]} device_ids
+ * @property {Uuid[]} model_ids
+ * @property {Date} timestamp
+ */
+
+/**
+ * @typedef {Object} SliceGroupRange
+ * @property {Uuid[]} device_ids
+ * @property {Uuid[]} model_ids
+ * @property {Date} begin
+ * @property {Date} end
+ */
+
+/**
+ * @typedef {Object} SliceGroupOption
+ * @property {?Uuid[]} device_ids
+ * @property {?Uuid[]} model_ids
+ * @property {?string} name
+ * @property {?Date} begin_or_timestamp
+ * @property {?Date} end
+ */
+
+/**
  * @typedef {Object} SliceSchema
  * @property {number} id
  * @property {Uuid} device_id
@@ -287,6 +311,65 @@ export async function list_slice_option(server, request) {
         sliceOption.setEnd(request.timestamp_end.valueOf() * 1000);
     }
     return client.listSliceOption(sliceOption, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data slices by specific time and uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceGroupTime} request data slice group time: device_ids, model_ids, timestamp
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_group_by_time(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceGroupTime = new pb_slice.SliceGroupTime();
+    sliceGroupTime.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    sliceGroupTime.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    sliceGroupTime.setTimestamp(request.timestamp.valueOf() * 1000);
+    return client.listSliceGroupByTime(sliceGroupTime, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data slices by range time and uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceGroupRange} request data slice group range: device_ids, model_ids, begin, end
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_group_by_range(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceGroupRange = new pb_slice.SliceGroupRange();
+    sliceGroupRange.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    sliceGroupRange.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    sliceGroupRange.setBegin(request.begin.valueOf() * 1000);
+    sliceGroupRange.setEnd(request.end.valueOf() * 1000);
+    return client.listSliceGroupByRange(sliceGroupRange, metadata(server))
+        .then(response => get_slice_schema_vec(response.toObject().resultsList));
+}
+
+/**
+ * Read data slices by options and uuid list
+ * @param {ServerConfig} server server configuration: address, token
+ * @param {SliceGroupOption} request data slice selection option: device_ids, model_ids, name, begin_or_timestamp, end
+ * @returns {Promise<SliceSchema[]>} data slice schema: device_id, model_id, timestamp_begin, timestamp_end, name, description
+ */
+export async function list_slice_group_option(server, request) {
+    const client = new pb_slice.SliceServicePromiseClient(server.address, null, null);
+    const sliceGroupOption = new pb_slice.SliceGroupOption();
+    if (request.device_ids) {
+        sliceGroupOption.setDeviceIdsList(request.device_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    if (request.model_ids) {
+        sliceGroupOption.setModelIdsList(request.model_ids.map((id) => uuid_hex_to_base64(id)));
+    }
+    sliceGroupOption.setName(request.name);
+    if (request.begin instanceof Date) {
+        sliceGroupOption.setBegin(request.timestamp_begin.valueOf() * 1000);
+    }
+    if (request.end instanceof Date) {
+        sliceGroupOption.setEnd(request.timestamp_end.valueOf() * 1000);
+    }
+    return client.listSliceGroupOption(sliceGroupOption, metadata(server))
         .then(response => get_slice_schema_vec(response.toObject().resultsList));
 }
 

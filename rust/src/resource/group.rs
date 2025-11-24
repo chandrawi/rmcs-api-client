@@ -97,7 +97,7 @@ pub(crate) async fn create_group_model(resource: &Resource, id: Uuid, name: &str
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
-        models: Vec::new()
+        model_ids: Vec::new()
     });
     let response = client.create_group_model(request)
         .await?
@@ -253,7 +253,7 @@ pub(crate) async fn create_group_device(resource: &Resource, id: Uuid, name: &st
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
-        devices: Vec::new()
+        device_ids: Vec::new()
     });
     let response = client.create_group_device(request)
         .await?
@@ -409,7 +409,7 @@ pub(crate) async fn create_group_gateway(resource: &Resource, id: Uuid, name: &s
         name: name.to_owned(),
         category: category.to_owned(),
         description: description.unwrap_or_default().to_owned(),
-        devices: Vec::new()
+        device_ids: Vec::new()
     });
     let response = client.create_group_gateway(request)
         .await?

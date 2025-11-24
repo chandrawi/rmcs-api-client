@@ -79,7 +79,7 @@ pub(crate) async fn create_type(resource: &Resource, id: Uuid, name: &str, descr
         id: id.as_bytes().to_vec(),
         name: name.to_owned(),
         description: description.unwrap_or_default().to_owned(),
-        models: Vec::new()
+        model_ids: Vec::new()
     });
     let response = client.create_type(request)
         .await?

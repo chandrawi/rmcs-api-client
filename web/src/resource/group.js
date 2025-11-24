@@ -58,7 +58,7 @@ function get_group_id(r) {
  * @property {string} name
  * @property {string} category
  * @property {string} description
- * @property {Uuid[]} models
+ * @property {Uuid[]} model_ids
  */
 
 /**
@@ -67,7 +67,7 @@ function get_group_id(r) {
  * @property {string} name
  * @property {string} category
  * @property {string} description
- * @property {Uuid[]} devices
+ * @property {Uuid[]} device_ids
  */
 
 /**
@@ -76,7 +76,7 @@ function get_group_id(r) {
  * @property {string} name
  * @property {string} category
  * @property {string} description
- * @property {Uuid[]} gateways
+ * @property {Uuid[]} gateway_ids
  */
 
 /**
@@ -89,7 +89,7 @@ export function get_group_model_schema(r) {
         name: r.name,
         category: r.category,
         description: r.description,
-        models: r.modelsList.map((v) => {return base64_to_uuid_hex(v)})
+        model_ids: r.modelIdsList.map((v) => {return base64_to_uuid_hex(v)})
     };
 }
 
@@ -111,7 +111,7 @@ export function get_group_device_schema(r) {
         name: r.name,
         category: r.category,
         description: r.description,
-        devices: r.devicesList.map((v) => {return base64_to_uuid_hex(v)})
+        device_ids: r.deviceIdsList.map((v) => {return base64_to_uuid_hex(v)})
     };
 }
 
@@ -133,7 +133,7 @@ export function get_group_gateway_schema(r) {
         name: r.name,
         category: r.category,
         description: r.description,
-        gateways: r.devicesList.map((v) => {return base64_to_uuid_hex(v)})
+        gateway_ids: r.deviceIdsList.map((v) => {return base64_to_uuid_hex(v)})
     };
 }
 
@@ -176,7 +176,7 @@ function get_group_gateway_schema_vec(r) {
  * Read a group model by uuid
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupId} request group model uuid: id
- * @returns {Promise<GroupModelSchema>} group model schema: id, name, category, description, models
+ * @returns {Promise<GroupModelSchema>} group model schema: id, name, category, description, model_ids
  */
 export async function read_group_model(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -190,7 +190,7 @@ export async function read_group_model(server, request) {
  * Read groups of model by uuid list
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupIds} request group uuid list: ids
- * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, model_ids
  */
 export async function list_group_model_by_ids(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -204,7 +204,7 @@ export async function list_group_model_by_ids(server, request) {
  * Read groups of model by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group model name: name
- * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, model_ids
  */
 export async function list_group_model_by_name(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -218,7 +218,7 @@ export async function list_group_model_by_name(server, request) {
  * Read groups of model by category
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupCategory} request group model category: category
- * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, model_ids
  */
 export async function list_group_model_by_category(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -232,7 +232,7 @@ export async function list_group_model_by_category(server, request) {
  * Read groups of model with select option
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupOption} request group model option: name, category
- * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, models
+ * @returns {Promise<GroupModelSchema[]>} group model schema: id, name, category, description, model_ids
  */
 export async function list_group_model_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -325,7 +325,7 @@ export async function remove_group_model_member(server, request) {
  * Read a group device by uuid
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupId} request group device uuid: id
- * @returns {Promise<GroupDeviceSchema>} group device schema: id, name, category, description, devices
+ * @returns {Promise<GroupDeviceSchema>} group device schema: id, name, category, description, device_ids
  */
 export async function read_group_device(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -339,7 +339,7 @@ export async function read_group_device(server, request) {
  * Read groups of device by uuid list
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupIds} request group uuid list: ids
- * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, device_ids
  */
 export async function list_group_device_by_ids(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -353,7 +353,7 @@ export async function list_group_device_by_ids(server, request) {
  * Read groups of device by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group device name: name
- * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, device_ids
  */
 export async function list_group_device_by_name(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -367,7 +367,7 @@ export async function list_group_device_by_name(server, request) {
  * Read groups of device by category
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupCategory} request group device category: category
- * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, device_ids
  */
 export async function list_group_device_by_category(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -381,7 +381,7 @@ export async function list_group_device_by_category(server, request) {
  * Read groups of device with select options
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupOption} request group device option: name, category
- * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, devices
+ * @returns {Promise<GroupDeviceSchema[]>} group device schema: id, name, category, description, device_ids
  */
 export async function list_group_device_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -474,7 +474,7 @@ export async function remove_group_device_member(server, request) {
  * Read a group gateway by uuid
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupId} request group gateway uuid: id
- * @returns {Promise<GroupGatewaySchema>} group gateway schema: id, name, category, description, gateways
+ * @returns {Promise<GroupGatewaySchema>} group gateway schema: id, name, category, description, gateway_ids
  */
 export async function read_group_gateway(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -488,7 +488,7 @@ export async function read_group_gateway(server, request) {
  * Read groups of gateway by uuid list
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupIds} request group uuid list: ids
- * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateway_ids
  */
 export async function list_group_gateway_by_ids(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -502,7 +502,7 @@ export async function list_group_gateway_by_ids(server, request) {
  * Read groups of gateway by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupName} request group gateway name: name
- * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateway_ids
  */
 export async function list_group_gateway_by_name(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -516,7 +516,7 @@ export async function list_group_gateway_by_name(server, request) {
  * Read groups of gateway by category
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupCategory} request group gateway category: category
- * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateway_ids
  */
 export async function list_group_gateway_by_category(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);
@@ -530,7 +530,7 @@ export async function list_group_gateway_by_category(server, request) {
  * Read groups of gateway with select options
  * @param {ServerConfig} server server configuration: address, token
  * @param {GroupOption} request group gateway option: name, category
- * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateways
+ * @returns {Promise<GroupGatewaySchema[]>} group gateway schema: id, name, category, description, gateway_ids
  */
 export async function list_group_gateway_option(server, request) {
     const client = new pb_group.GroupServicePromiseClient(server.address, null, null);

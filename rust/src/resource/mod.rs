@@ -921,6 +921,27 @@ impl Resource {
         .map(|v| v.into_iter().map(|s| s.into()).collect())
     }
 
+    pub async fn list_slice_group_by_time(&self, device_ids: &[Uuid], model_ids: &[Uuid], timestamp: DateTime<Utc>)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_group_by_time(&self, device_ids, model_ids, timestamp).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_group_by_range(&self, device_ids: &[Uuid], model_ids: &[Uuid], begin: DateTime<Utc>, end: DateTime<Utc>)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_group_by_range(&self, device_ids, model_ids, begin, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
+    pub async fn list_slice_group_option(&self, device_ids: Option<&[Uuid]>, model_ids: Option<&[Uuid]>, name: Option<&str>, begin_or_timestamp: Option<DateTime<Utc>>, end: Option<DateTime<Utc>>)
+        -> Result<Vec<SliceSchema>, Status>
+    {
+        slice::list_slice_group_option(&self, device_ids, model_ids, name, begin_or_timestamp, end).await
+        .map(|v| v.into_iter().map(|s| s.into()).collect())
+    }
+
     pub async fn create_slice(&self, device_id: Uuid, model_id: Uuid, timestamp_begin: DateTime<Utc>, timestamp_end: DateTime<Utc>, name: &str, description: Option<&str>)
         -> Result<i32, Status>
     {

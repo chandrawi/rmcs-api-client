@@ -97,15 +97,15 @@ def test_resource():
 
     # read group model
     groups = resource.list_group_model_by_category("APPLICATION")
-    group_model_filter = filter(lambda x: model_id in x.models, groups)
-    group_model = groups[0]
+    group_model_filter = filter(lambda x: model_id in x.model_ids, groups)
+    group_model = list(group_model_filter)[0]
     assert group_model.name == "data"
     assert group_model.category == "APPLICATION"
     # read group device
     groups = resource.list_group_device_by_name("sensor")
-    group_device_filter = filter(lambda x: device_id1 in x.devices, groups)
+    group_device_filter = filter(lambda x: device_id1 in x.device_ids, groups)
     group_device = list(group_device_filter)[0]
-    assert group_device.devices == [device_id2, device_id1] # device_id1 > device_id2, so device1 in second (last) order
+    assert group_device.device_ids == [device_id2, device_id1] # device_id1 > device_id2, so device1 in second (last) order
     assert group_device.name == "sensor"
     assert group_device.category == "APPLICATION"
 
@@ -179,7 +179,7 @@ def test_resource():
     assert len(ids) == 2
 
     # read buffers from a device group
-    buffers_group = resource.list_buffer_group_first(100, group_device.devices, None, None)
+    buffers_group = resource.list_buffer_group_first(100, group_device.device_ids, None, None)
     assert buffers_group[0].data == raw_1
     assert buffers_group[1].data == raw_2
 
@@ -210,7 +210,7 @@ def test_resource():
     assert Tag.DEFAULT == data.tag
 
     # read data from a device group
-    data_group = resource.list_data_group_by_time(group_device.devices, [model_id,], timestamp_1)
+    data_group = resource.list_data_group_by_time(group_device.device_ids, [model_id,], timestamp_1)
     data_values = []
     for data in data_group:
         for value in data.data: data_values.append(value)
@@ -317,9 +317,9 @@ def test_resource():
 
     # check number of member of the group
     group = resource.read_group_model(group_model_id)
-    assert len(group.models) == 0
+    assert len(group.model_ids) == 0
     group = resource.read_group_device(group_device_id)
-    assert len(group.devices) == 0
+    assert len(group.device_ids) == 0
     # delete group model and device
     resource.delete_group_model(group_model_id)
     resource.delete_group_device(group_device_id)

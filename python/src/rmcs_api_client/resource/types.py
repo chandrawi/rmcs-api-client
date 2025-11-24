@@ -10,11 +10,11 @@ class TypeSchema:
     id: UUID
     name: str
     description: str
-    models: List[UUID]
+    model_ids: List[UUID]
 
     def from_response(r):
         models = []
-        for model in r.models: models.append(UUID(bytes=model))
+        for model in r.model_ids: models.append(UUID(bytes=model))
         return TypeSchema(UUID(bytes=r.id), r.name, r.description, models)
 
 

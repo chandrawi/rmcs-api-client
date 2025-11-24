@@ -51,7 +51,7 @@ function get_type_id(r) {
  * @property {Uuid} id
  * @property {string} name
  * @property {string} description
- * @property {Uuid[]} models
+ * @property {Uuid[]} model_ids
  */
 
 /**
@@ -63,7 +63,7 @@ export function get_type_schema(r) {
         id: base64_to_uuid_hex(r.id),
         name: r.name,
         description: r.description,
-        models: r.modelsList.map((v) => {return base64_to_uuid_hex(v)})
+        model_ids: r.modelIdsList.map((v) => {return base64_to_uuid_hex(v)})
     };
 }
 
@@ -93,7 +93,7 @@ function get_type_schema_vec(r) {
  * Read a device type by uuid
  * @param {ServerConfig} server server configuration: address, token
  * @param {TypeId} request type uuid: id
- * @returns {Promise<TypeSchema>} type schema: id, name, description, models
+ * @returns {Promise<TypeSchema>} type schema: id, name, description, model_ids
  */
 export async function read_type(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
@@ -107,7 +107,7 @@ export async function read_type(server, request) {
  * Read device types by uuid list
  * @param {ServerConfig} server server configuration: address, token
  * @param {TypeIds} request type uuid list: ids
- * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, model_ids
  */
 export async function list_type_by_ids(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
@@ -121,7 +121,7 @@ export async function list_type_by_ids(server, request) {
  * Read device types by name
  * @param {ServerConfig} server server configuration: address, token
  * @param {TypeName} request type name: name
- * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, model_ids
  */
 export async function list_type_by_name(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
@@ -135,7 +135,7 @@ export async function list_type_by_name(server, request) {
  * Read device types with select options
  * @param {ServerConfig} server server configuration: address, token
  * @param {TypeOption} request type select option: name
- * @returns {Promise<TypeSchema[]>} type schema: id, name, description, models
+ * @returns {Promise<TypeSchema[]>} type schema: id, name, description, model_ids
  */
 export async function list_type_option(server, request) {
     const client = new pb_device.DeviceServicePromiseClient(server.address, null, null);
